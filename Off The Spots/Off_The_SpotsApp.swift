@@ -12,7 +12,7 @@ import SwiftData
 struct Off_The_SpotsApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Song.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +25,7 @@ struct Off_The_SpotsApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SongsListView()
         }
         .modelContainer(sharedModelContainer)
     }
