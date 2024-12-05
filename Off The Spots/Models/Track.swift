@@ -12,9 +12,11 @@ import SwiftData
 final class Track {
     var id: UUID
     var name: String
+    @Attribute(.externalStorage) var file: Data?
     
-    init(name: String) {
+    init(name: String, file: Data? = nil) {
         self.id = UUID()
         self.name = name
+        self.file = file
     }
 }

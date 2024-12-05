@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct BottomBarView: View {
     @Binding var presentSongSheet: Bool
     var song: Song
+    
+    var audioPlayer: AVAudioPlayer
+    @Binding var isPlaying: Bool
     
     var body: some View {
         HStack {
@@ -25,14 +29,28 @@ struct BottomBarView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
+            
             Spacer()
             
-            Button(action: {}, label: {
-                Image(systemName: "play.fill")
-                    .font(.title)
+            Button(action: {
+                if(isPlaying) {
+                    audioPlayer.pause()
+                    isPlaying = false
+                } else {
+                    audioPlayer.play()
+                    isPlaying = true
+                }
+            }, label: {
+                if(isPlaying) {
+                    Image(systemName: "pause.fill")
+                        .font(.title)
+                } else {
+                    Image(systemName: "play.fill")
+                        .font(.title)
+                }
             })
             
-            Button(action: {}, label: {
+            Button(action: { audioPlayer.currentTime -= 15 }, label: {
                 Image(systemName: "15.arrow.trianglehead.counterclockwise")
                     .font(.title)
             })
@@ -53,9 +71,16 @@ struct BottomBarView: View {
             tracks: [Track(name: "Bass Left")],
             selectedTrack: Track(name: "Bass Left")
         )
+        @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+        @State var isPlaying: Bool = false
         
         var body: some View {
-            BottomBarView(presentSongSheet: $presentSongSheet, song: song)
+            BottomBarView(
+                presentSongSheet: $presentSongSheet,
+                song: song,
+                audioPlayer: audioPlayer,
+                isPlaying: $isPlaying
+            )
         }
     }
     

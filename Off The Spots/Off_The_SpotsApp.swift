@@ -25,7 +25,7 @@ struct Off_The_SpotsApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SongsListView()
+            MainView()
         }
         .modelContainer(sharedModelContainer)
     }

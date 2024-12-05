@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct HeaderView: View {
-    @Binding var presentSettingsSheet: Bool
     var songs: [Song]
-    var addItem: () -> Void
+    @Binding var presentSettingsSheet: Bool
+    @Binding var presentAddSongPopover: Bool
     
     var body: some View {
         HStack {
@@ -19,16 +19,18 @@ struct HeaderView: View {
                     .font(.title2)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel("Settings")
             
             Text("Off The Spots")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .center)
             
             HStack {
-                Button(action: { addItem() }, label: {
+                Button(action: { presentAddSongPopover = true }, label: {
                     Image(systemName: "plus")
                         .font(.title2)
                 })
+                .accessibilityLabel("Add Song")
                 
                 if(!songs.isEmpty) {
                     EditButton()
@@ -45,11 +47,16 @@ struct HeaderView: View {
 
 #Preview {
     struct HeaderView_Preview: View {
-        @State private var presentSettingsSheet = false
         @State private var songs: [Song] = []
+        @State private var presentSettingsSheet = false
+        @State private var presentAddSongPopover = false
         
         var body: some View {
-            HeaderView(presentSettingsSheet: $presentSettingsSheet, songs: songs, addItem: {})
+            HeaderView(
+                songs: songs,
+                presentSettingsSheet: $presentSettingsSheet,
+                presentAddSongPopover: $presentAddSongPopover
+            )
         }
     }
     
