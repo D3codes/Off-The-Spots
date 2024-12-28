@@ -26,6 +26,7 @@ struct RateView: View {
                     Button(action: {
                         if(rateValue > 0.2) {
                             rateValue -= 0.1
+                            audioPlayer.enableRate = true
                             audioPlayer.rate = rateValue
                         }
                     }, label: {
@@ -40,6 +41,7 @@ struct RateView: View {
                     Button(action: {
                         if(rateValue < 2) {
                             rateValue += 0.1
+                            audioPlayer.enableRate = true
                             audioPlayer.rate = rateValue
                         }
                     }, label: {

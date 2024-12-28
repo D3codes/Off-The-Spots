@@ -23,7 +23,7 @@ struct PanningView: View {
                     .padding(.bottom)
                 
                 HStack {
-                    Image(systemName: "wave.3.left", variableValue: panningValue <= 0 ? 1 : 1-(Double(panningValue)))
+                    Image(systemName: "wave.3.left", variableValue: panningValue <= 0 ? 1 : 1-panningValue)
                         .scaleEffect(1.5)
                     
                     UISliderView(
@@ -37,7 +37,7 @@ struct PanningView: View {
                         audioPlayer.pan = Float(value)
                     }
                     
-                    Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : (Double(panningValue)).map(from: -1...0, to: 0...1))
+                    Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : panningValue.map(from: -1...0, to: 0...1))
                         .scaleEffect(1.5)
                 }
                 .frame(height: 40)
