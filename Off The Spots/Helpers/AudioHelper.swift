@@ -11,8 +11,11 @@ import SwiftUI
 
 class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private var audioPlayer: AVAudioPlayer = AVAudioPlayer()
-    @State var isPlaying: Bool = false
-    @State var progress: Double = 0
+    @Published var isPlaying: Bool = false
+    @Published var progress: Double = 0
+    @Published var duration: Double = 0
+    @Published var panningValue: Double = 0
+    @Published var rateValue: Float = 1.0
     
     override init() {
         super.init()
@@ -38,13 +41,42 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         updateNowPlaying()
     }
     
+    func skip(seconds: Double) {
+        audioPlayer.currentTime += seconds
+        updateNowPlaying()
+    }
+    
+    func setCurrentTime(value: Double) {
+        audioPlayer.currentTime = value
+        progress = value
+    }
+    
+    func updateProgress() {
+        progress = audioPlayer.currentTime
+        updateNowPlaying()
+    }
+    
+    func setPan(value: Double) {
+        audioPlayer.pan = Float(value)
+        panningValue = value
+    }
+    
+    func setRate(value: Float) {
+        audioPlayer.enableRate = true
+        audioPlayer.rate = value
+        rateValue = value
+    }
+    
     func setSelectedSong(song: Song) {
         isPlaying = false
         progress = 0
+        setPan(value: 0.0)
+        setRate(value: 1.0)
         
         do {
             audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
             audioPlayer.enableRate = true
+            audioPlayer.delegate = self
         } catch {
             print("Failed to create AVAudioPlayer with error: \(error)")
         }
@@ -56,6 +88,7 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
             print("Failed to set AVAudioSession category with error: \(error)")
         }
         
+        duration = audioPlayer.duration
         setupNowPlaying(song: song)
     }
     
@@ -103,6 +136,14 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 return .success
             }
             return .commandFailed
+        }
+    }
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        if (flag) {
+            isPlaying = false
+            progress = 0
+            updateNowPlaying()
         }
     }
 }

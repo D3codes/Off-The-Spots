@@ -15,9 +15,7 @@ struct MainView: View {
     @Query private var songs: [Song]
     @State var selectedSong: Song?
     
-    @State private var audioPlayer: AVAudioPlayer?
-    @State private var isPlaying: Bool = false
-    @State private var progress: Double = 0.0
+    @StateObject private var player: AudioHelper = AudioHelper()
     @State private var isEditingProgress: Bool = false
     
     @State private var addSongInitialTrackUrl: URL?
@@ -63,18 +61,15 @@ struct MainView: View {
                 BottomBarView(
                     presentSongSheet: $presentSongSheet,
                     song: selectedSong!,
-                    audioPlayer: audioPlayer!,
-                    isPlaying: $isPlaying
+                    player: player
                 )
             }
         }
         .sheet(isPresented: $presentSongSheet) {
             SongView(
                 song: Binding($selectedSong)!,
-                progress: $progress,
                 isEditingProgress: $isEditingProgress,
-                audioPlayer: Binding($audioPlayer)!,
-                isPlaying: $isPlaying
+                player: player
             )
                 .presentationDragIndicator(.visible)
         }
@@ -87,7 +82,6 @@ struct MainView: View {
         }
         .onAppear() {
             setSelectedSong(song: selectedSong)
-            setupRemoteTransportControls()
         }
         .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
@@ -100,9 +94,8 @@ struct MainView: View {
                 if(selectedSong?.id == songs[index].id) {
                     selectedSong = nil
                     
-                    if(isPlaying) {
-                        audioPlayer?.stop()
-                        isPlaying = false
+                    if(player.isPlaying) {
+                        player.stop()
                     }
                 }
                 
@@ -112,95 +105,14 @@ struct MainView: View {
     }
     
     private func setSelectedSong(song: Song?) {
-        if let song {
-            selectedSong = song
-            progress = 0
-            isPlaying = false
-            
-            do {
-                audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
-                audioPlayer?.enableRate = true
-            } catch {
-                print("oops")
-            }
-            
-            do {
-                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
-                try AVAudioSession.sharedInstance().setActive(true)
-            } catch {
-                print(error)
-            }
-            
-            setupNowPlaying()
-        }
-    }
-    
-    private func play() {
-        guard let audioPlayer else { return }
-        audioPlayer.play()
-        isPlaying = true
-        updateNowPlaying()
-    }
-    
-    private func pause() {
-        guard let audioPlayer else { return }
-        audioPlayer.pause()
-        isPlaying = false
-        updateNowPlaying()
+        guard let song else { return }
+        selectedSong = song
+        player.setSelectedSong(song: song)
     }
     
     private func updateProgress() {
-        guard let audioPlayer = audioPlayer, audioPlayer.isPlaying else { return }
-        if isEditingProgress { return }
-        
-        progress = audioPlayer.currentTime
-        updateNowPlaying()
-    }
-    
-    private func setupRemoteTransportControls() {
-        let commandCenter = MPRemoteCommandCenter.shared()
-
-        commandCenter.playCommand.addTarget { _ in
-            if !self.audioPlayer!.isPlaying {
-                self.play()
-                return .success
-            }
-            return .commandFailed
-        }
-
-        commandCenter.pauseCommand.addTarget { _ in
-            if self.audioPlayer!.isPlaying {
-                self.pause()
-                return .success
-            }
-            return .commandFailed
-        }
-    }
-    
-    private func setupNowPlaying() {
-        var nowPlayingInfo = [String : Any]()
-        nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong!.name
-        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong!.selectedTrack.name
-
-//        if let image = UIImage(named: "logo") {
-//            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
-//                return image
-//            }
-//        }
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer!.currentTime
-        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = audioPlayer!.duration
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = audioPlayer!.rate
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-    
-    private func updateNowPlaying() {
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
-
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer!.currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1 : 0
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        guard player.isPlaying, !isEditingProgress else { return }
+        player.updateProgress()
     }
 }
 

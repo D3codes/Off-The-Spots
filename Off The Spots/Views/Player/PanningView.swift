@@ -9,8 +9,9 @@ import SwiftUI
 import AVFoundation
 
 struct PanningView: View {
-    @Binding var audioPlayer: AVAudioPlayer
-    @State var panningValue: Double
+    @ObservedObject var player: AudioHelper
+    
+    @Binding var panningValue: Double
     @State var vibrated: Bool = false
     
     var body: some View {
@@ -50,7 +51,7 @@ struct PanningView: View {
                             vibrated = false
                         }
                         
-                        audioPlayer.pan = Float(panningValue)
+                        player.setPan(value: panningValue)
                     }
                     
                     Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : panningValue.map(from: -1...0, to: 0...1))
@@ -66,16 +67,16 @@ struct PanningView: View {
     
     func handleTouchUp() {
         vibrated = false
-        audioPlayer.pan = Float(panningValue)
+        player.setPan(value: panningValue)
     }
 }
 
 #Preview {
     struct PanningView_Preview: View {
-        @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+        @StateObject var player: AudioHelper = AudioHelper()
         
         var body: some View {
-            PanningView(audioPlayer: $audioPlayer, panningValue: Double(audioPlayer.pan))
+            PanningView(player: player, panningValue: $player.panningValue)
         }
     }
     
