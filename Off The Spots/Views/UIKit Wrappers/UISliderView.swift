@@ -10,6 +10,8 @@ import SwiftUI
 
 struct UISliderView: UIViewRepresentable {
     @Binding var value: Double
+    var handleTouchDown: () -> Void = { }
+    var handleTouchUp: () -> Void = { }
     
     var minValue = 1.0
     var maxValue = 100.0
@@ -19,18 +21,30 @@ struct UISliderView: UIViewRepresentable {
     
     class Coordinator: NSObject {
         var value: Binding<Double>
+        var handleTouchDown: () -> Void
+        var handleTouchUp: () -> Void
         
-        init(value: Binding<Double>) {
+        init(value: Binding<Double>, handleTouchDown: @escaping () -> Void, handleTouchUp: @escaping () -> Void) {
             self.value = value
+            self.handleTouchDown = handleTouchDown
+            self.handleTouchUp = handleTouchUp
         }
         
         @objc func valueChanged(_ sender: UISlider) {
             self.value.wrappedValue = Double(sender.value)
         }
+        
+        @objc func touchDown(_ sender: UISlider) {
+            handleTouchDown()
+        }
+        
+        @objc func touchUp(_ sender: UISlider) {
+            handleTouchUp()
+        }
     }
     
     func makeCoordinator() -> UISliderView.Coordinator {
-        Coordinator(value: $value)
+        Coordinator(value: $value, handleTouchDown: handleTouchDown, handleTouchUp: handleTouchUp)
     }
     
     func makeUIView(context: Context) -> UISlider {
@@ -46,6 +60,30 @@ struct UISliderView: UIViewRepresentable {
             context.coordinator,
             action: #selector(Coordinator.valueChanged(_:)),
             for: .valueChanged
+        )
+        
+        slider.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.touchDown(_:)),
+            for: .touchDown
+        )
+        
+        slider.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.touchUp(_:)),
+            for: .touchUpInside
+        )
+        
+        slider.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.touchUp(_:)),
+            for: .touchUpOutside
+        )
+        
+        slider.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.touchUp(_:)),
+            for: .touchCancel
         )
         
         return slider
