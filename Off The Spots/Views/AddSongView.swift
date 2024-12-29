@@ -14,49 +14,59 @@ struct AddSongView: View {
     let songId: UUID = UUID()
     @State var songTitle: String = ""
     @State var tracks: [Track] = []
+    @FocusState var isSongFieldFocused: Bool
     
     @State private var presentFileImporter: Bool = false
     
     var body: some View {
-        VStack {
-            Group {
-                VStack(spacing: 0) {
-                    Text("Song Name")
-                        .font(.title2)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    TextField("", text: $songTitle)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.largeTitle)
-                }
-                .padding(.bottom, 40)
-                
-                HStack {
-                    Text("Tracks")
-                        .font(.title2)
-                    
-                    Spacer()
-                    
-                    Button(action: { presentFileImporter = true }, label: {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                    })
-                }
+        List {
+            Section {
+                TextField("New Song", text: $songTitle)
+                    .focused($isSongFieldFocused)
+                    .onAppear { isSongFieldFocused = true }
+            } header: {
+                Text("Name")
+                    .font(.subheadline)
             }
-            .padding()
-            List {
+            
+            Section {
                 ForEach(0..<tracks.count, id: \.self) { index in
                     TextField("", text: self.$tracks[index].name)
                 }
                 .onDelete(perform: deleteTracks)
+                .scrollContentBackground(.hidden)
+            } header: {
+                HStack {
+                    Text("Tracks")
+                        .font(.subheadline)
+                    
+                    Spacer()
+                    
+                    EditButton()
+                        .font(.subheadline)
+                    Divider()
+                        .background(.separator)
+                        .padding(.horizontal)
+                    Button(action: { presentFileImporter = true }) {
+                        Text("Add")
+                    }
+                    .font(.subheadline)
+                }
+            } footer: {
+                if tracks.isEmpty {
+                    Text("No Tracks")
+                        .foregroundStyle(.secondary)
+                        .font(.title3)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top)
+                }
             }
-            .scrollContentBackground(.hidden)
-            .background(.quaternary)
         }
         .safeAreaInset(edge: .top) {
             HStack {
                 Button(action: { presentAddSongPopover = false }, label: {
                     Text("Cancel")
-                        .font(.title2)
+                        .font(.title3)
                 })
                 
                 Spacer()
@@ -66,37 +76,38 @@ struct AddSongView: View {
                     presentAddSongPopover = false
                 }, label: {
                     Text("Save")
-                        .font(.title2)
+                        .font(.title3)
+                        .fontWeight(.semibold)
                 })
                 .disabled(songTitle.isEmpty || tracks.isEmpty)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 15)
-            .background(.thickMaterial)
+            .padding(.horizontal, 24)
+            .padding(.vertical)
+            .background(.regularMaterial)
         }
         .fileImporter(
             isPresented: $presentFileImporter,
             allowedContentTypes: [.mp3],
             allowsMultipleSelection: false,
             onCompletion: { results in
-            switch results {
-            case .success(let fileUrls):
-                // gain access to the directory
-                let gotAccess = fileUrls[0].startAccessingSecurityScopedResource()
-                if(!gotAccess) {
-                    return
+                switch results {
+                case .success(let fileUrls):
+                    // gain access to the directory
+                    let gotAccess = fileUrls[0].startAccessingSecurityScopedResource()
+                    if(!gotAccess) {
+                        return
+                    }
+                    
+                    // access the directory URL
+                    addTrack(fileUrl: fileUrls[0])
+                    
+                    // release access
+                    fileUrls[0].stopAccessingSecurityScopedResource()
+                    
+                case .failure(let error):
+                    print("Error: \(error)")
                 }
-                
-                // access the directory URL
-                addTrack(fileUrl: fileUrls[0])
-                
-                // release access
-                fileUrls[0].stopAccessingSecurityScopedResource()
-                
-            case .failure(let error):
-                print("Error: \(error)")
-            }
-        })
+            })
     }
     
     func addTrack(fileUrl: URL) {
