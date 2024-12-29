@@ -9,8 +9,9 @@ import SwiftUI
 import AVFoundation
 
 struct RateView: View {
-    @Binding var audioPlayer: AVAudioPlayer
-    @State var rateValue: Float
+    @ObservedObject var player: AudioHelper
+    
+    @Binding var rateValue: Float
     
     var body: some View {
         ZStack {
@@ -28,8 +29,7 @@ struct RateView: View {
                             withAnimation {
                                 rateValue -= 0.1
                             }
-                            audioPlayer.enableRate = true
-                            audioPlayer.rate = rateValue
+                            player.setRate(value: rateValue)
                         }
                     }, label: {
                         Image(systemName: "minus")
@@ -46,8 +46,7 @@ struct RateView: View {
                             withAnimation {
                                 rateValue += 0.1
                             }
-                            audioPlayer.enableRate = true
-                            audioPlayer.rate = rateValue
+                            player.setRate(value: rateValue)
                         }
                     }, label: {
                         Image(systemName: "plus")
@@ -70,10 +69,10 @@ struct RateView: View {
 
 #Preview {
     struct RateView_Preview: View {
-        @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+        @StateObject var player: AudioHelper = AudioHelper()
         
         var body: some View {
-            RateView(audioPlayer: $audioPlayer, rateValue: audioPlayer.rate)
+            RateView(player: player, rateValue: $player.rateValue)
         }
     }
     

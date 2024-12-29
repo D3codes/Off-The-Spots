@@ -11,9 +11,7 @@ import AVFoundation
 struct BottomBarView: View {
     @Binding var presentSongSheet: Bool
     var song: Song
-    
-    var audioPlayer: AVAudioPlayer
-    @Binding var isPlaying: Bool
+    @ObservedObject var player: AudioHelper
     
     var body: some View {
         HStack {
@@ -33,15 +31,13 @@ struct BottomBarView: View {
             Spacer()
             
             Button(action: {
-                if(isPlaying) {
-                    audioPlayer.pause()
-                    isPlaying = false
+                if(player.isPlaying) {
+                    player.pause()
                 } else {
-                    audioPlayer.play()
-                    isPlaying = true
+                    player.play()
                 }
             }, label: {
-                if(isPlaying) {
+                if(player.isPlaying) {
                     Image(systemName: "pause.fill")
                         .font(.title)
                 } else {
@@ -50,7 +46,7 @@ struct BottomBarView: View {
                 }
             })
             
-            Button(action: { audioPlayer.currentTime -= 15 }, label: {
+            Button(action: { player.skip(seconds: -15) }, label: {
                 Image(systemName: "15.arrow.trianglehead.counterclockwise")
                     .font(.title)
             })
@@ -71,15 +67,13 @@ struct BottomBarView: View {
             tracks: [Track(name: "Bass Left")],
             selectedTrack: Track(name: "Bass Left")
         )
-        @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
-        @State var isPlaying: Bool = false
+        @State var player: AudioHelper = AudioHelper()
         
         var body: some View {
             BottomBarView(
                 presentSongSheet: $presentSongSheet,
                 song: song,
-                audioPlayer: audioPlayer,
-                isPlaying: $isPlaying
+                player: player
             )
         }
     }

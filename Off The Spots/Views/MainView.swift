@@ -8,15 +8,14 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import MediaPlayer
 
 struct MainView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var songs: [Song]
     @State var selectedSong: Song?
     
-    @State private var audioPlayer: AVAudioPlayer?
-    @State private var isPlaying: Bool = false
-    @State private var progress: Double = 0.0
+    @StateObject private var player: AudioHelper = AudioHelper()
     @State private var isEditingProgress: Bool = false
     
     @State private var addSongInitialTrackUrl: URL?
@@ -62,18 +61,15 @@ struct MainView: View {
                 BottomBarView(
                     presentSongSheet: $presentSongSheet,
                     song: selectedSong!,
-                    audioPlayer: audioPlayer!,
-                    isPlaying: $isPlaying
+                    player: player
                 )
             }
         }
         .sheet(isPresented: $presentSongSheet) {
             SongView(
                 song: Binding($selectedSong)!,
-                progress: $progress,
                 isEditingProgress: $isEditingProgress,
-                audioPlayer: Binding($audioPlayer)!,
-                isPlaying: $isPlaying
+                player: player
             )
                 .presentationDragIndicator(.visible)
         }
@@ -84,7 +80,9 @@ struct MainView: View {
         .fullScreenCover(isPresented: $presentAddSongPopover) {
             AddSongView(presentAddSongPopover: $presentAddSongPopover, addSong: { modelContext.insert($0) })
         }
-        .onAppear() { setSelectedSong(song: selectedSong) }
+        .onAppear() {
+            setSelectedSong(song: selectedSong)
+        }
         .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
         }
@@ -96,9 +94,8 @@ struct MainView: View {
                 if(selectedSong?.id == songs[index].id) {
                     selectedSong = nil
                     
-                    if(isPlaying) {
-                        audioPlayer?.stop()
-                        isPlaying = false
+                    if(player.isPlaying) {
+                        player.stop()
                     }
                 }
                 
@@ -108,25 +105,14 @@ struct MainView: View {
     }
     
     private func setSelectedSong(song: Song?) {
-        if let song {
-            selectedSong = song
-            progress = 0
-            isPlaying = false
-            
-            do {
-                audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
-                audioPlayer?.enableRate = true
-            } catch {
-                print("oops")
-            }
-        }
+        guard let song else { return }
+        selectedSong = song
+        player.setSelectedSong(song: song)
     }
     
     private func updateProgress() {
-        guard let audioPlayer = audioPlayer, audioPlayer.isPlaying else { return }
-        if isEditingProgress { return }
-        
-        progress = audioPlayer.currentTime
+        guard player.isPlaying, !isEditingProgress else { return }
+        player.updateProgress()
     }
 }
 
