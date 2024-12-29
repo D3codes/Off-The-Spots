@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct AddSongView: View {
-    @Binding var presentAddSongPopover: Bool
-    var addSong: (_ song: Song) -> Void
-    
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
     let songId: UUID = UUID()
     @State var songTitle: String = ""
     @State var tracks: [Track] = []
     @FocusState var isSongFieldFocused: Bool
-    
+
     @State private var presentFileImporter: Bool = false
-    
+
     var body: some View {
         List {
             Section {
@@ -33,21 +33,18 @@ struct AddSongView: View {
                 ForEach(0..<tracks.count, id: \.self) { index in
                     TextField("", text: self.$tracks[index].name)
                 }
+                .onMove(perform: moveTracks)
                 .onDelete(perform: deleteTracks)
                 .scrollContentBackground(.hidden)
             } header: {
                 HStack {
                     Text("Tracks")
                         .font(.subheadline)
-                    
+
                     Spacer()
-                    
-                    EditButton()
-                        .font(.subheadline)
-                    Divider()
-                        .background(.separator)
-                        .padding(.horizontal)
+
                     Button(action: { presentFileImporter = true }) {
+                        Image(systemName: "plus")
                         Text("Add")
                     }
                     .font(.subheadline)
@@ -62,28 +59,28 @@ struct AddSongView: View {
                 }
             }
         }
-        .safeAreaInset(edge: .top) {
-            HStack {
-                Button(action: { presentAddSongPopover = false }, label: {
-                    Text("Cancel")
-                        .font(.title3)
-                })
-                
-                Spacer()
-                
-                Button(action: {
-                    addSong(Song(name: songTitle, tracks: tracks, selectedTrack: tracks[0]))
-                    presentAddSongPopover = false
-                }, label: {
-                    Text("Save")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                })
-                .disabled(songTitle.isEmpty || tracks.isEmpty)
+        .navigationTitle(Text("Add Song"))
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical)
-            .background(.regularMaterial)
+            ToolbarItem(placement: .navigationBarTrailing) {
+                EditButton()
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            Button(action: {
+                modelContext.insert(Song(name: songTitle, tracks: tracks, selectedTrack: tracks[0]))
+                dismiss()
+            }) {
+                Text("Save")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
+            .disabled(songTitle.isEmpty || tracks.isEmpty)
         }
         .fileImporter(
             isPresented: $presentFileImporter,
@@ -126,6 +123,12 @@ struct AddSongView: View {
             }
         }
     }
+
+    private func moveTracks(offsets: IndexSet, destination: Int) {
+        withAnimation {
+            tracks.move(fromOffsets: offsets, toOffset: destination)
+        }
+    }
 }
 
 #Preview {
@@ -134,8 +137,6 @@ struct AddSongView: View {
         
         var body: some View {
             AddSongView(
-                presentAddSongPopover: $presentAddSongPopover,
-                addSong: { _ in },
                 songTitle: "After You've Gone",
                 tracks: [
                     Track(name: "Bass Left"),

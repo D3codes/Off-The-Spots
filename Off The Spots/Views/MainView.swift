@@ -18,26 +18,15 @@ struct MainView: View {
     @State private var isPlaying: Bool = false
     
     @State private var addSongInitialTrackUrl: URL?
-    @State private var presentAddSongPopover: Bool = false
     
     @State private var presentSongSheet: Bool = false
-    
-    @State private var presentSettingsSheet: Bool = false
+    @State private var isAddSongSheetPresented = false
 
     var body: some View {
-        Group {
+        VStack {
             if(songs.isEmpty) {
-                VStack(alignment: .trailing) {
-                    VStack(alignment: .trailing) {
-                        Image(systemName: "arrowshape.up.fill")
-                            .font(.title)
-                            .padding(.trailing, 13)
-                            .symbolEffect(.wiggle.byLayer, options: .speed(0.5).repeat(.continuous))
-                        Text("Add a song to get started")
-                            .padding(.trailing, 20)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                SplashScreenView(isSheetPresented: $isAddSongSheetPresented)
+                    .toolbar(.hidden)
             } else {
                 List {
                     ForEach(songs) { song in
@@ -50,19 +39,33 @@ struct MainView: View {
                     }
                     .onDelete(perform: deleteSongs)
                 }
-            }
-        }
-        .safeAreaInset(edge: .top) {
-            HeaderView(songs: songs, presentSettingsSheet: $presentSettingsSheet, presentAddSongPopover: $presentAddSongPopover)
-        }
-        .safeAreaInset(edge: .bottom) {
-            if(selectedSong != nil) {
-                BottomBarView(
-                    presentSongSheet: $presentSongSheet,
-                    song: selectedSong!,
-                    audioPlayer: audioPlayer!,
-                    isPlaying: $isPlaying
-                )
+                .navigationTitle(Text("Songs"))
+                .toolbar {
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gearshape")
+                    }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    // Try to wrap in a VStack
+                    Button(action: { isAddSongSheetPresented.toggle() }) {
+                        HStack {
+                            Image(systemName: "plus")
+                            Text("Add Song")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding()
+                    
+                    if(selectedSong != nil) {
+                        BottomBarView(
+                            presentSongSheet: $presentSongSheet,
+                            song: selectedSong!,
+                            audioPlayer: audioPlayer!,
+                            isPlaying: $isPlaying
+                        )
+                    }
+                }
             }
         }
         .sheet(isPresented: $presentSongSheet) {
@@ -71,14 +74,13 @@ struct MainView: View {
                 audioPlayer: Binding($audioPlayer)!,
                 isPlaying: $isPlaying
             )
-                .presentationDragIndicator(.visible)
+            .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $presentSettingsSheet) {
-            SettingsView()
-                .presentationDragIndicator(.visible)
-        }
-        .fullScreenCover(isPresented: $presentAddSongPopover) {
-            AddSongView(presentAddSongPopover: $presentAddSongPopover, addSong: { modelContext.insert($0) })
+        .sheet(isPresented: $isAddSongSheetPresented) {
+            NavigationView {
+                AddSongView()
+            }
+            .interactiveDismissDisabled(true)
         }
         .onAppear() { setSelectedSong(song: selectedSong) }
     }
