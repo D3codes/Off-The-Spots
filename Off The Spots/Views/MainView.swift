@@ -16,7 +16,6 @@ struct MainView: View {
     
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlaying: Bool = false
-    @State private var timer: Timer?
     @State private var progress: Double = 0.0
     @State private var isEditingProgress: Bool = false
     
