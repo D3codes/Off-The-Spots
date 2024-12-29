@@ -1,0 +1,108 @@
+//
+//  AudioHelper.swift
+//  Off The Spots
+//
+//  Created by David Freeman on 12/29/24.
+//
+
+import AVFoundation
+import MediaPlayer
+import SwiftUI
+
+class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
+    private var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+    @State var isPlaying: Bool = false
+    @State var progress: Double = 0
+    
+    override init() {
+        super.init()
+        setupRemoteTransportControls()
+    }
+    
+    func play() {
+        audioPlayer.play()
+        isPlaying = true
+        updateNowPlaying()
+    }
+    
+    func pause() {
+        audioPlayer.pause()
+        isPlaying = false
+        updateNowPlaying()
+    }
+    
+    func stop() {
+        audioPlayer.stop()
+        isPlaying = false
+        progress = 0
+        updateNowPlaying()
+    }
+    
+    func setSelectedSong(song: Song) {
+        isPlaying = false
+        progress = 0
+        
+        do {
+            audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
+            audioPlayer.enableRate = true
+        } catch {
+            print("Failed to create AVAudioPlayer with error: \(error)")
+        }
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to set AVAudioSession category with error: \(error)")
+        }
+        
+        setupNowPlaying(song: song)
+    }
+    
+    private func setupNowPlaying(song: Song) {
+        var nowPlayingInfo = [String : Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = song.name
+        nowPlayingInfo[MPMediaItemPropertyArtist] = song.selectedTrack.name
+
+//        if let image = UIImage(named: "logo") {
+//            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
+//                return image
+//            }
+//        }
+        
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = audioPlayer.duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = audioPlayer.rate
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+    private func updateNowPlaying() {
+        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1 : 0
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+    private func setupRemoteTransportControls() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+
+        commandCenter.playCommand.addTarget { _ in
+            if !self.audioPlayer.isPlaying {
+                self.play()
+                return .success
+            }
+            return .commandFailed
+        }
+
+        commandCenter.pauseCommand.addTarget { _ in
+            if self.audioPlayer.isPlaying {
+                self.pause()
+                return .success
+            }
+            return .commandFailed
+        }
+    }
+}

@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import MediaPlayer
 
 struct MainView: View {
     @Environment(\.modelContext) private var modelContext
@@ -84,7 +85,10 @@ struct MainView: View {
         .fullScreenCover(isPresented: $presentAddSongPopover) {
             AddSongView(presentAddSongPopover: $presentAddSongPopover, addSong: { modelContext.insert($0) })
         }
-        .onAppear() { setSelectedSong(song: selectedSong) }
+        .onAppear() {
+            setSelectedSong(song: selectedSong)
+            setupRemoteTransportControls()
+        }
         .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
         }
@@ -119,7 +123,30 @@ struct MainView: View {
             } catch {
                 print("oops")
             }
+            
+            do {
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                print(error)
+            }
+            
+            setupNowPlaying()
         }
+    }
+    
+    private func play() {
+        guard let audioPlayer else { return }
+        audioPlayer.play()
+        isPlaying = true
+        updateNowPlaying()
+    }
+    
+    private func pause() {
+        guard let audioPlayer else { return }
+        audioPlayer.pause()
+        isPlaying = false
+        updateNowPlaying()
     }
     
     private func updateProgress() {
@@ -127,6 +154,53 @@ struct MainView: View {
         if isEditingProgress { return }
         
         progress = audioPlayer.currentTime
+        updateNowPlaying()
+    }
+    
+    private func setupRemoteTransportControls() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+
+        commandCenter.playCommand.addTarget { _ in
+            if !self.audioPlayer!.isPlaying {
+                self.play()
+                return .success
+            }
+            return .commandFailed
+        }
+
+        commandCenter.pauseCommand.addTarget { _ in
+            if self.audioPlayer!.isPlaying {
+                self.pause()
+                return .success
+            }
+            return .commandFailed
+        }
+    }
+    
+    private func setupNowPlaying() {
+        var nowPlayingInfo = [String : Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong!.name
+        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong!.selectedTrack.name
+
+//        if let image = UIImage(named: "logo") {
+//            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
+//                return image
+//            }
+//        }
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer!.currentTime
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = audioPlayer!.duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = audioPlayer!.rate
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+    private func updateNowPlaying() {
+        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer!.currentTime
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1 : 0
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 }
 
