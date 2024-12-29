@@ -11,6 +11,7 @@ import AVFoundation
 struct PanningView: View {
     @Binding var audioPlayer: AVAudioPlayer
     @State var panningValue: Double
+    @State var vibrated: Bool = false
     
     var body: some View {
         ZStack {
@@ -28,13 +29,28 @@ struct PanningView: View {
                     
                     UISliderView(
                         value: $panningValue,
+                        handleTouchUp: handleTouchUp,
                         minValue: -1.0,
                         maxValue: 1.0,
-                        minTrackColor: .lightGray,
-                        maxTrackColor: .lightGray
+                        thumbColor: UIColor(.white),
+                        minTrackColor: UIColor(.secondary),
+                        maxTrackColor: UIColor(.secondary)
                     )
                     .onChange(of: panningValue) { value,_ in
-                        audioPlayer.pan = Float(value)
+                        panningValue = value
+                        
+                        if (value > -0.1 && value < 0.1) {
+                            if (!vibrated) {
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                                vibrated = true
+                            }
+                            panningValue = 0
+                        } else {
+                            vibrated = false
+                        }
+                        
+                        audioPlayer.pan = Float(panningValue)
                     }
                     
                     Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : panningValue.map(from: -1...0, to: 0...1))
@@ -46,6 +62,11 @@ struct PanningView: View {
             .padding()
         }
         .frame(maxHeight: 50)
+    }
+    
+    func handleTouchUp() {
+        vibrated = false
+        audioPlayer.pan = Float(panningValue)
     }
 }
 
