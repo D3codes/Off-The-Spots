@@ -25,7 +25,9 @@ struct Off_The_SpotsApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainView()
+            NavigationStack {
+                MainView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }

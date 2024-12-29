@@ -8,95 +8,103 @@
 import SwiftUI
 
 struct AddSongView: View {
-    @Binding var presentAddSongPopover: Bool
-    var addSong: (_ song: Song) -> Void
-    
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
     let songId: UUID = UUID()
     @State var songTitle: String = ""
     @State var tracks: [Track] = []
-    
+    @FocusState var isSongFieldFocused: Bool
+
     @State private var presentFileImporter: Bool = false
-    
+
     var body: some View {
-        VStack {
-            Group {
-                VStack(spacing: 0) {
-                    Text("Song Name")
-                        .font(.title2)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    TextField("", text: $songTitle)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.largeTitle)
-                }
-                .padding(.bottom, 40)
-                
-                HStack {
-                    Text("Tracks")
-                        .font(.title2)
-                    
-                    Spacer()
-                    
-                    Button(action: { presentFileImporter = true }, label: {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                    })
-                }
+        List {
+            Section {
+                TextField("New Song", text: $songTitle)
+                    .focused($isSongFieldFocused)
+                    .onAppear { isSongFieldFocused = true }
+            } header: {
+                Text("Name")
+                    .font(.subheadline)
             }
-            .padding()
-            List {
+            
+            Section {
                 ForEach(0..<tracks.count, id: \.self) { index in
                     TextField("", text: self.$tracks[index].name)
                 }
+                .onMove(perform: moveTracks)
                 .onDelete(perform: deleteTracks)
+                .scrollContentBackground(.hidden)
+            } header: {
+                HStack {
+                    Text("Tracks")
+                        .font(.subheadline)
+
+                    Spacer()
+
+                    Button(action: { presentFileImporter = true }) {
+                        Image(systemName: "plus")
+                        Text("Add")
+                    }
+                    .font(.subheadline)
+                }
+            } footer: {
+                if tracks.isEmpty {
+                    Text("No Tracks")
+                        .foregroundStyle(.secondary)
+                        .font(.title3)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top)
+                }
             }
-            .scrollContentBackground(.hidden)
-            .background(.quaternary)
         }
-        .safeAreaInset(edge: .top) {
-            HStack {
-                Button(action: { presentAddSongPopover = false }, label: {
-                    Text("Cancel")
-                        .font(.title2)
-                })
-                
-                Spacer()
-                
-                Button(action: {
-                    addSong(Song(name: songTitle, tracks: tracks, selectedTrack: tracks[0]))
-                    presentAddSongPopover = false
-                }, label: {
-                    Text("Save")
-                        .font(.title2)
-                })
-                .disabled(songTitle.isEmpty || tracks.isEmpty)
+        .navigationTitle(Text("Add Song"))
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 15)
-            .background(.thickMaterial)
+            ToolbarItem(placement: .navigationBarTrailing) {
+                EditButton()
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            Button(action: {
+                modelContext.insert(Song(name: songTitle, tracks: tracks, selectedTrack: tracks[0]))
+                dismiss()
+            }) {
+                Text("Save")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
+            .disabled(songTitle.isEmpty || tracks.isEmpty)
         }
         .fileImporter(
             isPresented: $presentFileImporter,
             allowedContentTypes: [.mp3],
             allowsMultipleSelection: false,
             onCompletion: { results in
-            switch results {
-            case .success(let fileUrls):
-                // gain access to the directory
-                let gotAccess = fileUrls[0].startAccessingSecurityScopedResource()
-                if(!gotAccess) {
-                    return
+                switch results {
+                case .success(let fileUrls):
+                    // gain access to the directory
+                    let gotAccess = fileUrls[0].startAccessingSecurityScopedResource()
+                    if(!gotAccess) {
+                        return
+                    }
+                    
+                    // access the directory URL
+                    addTrack(fileUrl: fileUrls[0])
+                    
+                    // release access
+                    fileUrls[0].stopAccessingSecurityScopedResource()
+                    
+                case .failure(let error):
+                    print("Error: \(error)")
                 }
-                
-                // access the directory URL
-                addTrack(fileUrl: fileUrls[0])
-                
-                // release access
-                fileUrls[0].stopAccessingSecurityScopedResource()
-                
-            case .failure(let error):
-                print("Error: \(error)")
-            }
-        })
+            })
     }
     
     func addTrack(fileUrl: URL) {
@@ -115,6 +123,12 @@ struct AddSongView: View {
             }
         }
     }
+
+    private func moveTracks(offsets: IndexSet, destination: Int) {
+        withAnimation {
+            tracks.move(fromOffsets: offsets, toOffset: destination)
+        }
+    }
 }
 
 #Preview {
@@ -123,8 +137,6 @@ struct AddSongView: View {
         
         var body: some View {
             AddSongView(
-                presentAddSongPopover: $presentAddSongPopover,
-                addSong: { _ in },
                 songTitle: "After You've Gone",
                 tracks: [
                     Track(name: "Bass Left"),
