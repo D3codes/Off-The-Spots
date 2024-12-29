@@ -11,7 +11,6 @@ import AVFoundation
 struct PanningView: View {
     @Binding var audioPlayer: AVAudioPlayer
     @State var panningValue: Double
-    @State var isPanning: Bool = false
     @State var vibrated: Bool = false
     
     var body: some View {
@@ -30,7 +29,6 @@ struct PanningView: View {
                     
                     UISliderView(
                         value: $panningValue,
-                        handleTouchDown: handleTouchDown,
                         handleTouchUp: handleTouchUp,
                         minValue: -1.0,
                         maxValue: 1.0,
@@ -66,12 +64,8 @@ struct PanningView: View {
         .frame(maxHeight: 50)
     }
     
-    func handleTouchDown() {
-        isPanning = true
-    }
-    
     func handleTouchUp() {
-        isPanning = false
+        vibrated = false
         audioPlayer.pan = Float(panningValue)
     }
 }
