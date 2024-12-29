@@ -25,28 +25,33 @@ struct RateView: View {
                 HStack(spacing: 25) {
                     Button(action: {
                         if(rateValue > 0.2) {
-                            rateValue -= 0.1
+                            withAnimation {
+                                rateValue -= 0.1
+                            }
                             audioPlayer.enableRate = true
                             audioPlayer.rate = rateValue
                         }
                     }, label: {
                         Image(systemName: "minus")
-                            .font(.title2)
+                            .font(.title)
                             .foregroundColor(.primary)
                     })
                     
                     Text("\(String(format: "%.1f", rateValue))x")
-                        .font(.title2)
+                        .font(.title)
+                        .contentTransition(.numericText())
                     
                     Button(action: {
                         if(rateValue < 2) {
-                            rateValue += 0.1
+                            withAnimation {
+                                rateValue += 0.1
+                            }
                             audioPlayer.enableRate = true
                             audioPlayer.rate = rateValue
                         }
                     }, label: {
                         Image(systemName: "plus")
-                            .font(.title2)
+                            .font(.title)
                             .foregroundColor(.primary)
                     })
                 }
@@ -54,6 +59,12 @@ struct RateView: View {
             .padding(.bottom)
         }
         .frame(maxHeight: 50)
+        .sensoryFeedback(.increase, trigger: rateValue) { oldValue, newValue in
+            return newValue > oldValue
+        }
+        .sensoryFeedback(.decrease, trigger: rateValue) { oldValue, newValue in
+            return newValue < oldValue
+        }
     }
 }
 

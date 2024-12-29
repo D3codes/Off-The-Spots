@@ -22,9 +22,16 @@ struct PlaybackProgressView: View {
                 minValue: 0.0,
                 maxValue: audioPlayer.duration,
                 thumbColor: .clear,
-                minTrackColor: .blue,
-                maxTrackColor: .lightGray
+                minTrackColor: UIColor(.primary),
+                maxTrackColor: UIColor(.secondary)
             )
+            .mask(
+                Capsule()
+                    .frame(maxWidth: .infinity, maxHeight: 4)
+                    .padding(.horizontal, 12)
+                    .offset(y: 1)
+            )
+            .scaleEffect(x: 1, y: isEditingProgress ? 2 : 1)
             
             HStack {
                 Text("\(Int(progress + 0.5) / 60):\(String(format: "%02d", Int(progress + 0.5) % 60))")
@@ -37,11 +44,15 @@ struct PlaybackProgressView: View {
     }
     
     private func handleTouchDown() {
-        isEditingProgress = true
+        withAnimation {
+            isEditingProgress = true
+        }
     }
     
     private func handleTouchUp() {
-        isEditingProgress = false
+        withAnimation {
+            isEditingProgress = false
+        }
         audioPlayer.currentTime = progress
     }
 }
