@@ -9,8 +9,9 @@ import SwiftUI
 import AVFoundation
 
 struct RateView: View {
-    @Binding var audioPlayer: AVAudioPlayer
-    @State var rateValue: Float
+    @ObservedObject var player: AudioHelper
+    
+    @Binding var rateValue: Float
     
     var body: some View {
         ZStack {
@@ -25,28 +26,31 @@ struct RateView: View {
                 HStack(spacing: 25) {
                     Button(action: {
                         if(rateValue > 0.2) {
-                            rateValue -= 0.1
-                            audioPlayer.enableRate = true
-                            audioPlayer.rate = rateValue
+                            withAnimation {
+                                rateValue -= 0.1
+                            }
+                            player.setRate(value: rateValue)
                         }
                     }, label: {
                         Image(systemName: "minus")
-                            .font(.title2)
+                            .font(.title)
                             .foregroundColor(.primary)
                     })
                     
                     Text("\(String(format: "%.1f", rateValue))x")
-                        .font(.title2)
+                        .font(.title)
+                        .contentTransition(.numericText())
                     
                     Button(action: {
                         if(rateValue < 2) {
-                            rateValue += 0.1
-                            audioPlayer.enableRate = true
-                            audioPlayer.rate = rateValue
+                            withAnimation {
+                                rateValue += 0.1
+                            }
+                            player.setRate(value: rateValue)
                         }
                     }, label: {
                         Image(systemName: "plus")
-                            .font(.title2)
+                            .font(.title)
                             .foregroundColor(.primary)
                     })
                 }
@@ -54,15 +58,21 @@ struct RateView: View {
             .padding(.bottom)
         }
         .frame(maxHeight: 50)
+        .sensoryFeedback(.increase, trigger: rateValue) { oldValue, newValue in
+            return newValue > oldValue
+        }
+        .sensoryFeedback(.decrease, trigger: rateValue) { oldValue, newValue in
+            return newValue < oldValue
+        }
     }
 }
 
 #Preview {
     struct RateView_Preview: View {
-        @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+        @StateObject var player: AudioHelper = AudioHelper()
         
         var body: some View {
-            RateView(audioPlayer: $audioPlayer, rateValue: audioPlayer.rate)
+            RateView(player: player, rateValue: $player.rateValue)
         }
     }
     

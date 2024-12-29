@@ -10,25 +10,25 @@ import AVFoundation
 
 struct SongView: View {
     @Binding var song: Song
+    @Binding var isEditingProgress: Bool
     
-    @Binding var audioPlayer: AVAudioPlayer
-    @Binding var isPlaying: Bool
+    @ObservedObject var player: AudioHelper
     
     var body: some View {
         VStack {
             HStack {
                 Text(song.name)
-                    .font(.title)
+                    .font(.largeTitle)
                 Spacer()
                 Menu(content: {
                     Button(action: {}, label: { Label("Edit Song", systemImage: "pencil") })
-                    Button(action: {}, label: { Label("Edit Tracks", systemImage: "list.bullet.circle") })
                 }, label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.title2)
                         .foregroundColor(.primary)
                 })
             }
+            .padding(.top)
             
             Picker("Select a Track", selection: $song.selectedTrack) {
                 ForEach(song.tracks, id: \.self) { track in
@@ -37,50 +37,47 @@ struct SongView: View {
             }
             .pickerStyle(.menu)
             .onChange(of: song.selectedTrack, {
-                if(isPlaying) {
-                    audioPlayer.stop()
-                    isPlaying = false
+                if(player.isPlaying) {
+                    player.stop()
                 }
                 
-                do {
-                    audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
-                } catch {
-                    print("OOPS")
-                }
+                player.setSelectedSong(song: song)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
             
-            PanningView(audioPlayer: $audioPlayer, panningValue: Double(audioPlayer.pan))
+            PanningView(player: player, panningValue: $player.panningValue)
                 .padding()
             
             Spacer()
             
-            RateView(audioPlayer: $audioPlayer, rateValue: audioPlayer.rate)
+            RateView(player: player, rateValue: $player.rateValue)
                 .padding()
             
             Spacer()
             
-            PlaybackProgressView(audioPlayer: $audioPlayer)
+            PlaybackProgressView(
+                player: player,
+                duration: $player.duration,
+                progress: $player.progress,
+                isEditingProgress: $isEditingProgress)
             
             HStack {
-                Button(action: { audioPlayer.currentTime -= 15 }, label: {
+                Button(action: { player.skip(seconds: -15) }, label: {
                     Image(systemName: "15.arrow.trianglehead.counterclockwise")
                         .font(.largeTitle)
                 })
                 .padding()
                 
                 Button(action: {
-                    if(isPlaying) {
-                        audioPlayer.pause()
-                        isPlaying = false
+                    if(player.isPlaying) {
+                        player.pause()
                     } else {
-                        audioPlayer.play()
-                        isPlaying = true
+                        player.play()
                     }
                 }, label: {
-                    if(isPlaying) {
+                    if(player.isPlaying) {
                         Image(systemName: "pause.fill")
                             .font(.largeTitle)
                     } else {
@@ -90,7 +87,7 @@ struct SongView: View {
                 })
                 .padding()
                 
-                Button(action: { audioPlayer.currentTime += 15 }, label: {
+                Button(action: { player.skip(seconds: 15) }, label: {
                     Image(systemName: "15.arrow.trianglehead.clockwise")
                         .font(.largeTitle)
                 })
@@ -115,14 +112,14 @@ struct SongView: View {
             ],
             selectedTrack: Track(name: "Bass Left")
         )
-        @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
-        @State var isPlaying: Bool = false
+        @State var isEditingProgress: Bool = false
+        @StateObject var player: AudioHelper = AudioHelper()
         
         var body: some View {
             SongView(
                 song: $song,
-                audioPlayer: $audioPlayer,
-                isPlaying: $isPlaying
+                isEditingProgress: $isEditingProgress,
+                player: player
             )
         }
     }
