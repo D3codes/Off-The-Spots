@@ -16,6 +16,9 @@ struct MainView: View {
     
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlaying: Bool = false
+    @State private var timer: Timer?
+    @State private var progress: Double = 0.0
+    @State private var isEditingProgress: Bool = false
     
     @State private var addSongInitialTrackUrl: URL?
     @State private var presentAddSongPopover: Bool = false
@@ -68,6 +71,8 @@ struct MainView: View {
         .sheet(isPresented: $presentSongSheet) {
             SongView(
                 song: Binding($selectedSong)!,
+                progress: $progress,
+                isEditingProgress: $isEditingProgress,
                 audioPlayer: Binding($audioPlayer)!,
                 isPlaying: $isPlaying
             )
@@ -81,6 +86,9 @@ struct MainView: View {
             AddSongView(presentAddSongPopover: $presentAddSongPopover, addSong: { modelContext.insert($0) })
         }
         .onAppear() { setSelectedSong(song: selectedSong) }
+        .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
+            updateProgress()
+        }
     }
 
     private func deleteSongs(offsets: IndexSet) {
@@ -103,6 +111,8 @@ struct MainView: View {
     private func setSelectedSong(song: Song?) {
         if let song {
             selectedSong = song
+            progress = 0
+            isPlaying = false
             
             do {
                 audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
@@ -111,6 +121,13 @@ struct MainView: View {
                 print("oops")
             }
         }
+    }
+    
+    private func updateProgress() {
+        guard let audioPlayer = audioPlayer, audioPlayer.isPlaying else { return }
+        if isEditingProgress { return }
+        
+        progress = audioPlayer.currentTime
     }
 }
 

@@ -10,6 +10,8 @@ import AVFoundation
 
 struct SongView: View {
     @Binding var song: Song
+    @Binding var progress: Double
+    @Binding var isEditingProgress: Bool
     
     @Binding var audioPlayer: AVAudioPlayer
     @Binding var isPlaying: Bool
@@ -18,17 +20,17 @@ struct SongView: View {
         VStack {
             HStack {
                 Text(song.name)
-                    .font(.title)
+                    .font(.largeTitle)
                 Spacer()
                 Menu(content: {
                     Button(action: {}, label: { Label("Edit Song", systemImage: "pencil") })
-                    Button(action: {}, label: { Label("Edit Tracks", systemImage: "list.bullet.circle") })
                 }, label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.title2)
                         .foregroundColor(.primary)
                 })
             }
+            .padding(.top)
             
             Picker("Select a Track", selection: $song.selectedTrack) {
                 ForEach(song.tracks, id: \.self) { track in
@@ -62,7 +64,10 @@ struct SongView: View {
             
             Spacer()
             
-            PlaybackProgressView(audioPlayer: $audioPlayer)
+            PlaybackProgressView(
+                audioPlayer: $audioPlayer,
+                progress: $progress,
+                isEditingProgress: $isEditingProgress)
             
             HStack {
                 Button(action: { audioPlayer.currentTime -= 15 }, label: {
@@ -117,10 +122,14 @@ struct SongView: View {
         )
         @State var audioPlayer: AVAudioPlayer = AVAudioPlayer()
         @State var isPlaying: Bool = false
+        @State var progress: Double = 0.0
+        @State var isEditingProgress: Bool = false
         
         var body: some View {
             SongView(
                 song: $song,
+                progress: $progress,
+                isEditingProgress: $isEditingProgress,
                 audioPlayer: $audioPlayer,
                 isPlaying: $isPlaying
             )
