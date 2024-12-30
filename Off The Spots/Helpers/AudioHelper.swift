@@ -97,11 +97,11 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         nowPlayingInfo[MPMediaItemPropertyTitle] = song.name
         nowPlayingInfo[MPMediaItemPropertyArtist] = song.selectedTrack.name
 
-//        if let image = UIImage(named: "logo") {
-//            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
-//                return image
-//            }
-//        }
+        if let image = UIImage(named: "splash") {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
+                return image
+            }
+        }
         
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = audioPlayer.duration
@@ -136,6 +136,28 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 return .success
             }
             return .commandFailed
+        }
+        
+        commandCenter.stopCommand.addTarget { _ in
+            self.stop()
+            return .success
+        }
+        
+        commandCenter.skipBackwardCommand.addTarget { _ in
+            self.skip(seconds: -10)
+            return .success
+        }
+        
+        commandCenter.skipForwardCommand.addTarget { _ in
+            self.skip(seconds: 10)
+            return .success
+        }
+        
+        commandCenter.changePlaybackPositionCommand.addTarget { event in
+            guard let e = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            
+            self.setCurrentTime(value: e.positionTime)
+            return .success
         }
     }
     
