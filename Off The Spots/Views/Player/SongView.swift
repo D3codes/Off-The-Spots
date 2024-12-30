@@ -11,8 +11,9 @@ import AVFoundation
 struct SongView: View {
     @Binding var song: Song
     @Binding var isEditingProgress: Bool
-    
     @ObservedObject var player: AudioHelper
+    
+    @State private var isAddSongSheetPresented: Bool = false
     
     var body: some View {
         VStack {
@@ -21,7 +22,9 @@ struct SongView: View {
                     .font(.largeTitle)
                 Spacer()
                 Menu(content: {
-                    Button(action: {}, label: { Label("Edit Song", systemImage: "pencil") })
+                    Button(action: {
+                        isAddSongSheetPresented = true
+                    }, label: { Label("Edit Song", systemImage: "pencil") })
                 }, label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.title2)
@@ -126,6 +129,12 @@ struct SongView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(20)
+        .sheet(isPresented: $isAddSongSheetPresented) {
+            NavigationView {
+                EditSongView(song: $song)
+            }
+            .interactiveDismissDisabled(true)
+        }
     }
 }
 

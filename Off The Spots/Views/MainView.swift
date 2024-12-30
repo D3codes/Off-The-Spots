@@ -79,7 +79,14 @@ struct MainView: View {
         }
         .sheet(isPresented: $isAddSongSheetPresented) {
             NavigationView {
-                AddSongView()
+                @State var newSong: Song = Song(
+                    id: UUID(),
+                    name: "",
+                    tracks: [],
+                    selectedTrack: Track(name: "")
+                )
+                
+                EditSongView(song: $newSong)
             }
             .interactiveDismissDisabled(true)
         }
