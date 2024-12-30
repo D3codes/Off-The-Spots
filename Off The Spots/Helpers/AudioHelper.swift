@@ -16,6 +16,9 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var duration: Double = 0
     @Published var panningValue: Double = 0
     @Published var rateValue: Float = 1.0
+    @Published var isLooping: Bool = false
+    @Published var loopStart: Double? = nil
+    @Published var loopEnd: Double? = nil
     
     override init() {
         super.init()
@@ -43,6 +46,12 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     func skip(seconds: Double) {
         audioPlayer.currentTime += seconds
+        
+        if (isLooping && (audioPlayer.currentTime > loopEnd! || audioPlayer.currentTime < loopStart!)) {
+            audioPlayer.currentTime = loopStart!
+        }
+        
+        progress = audioPlayer.currentTime
         updateNowPlaying()
     }
     
@@ -52,6 +61,10 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func updateProgress() {
+        if (isLooping && (audioPlayer.currentTime > loopEnd! || audioPlayer.currentTime < loopStart!)) {
+            audioPlayer.currentTime = loopStart!
+        }
+        
         progress = audioPlayer.currentTime
         updateNowPlaying()
     }
@@ -65,6 +78,36 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         audioPlayer.enableRate = true
         audioPlayer.rate = value
         rateValue = value
+    }
+    
+    func setLoopStart(value: Double) {
+        guard value < loopEnd ?? 9999999999 else { return }
+        loopStart = value
+    }
+    
+    func clearLoopStart() {
+        loopStart = nil
+        stopLoop()
+    }
+    
+    func setLoopEnd(value: Double) {
+        guard value > loopStart ?? 0 else { return }
+        loopEnd = value
+    }
+    
+    func clearLoopEnd() {
+        loopEnd = nil
+        stopLoop()
+    }
+    
+    func startLoop() {
+        guard loopStart != nil, loopEnd != nil else { return }
+        isLooping = true
+        setCurrentTime(value: loopStart!)
+    }
+    
+    func stopLoop() {
+        isLooping = false
     }
     
     func setSelectedSong(song: Song) {
