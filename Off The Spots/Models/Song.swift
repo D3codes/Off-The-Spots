@@ -15,8 +15,8 @@ final class Song {
     var tracks: [Track]
     var selectedTrack: Track
     
-    init(name: String, tracks: [Track], selectedTrack: Track) {
-        self.id = UUID()
+    init(id: UUID = UUID(), name: String, tracks: [Track], selectedTrack: Track) {
+        self.id = id
         self.name = name
         self.tracks = tracks
         self.selectedTrack = selectedTrack

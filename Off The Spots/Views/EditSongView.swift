@@ -1,5 +1,5 @@
 //
-//  AddSongView.swift
+//  EditSongView.swift
 //  Off The Spots
 //
 //  Created by David Freeman on 12/4/24.
@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct AddSongView: View {
+struct EditSongView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    let songId: UUID = UUID()
-    @State var songTitle: String = ""
-    @State var tracks: [Track] = []
+    @State private var sheetTitle: String = "Add Song"
+    
+    @Binding var song: Song
     @FocusState var isSongFieldFocused: Bool
 
     @State private var presentFileImporter: Bool = false
@@ -21,7 +21,7 @@ struct AddSongView: View {
     var body: some View {
         List {
             Section {
-                TextField("New Song", text: $songTitle)
+                TextField("New Song", text: $song.name)
                     .focused($isSongFieldFocused)
                     .onAppear { isSongFieldFocused = true }
             } header: {
@@ -30,8 +30,8 @@ struct AddSongView: View {
             }
             
             Section {
-                ForEach(0..<tracks.count, id: \.self) { index in
-                    TextField("", text: self.$tracks[index].name)
+                ForEach(0..<song.tracks.count, id: \.self) { index in
+                    TextField("", text: self.$song.tracks[index].name)
                 }
                 .onMove(perform: moveTracks)
                 .onDelete(perform: deleteTracks)
@@ -50,7 +50,7 @@ struct AddSongView: View {
                     .font(.subheadline)
                 }
             } footer: {
-                if tracks.isEmpty {
+                if(song.tracks.isEmpty) {
                     Text("No Tracks")
                         .foregroundStyle(.secondary)
                         .font(.title3)
@@ -59,7 +59,7 @@ struct AddSongView: View {
                 }
             }
         }
-        .navigationTitle(Text("Add Song"))
+        .navigationTitle(Text(sheetTitle))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
@@ -72,7 +72,9 @@ struct AddSongView: View {
         }
         .safeAreaInset(edge: .bottom) {
             Button(action: {
-                modelContext.insert(Song(name: songTitle, tracks: tracks, selectedTrack: tracks[0]))
+                song.selectedTrack = song.tracks[0]
+                modelContext.delete(song)
+                modelContext.insert(song)
                 dismiss()
             }) {
                 Text("Save")
@@ -80,7 +82,7 @@ struct AddSongView: View {
             }
             .buttonStyle(.borderedProminent)
             .padding()
-            .disabled(songTitle.isEmpty || tracks.isEmpty)
+            .disabled(song.name.isEmpty || song.tracks.isEmpty)
         }
         .fileImporter(
             isPresented: $presentFileImporter,
@@ -105,12 +107,17 @@ struct AddSongView: View {
                     print("Error: \(error)")
                 }
             })
+        .onAppear {
+            if(!song.name.isEmpty) {
+                sheetTitle = "Edit Song"
+            }
+        }
     }
     
     func addTrack(fileUrl: URL) {
         do {
             let file: Data = try Data(contentsOf: fileUrl)
-            tracks.append(Track(name: fileUrl.lastPathComponent, file: file))
+            song.tracks.append(Track(name: fileUrl.deletingPathExtension().lastPathComponent, file: file))
         } catch {
             
         }
@@ -119,34 +126,32 @@ struct AddSongView: View {
     private func deleteTracks(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                tracks.remove(at: index)
+                song.tracks.remove(at: index)
             }
         }
     }
 
     private func moveTracks(offsets: IndexSet, destination: Int) {
         withAnimation {
-            tracks.move(fromOffsets: offsets, toOffset: destination)
+            song.tracks.move(fromOffsets: offsets, toOffset: destination)
         }
     }
 }
 
 #Preview {
-    struct AddSongView_Preview: View {
+    struct EditSongView_Preview: View {
         @State var presentAddSongPopover: Bool = false
+        @State var song: Song = Song(
+            id: UUID(),
+            name: "",
+            tracks: [],
+            selectedTrack: Track(name: "")
+        )
         
         var body: some View {
-            AddSongView(
-                songTitle: "After You've Gone",
-                tracks: [
-                    Track(name: "Bass Left"),
-                    Track(name: "Bari Left"),
-                    Track(name: "Lead Left"),
-                    Track(name: "Tenor Left")
-                ]
-            )
+            EditSongView(song: $song)
         }
     }
     
-    return AddSongView_Preview()
+    return AddEditSongView_Preview()
 }
