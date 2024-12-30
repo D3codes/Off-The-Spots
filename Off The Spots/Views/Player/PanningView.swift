@@ -62,7 +62,6 @@ struct PanningView: View {
             }
             .padding()
         }
-        .frame(maxHeight: 50)
     }
     
     func handleTouchUp() {

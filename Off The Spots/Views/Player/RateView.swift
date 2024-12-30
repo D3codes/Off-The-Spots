@@ -21,9 +21,9 @@ struct RateView: View {
             VStack {
                 Text("Playback Speed")
                     .font(.subheadline)
-                    .padding(.vertical)
+                    .padding(.bottom)
                 
-                HStack(spacing: 25) {
+                HStack(spacing: 20) {
                     Button(action: {
                         if(rateValue > 0.2) {
                             withAnimation {
@@ -32,13 +32,18 @@ struct RateView: View {
                             player.setRate(value: rateValue)
                         }
                     }, label: {
-                        Image(systemName: "minus")
-                            .font(.title)
-                            .foregroundColor(.primary)
+                        ZStack {
+                            Circle()
+                                .tint(.clear)
+                            
+                            Image(systemName: "minus")
+                                .font(.title2)
+                                .foregroundColor(rateValue > 0.2 ? .primary : .secondary)
+                        }
                     })
                     
                     Text("\(String(format: "%.1f", rateValue))x")
-                        .font(.title)
+                        .font(.title2)
                         .contentTransition(.numericText())
                     
                     Button(action: {
@@ -49,15 +54,19 @@ struct RateView: View {
                             player.setRate(value: rateValue)
                         }
                     }, label: {
-                        Image(systemName: "plus")
-                            .font(.title)
-                            .foregroundColor(.primary)
+                        ZStack {
+                            Circle()
+                                .tint(.clear)
+                            
+                            Image(systemName: "plus")
+                                .font(.title2)
+                                .foregroundColor(rateValue < 2 ? .primary : .secondary)
+                        }
                     })
                 }
             }
-            .padding(.bottom)
+            .padding()
         }
-        .frame(maxHeight: 50)
         .sensoryFeedback(.increase, trigger: rateValue) { oldValue, newValue in
             return newValue > oldValue
         }

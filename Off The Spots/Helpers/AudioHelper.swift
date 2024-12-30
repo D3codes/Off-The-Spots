@@ -115,6 +115,8 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         progress = 0
         setPan(value: 0.0)
         setRate(value: 1.0)
+        clearLoopStart()
+        clearLoopEnd()
         
         do {
             audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
