@@ -67,12 +67,9 @@ struct LoopView: View {
             .padding(.bottom)
         }
         .frame(maxHeight: 50)
-//        .sensoryFeedback(.increase, trigger: rateValue) { oldValue, newValue in
-//            return newValue > oldValue
-//        }
-//        .sensoryFeedback(.decrease, trigger: rateValue) { oldValue, newValue in
-//            return newValue < oldValue
-//        }
+        .sensoryFeedback(.selection, trigger: loopStart)
+        .sensoryFeedback(.selection, trigger: loopEnd)
+        .sensoryFeedback(.selection, trigger: isLooping)
     }
 }
 
