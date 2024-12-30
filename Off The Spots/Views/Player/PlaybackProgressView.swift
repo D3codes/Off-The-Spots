@@ -14,6 +14,12 @@ struct PlaybackProgressView: View {
     @Binding var duration: Double
     @Binding var progress: Double
     @Binding var isEditingProgress: Bool
+
+    @Binding var loopStart: Double?
+    @Binding var loopEnd: Double?
+    
+    let loopStartImage = UIImage(named: "loopBegin")!.withTintColor(UIColor(.accentColor))
+    let loopEndImage = UIImage(named: "loopEnd")!.withTintColor(UIColor(.accentColor))
     
     var body: some View {
         VStack {
@@ -24,8 +30,8 @@ struct PlaybackProgressView: View {
                 minValue: 0.0,
                 maxValue: duration,
                 thumbColor: .clear,
-                minTrackColor: UIColor(.primary),
-                maxTrackColor: UIColor(.secondary)
+                minTrackColor: .primary,
+                maxTrackColor: .secondary
             )
             .mask(
                 Capsule()
@@ -34,6 +40,42 @@ struct PlaybackProgressView: View {
                     .offset(y: 1)
             )
             .scaleEffect(x: 1, y: isEditingProgress ? 2 : 1)
+            .overlay(
+                ZStack {
+                    if loopStart != nil {
+                        UISliderView(
+                            value: Binding<Double>(get: {
+                                return loopStart ?? 0.0
+                            }, set: {
+                                loopStart = $0
+                            }),
+                            minValue: 0.0,
+                            maxValue: duration,
+                            thumbImage: loopStartImage,
+                            thumbColor: .green,
+                            minTrackColor: .clear,
+                            maxTrackColor: .clear
+                        )
+                    }
+                    
+                    if loopEnd != nil {
+                        UISliderView(
+                            value: Binding<Double>(get: {
+                                return loopEnd ?? 0.0
+                            }, set: {
+                                loopEnd = $0
+                            }),
+                            minValue: 0.0,
+                            maxValue: duration,
+                            thumbImage: loopEndImage,
+                            thumbColor: .red,
+                            minTrackColor: .clear,
+                            maxTrackColor: .clear
+                        )
+                    }
+                }
+                //.allowsHitTesting(false)
+            )
             
             HStack {
                 Text("\(Int(progress + 0.5) / 60):\(String(format: "%02d", Int(progress + 0.5) % 60))")
@@ -66,13 +108,17 @@ struct PlaybackProgressView: View {
         @StateObject var player: AudioHelper = AudioHelper()
         @State var progress: Double = 0.0
         @State var isEditingProgress: Bool = false
+        @State var loopStart: Double? = nil
+        @State var loopEnd: Double? = nil
         
         var body: some View {
             PlaybackProgressView(
                 player: player,
                 duration: $player.duration,
                 progress: $player.progress,
-                isEditingProgress: $isEditingProgress)
+                isEditingProgress: $isEditingProgress,
+                loopStart: $loopStart,
+                loopEnd: $loopEnd)
         }
     }
     

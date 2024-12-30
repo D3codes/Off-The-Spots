@@ -13,18 +13,23 @@ struct UISliderView: UIViewRepresentable {
     var handleTouchDown: () -> Void = { }
     var handleTouchUp: () -> Void = { }
     
-    var minValue = 1.0
-    var maxValue = 100.0
-    var thumbColor: UIColor = .white
-    var minTrackColor: UIColor = .blue
-    var maxTrackColor: UIColor = .lightGray
+    var minValue: Double = 0.0
+    var maxValue: Double = 100.0
+    var thumbImage: UIImage?
+    var thumbColor: Color = .white
+    var minTrackColor: Color = .primary
+    var maxTrackColor: Color = .secondary
     
     class Coordinator: NSObject {
         var value: Binding<Double>
         var handleTouchDown: () -> Void
         var handleTouchUp: () -> Void
         
-        init(value: Binding<Double>, handleTouchDown: @escaping () -> Void, handleTouchUp: @escaping () -> Void) {
+        init(
+            value: Binding<Double>,
+            handleTouchDown: @escaping () -> Void,
+            handleTouchUp: @escaping () -> Void
+        ) {
             self.value = value
             self.handleTouchDown = handleTouchDown
             self.handleTouchUp = handleTouchUp
@@ -44,17 +49,24 @@ struct UISliderView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> UISliderView.Coordinator {
-        Coordinator(value: $value, handleTouchDown: handleTouchDown, handleTouchUp: handleTouchUp)
+        Coordinator(
+            value: $value,
+            handleTouchDown: handleTouchDown,
+            handleTouchUp: handleTouchUp)
     }
     
     func makeUIView(context: Context) -> UISlider {
         let slider = UISlider(frame: .zero)
-        slider.thumbTintColor = thumbColor
-        slider.minimumTrackTintColor = minTrackColor
-        slider.maximumTrackTintColor = maxTrackColor
+        slider.thumbTintColor = UIColor(thumbColor)
+        slider.minimumTrackTintColor = UIColor(minTrackColor)
+        slider.maximumTrackTintColor = UIColor(maxTrackColor)
         slider.minimumValue = Float(minValue)
         slider.maximumValue = Float(maxValue)
         slider.value = Float(value)
+        if let thumbImage {
+            slider.setThumbImage(thumbImage, for: .normal)
+            slider.setThumbImage(thumbImage, for: .highlighted)
+        }
         
         slider.addTarget(
             context.coordinator,

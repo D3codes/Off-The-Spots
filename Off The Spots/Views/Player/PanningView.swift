@@ -33,9 +33,9 @@ struct PanningView: View {
                         handleTouchUp: handleTouchUp,
                         minValue: -1.0,
                         maxValue: 1.0,
-                        thumbColor: UIColor(.white),
-                        minTrackColor: UIColor(.secondary),
-                        maxTrackColor: UIColor(.secondary)
+                        thumbColor: .white,
+                        minTrackColor: .secondary,
+                        maxTrackColor: .secondary
                     )
                     .onChange(of: panningValue) { value,_ in
                         panningValue = value

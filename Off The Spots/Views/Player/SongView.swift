@@ -57,11 +57,22 @@ struct SongView: View {
             
             Spacer()
             
+            LoopView(
+                player: player,
+                loopStart: $player.loopStart,
+                loopEnd: $player.loopEnd,
+                isLooping: $player.isLooping)
+                .padding()
+            
+            Spacer()
+            
             PlaybackProgressView(
                 player: player,
                 duration: $player.duration,
                 progress: $player.progress,
-                isEditingProgress: $isEditingProgress)
+                isEditingProgress: $isEditingProgress,
+                loopStart: $player.loopStart,
+                loopEnd: $player.loopEnd)
             
             HStack {
                 Button(action: { player.skip(seconds: -15) }, label: {
