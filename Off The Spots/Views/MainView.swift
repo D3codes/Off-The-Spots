@@ -36,6 +36,7 @@ struct MainView: View {
                             presentSongSheet = true
                         }, label: {
                             Text(song.name)
+                                .tint(.primary)
                         })
                     }
                     .onDelete(perform: deleteSongs)

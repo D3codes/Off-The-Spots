@@ -40,15 +40,18 @@ struct BottomBarView: View {
                 if(player.isPlaying) {
                     Image(systemName: "pause.fill")
                         .font(.title)
+                        .tint(.primary)
                 } else {
                     Image(systemName: "play.fill")
                         .font(.title)
+                        .tint(.primary)
                 }
             })
             
             Button(action: { player.skip(seconds: -15) }, label: {
                 Image(systemName: "15.arrow.trianglehead.counterclockwise")
                     .font(.title)
+                    .tint(.primary)
             })
             .padding(.horizontal, 10)
         }
