@@ -46,23 +46,25 @@ struct SongView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
+            Spacer()
             
             PanningView(player: player, panningValue: $player.panningValue)
-                .padding()
+                .frame(maxHeight: 50)
             
             Spacer()
             
-            RateView(player: player, rateValue: $player.rateValue)
-                .padding()
-            
-            Spacer()
-            
-            LoopView(
-                player: player,
-                loopStart: $player.loopStart,
-                loopEnd: $player.loopEnd,
-                isLooping: $player.isLooping)
-                .padding()
+            HStack {
+                RateView(player: player, rateValue: $player.rateValue)
+                
+                Spacer()
+                
+                LoopView(
+                    player: player,
+                    loopStart: $player.loopStart,
+                    loopEnd: $player.loopEnd,
+                    isLooping: $player.isLooping)
+            }
+            .frame(maxHeight: 50)
             
             Spacer()
             
@@ -78,8 +80,9 @@ struct SongView: View {
                 Button(action: { player.skip(seconds: -15) }, label: {
                     Image(systemName: "15.arrow.trianglehead.counterclockwise")
                         .font(.largeTitle)
+                        .tint(.primary)
                 })
-                .padding()
+                .padding(.horizontal)
                 
                 Button(action: {
                     if(player.isPlaying) {
@@ -91,20 +94,24 @@ struct SongView: View {
                     if(player.isPlaying) {
                         Image(systemName: "pause.fill")
                             .font(.largeTitle)
+                            .tint(.primary)
                     } else {
                         Image(systemName: "play.fill")
                             .font(.largeTitle)
+                            .tint(.primary)
                     }
                 })
-                .padding()
+                .padding(.horizontal)
                 
                 Button(action: { player.skip(seconds: 15) }, label: {
                     Image(systemName: "15.arrow.trianglehead.clockwise")
                         .font(.largeTitle)
+                        .tint(.primary)
                 })
-                .padding()
+                .padding(.horizontal)
             }
             .frame(maxWidth: .infinity)
+            .padding(.bottom)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(20)

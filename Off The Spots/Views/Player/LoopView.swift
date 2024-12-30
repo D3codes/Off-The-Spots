@@ -23,9 +23,9 @@ struct LoopView: View {
             VStack {
                 Text("Loop Section")
                     .font(.subheadline)
-                    .padding(.vertical)
+                    .padding(.bottom)
                 
-                HStack(spacing: 25) {
+                HStack(spacing: 20) {
                     Button(action: {
                         if loopStart == nil {
                             player.setLoopStart(value: player.progress)
@@ -33,9 +33,14 @@ struct LoopView: View {
                             player.clearLoopStart()
                         }
                     }, label: {
-                        Image(systemName: "chevron.right.to.line")
-                            .font(.title)
-                            .foregroundColor(loopStart != nil ? .accentColor : .primary)
+                        ZStack {
+                            Circle()
+                                .tint(.clear)
+                            
+                            Image(systemName: "chevron.right.to.line")
+                                .font(.title2)
+                                .foregroundColor(loopStart != nil ? .accentColor : .primary)
+                        }
                     })
                     
                     Button(action: {
@@ -46,7 +51,7 @@ struct LoopView: View {
                         }
                     }, label: {
                         Image(systemName: "arrow.rectanglepath")
-                            .font(.title)
+                            .font(.title2)
                             .foregroundColor(isLooping ? .accentColor : .primary)
                     })
                     .disabled(loopStart == nil || loopEnd == nil)
@@ -58,15 +63,19 @@ struct LoopView: View {
                             player.clearLoopEnd()
                         }
                     }, label: {
-                        Image(systemName: "chevron.left.to.line")
-                            .font(.title)
-                            .foregroundColor(loopEnd != nil ? .accentColor : .primary)
+                        ZStack {
+                            Circle()
+                                .tint(.clear)
+                            
+                            Image(systemName: "chevron.left.to.line")
+                                .font(.title2)
+                                .foregroundColor(loopEnd != nil ? .accentColor : .primary)
+                        }
                     })
                 }
             }
-            .padding(.bottom)
+            .padding(20)
         }
-        .frame(maxHeight: 50)
         .sensoryFeedback(.selection, trigger: loopStart)
         .sensoryFeedback(.selection, trigger: loopEnd)
         .sensoryFeedback(.selection, trigger: isLooping)
