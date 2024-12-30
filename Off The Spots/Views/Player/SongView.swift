@@ -77,6 +77,12 @@ struct SongView: View {
                 loopEnd: $player.loopEnd)
             
             HStack {
+                Rectangle()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(.clear)
+                
+                Spacer()
+                
                 Button(action: { player.skip(seconds: -15) }, label: {
                     Image(systemName: "15.arrow.trianglehead.counterclockwise")
                         .font(.largeTitle)
@@ -109,6 +115,11 @@ struct SongView: View {
                         .tint(.primary)
                 })
                 .padding(.horizontal)
+                
+                Spacer()
+                
+                AirPlayButton()
+                    .frame(width: 40, height: 40)
             }
             .frame(maxWidth: .infinity)
             .padding(.bottom)
