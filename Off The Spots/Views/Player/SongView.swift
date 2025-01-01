@@ -13,6 +13,8 @@ struct SongView: View {
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
     
+    @State private var loopStartLocked: Bool = false
+    @State private var loopEndLocked: Bool = false
     @State private var isAddSongSheetPresented: Bool = false
     
     var body: some View {
@@ -52,22 +54,23 @@ struct SongView: View {
             Spacer()
             
             PanningView(player: player, panningValue: $player.panningValue)
-                .frame(maxHeight: 50)
+                .frame(maxHeight: 80)
             
             Spacer()
             
-            HStack {
-                RateView(player: player, rateValue: $player.rateValue)
-                
-                Spacer()
-                
-                LoopView(
-                    player: player,
-                    loopStart: $player.loopStart,
-                    loopEnd: $player.loopEnd,
-                    isLooping: $player.isLooping)
-            }
-            .frame(maxHeight: 50)
+            RateView(player: player, rateValue: $player.rateValue)
+                .frame(maxHeight: 80)
+            
+            Spacer()
+            
+            LoopView(
+                player: player,
+                loopStart: $player.loopStart,
+                loopStartLocked: $loopStartLocked,
+                loopEnd: $player.loopEnd,
+                loopEndLocked: $loopEndLocked,
+                isLooping: $player.isLooping)
+            .frame(maxHeight: 80)
             
             Spacer()
             
@@ -77,7 +80,9 @@ struct SongView: View {
                 progress: $player.progress,
                 isEditingProgress: $isEditingProgress,
                 loopStart: $player.loopStart,
-                loopEnd: $player.loopEnd)
+                loopStartLocked: $loopStartLocked,
+                loopEnd: $player.loopEnd,
+                loopEndLocked: $loopEndLocked)
             
             HStack {
                 Rectangle()
