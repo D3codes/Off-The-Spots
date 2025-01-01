@@ -57,7 +57,6 @@ struct PanningView: View {
                     Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : panningValue.map(from: -1...0, to: 0...1))
                         .scaleEffect(1.5)
                 }
-                .frame(height: 40)
                 .padding(.horizontal)
             }
             .padding()
@@ -76,6 +75,7 @@ struct PanningView: View {
         
         var body: some View {
             PanningView(player: player, panningValue: $player.panningValue)
+                .frame(maxHeight: 50)
         }
     }
     

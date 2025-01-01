@@ -82,6 +82,7 @@ struct RateView: View {
         
         var body: some View {
             RateView(player: player, rateValue: $player.rateValue)
+                .frame(maxHeight: 50)
         }
     }
     

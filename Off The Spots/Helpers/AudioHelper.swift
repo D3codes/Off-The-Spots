@@ -80,9 +80,10 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         rateValue = value
     }
     
-    func setLoopStart(value: Double) {
-        guard value < loopEnd ?? 9999999999 else { return }
+    func setLoopStart(value: Double) -> Bool {
+        guard value < loopEnd ?? 9999999999 else { return false }
         loopStart = value
+        return true
     }
     
     func clearLoopStart() {
@@ -90,9 +91,10 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         stopLoop()
     }
     
-    func setLoopEnd(value: Double) {
-        guard value > loopStart ?? 0 else { return }
+    func setLoopEnd(value: Double) -> Bool {
+        guard value > loopStart ?? 0 else { return false }
         loopEnd = value
+        return true
     }
     
     func clearLoopEnd() {

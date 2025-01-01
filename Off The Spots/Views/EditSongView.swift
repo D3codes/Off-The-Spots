@@ -153,5 +153,5 @@ struct EditSongView: View {
         }
     }
     
-    return AddEditSongView_Preview()
+    return EditSongView_Preview()
 }

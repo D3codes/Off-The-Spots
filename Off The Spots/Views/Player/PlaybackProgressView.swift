@@ -16,7 +16,9 @@ struct PlaybackProgressView: View {
     @Binding var isEditingProgress: Bool
 
     @Binding var loopStart: Double?
+    @Binding var loopStartLocked: Bool
     @Binding var loopEnd: Double?
+    @Binding var loopEndLocked: Bool
     
     let loopStartImage = UIImage(named: "loopBegin")!.withTintColor(UIColor(.accentColor))
     let loopEndImage = UIImage(named: "loopEnd")!.withTintColor(UIColor(.accentColor))
@@ -56,6 +58,7 @@ struct PlaybackProgressView: View {
                             minTrackColor: .clear,
                             maxTrackColor: .clear
                         )
+                        .allowsHitTesting(!loopStartLocked)
                     }
                     
                     if loopEnd != nil {
@@ -72,9 +75,9 @@ struct PlaybackProgressView: View {
                             minTrackColor: .clear,
                             maxTrackColor: .clear
                         )
+                        .allowsHitTesting(!loopEndLocked)
                     }
                 }
-                //.allowsHitTesting(false)
             )
             
             HStack {
@@ -108,8 +111,10 @@ struct PlaybackProgressView: View {
         @StateObject var player: AudioHelper = AudioHelper()
         @State var progress: Double = 0.0
         @State var isEditingProgress: Bool = false
-        @State var loopStart: Double? = nil
+        @State var loopStart: Double? = 0.0
+        @State var loopStartLocked: Bool = true
         @State var loopEnd: Double? = nil
+        @State var loopEndLocked: Bool = false
         
         var body: some View {
             PlaybackProgressView(
@@ -118,7 +123,9 @@ struct PlaybackProgressView: View {
                 progress: $player.progress,
                 isEditingProgress: $isEditingProgress,
                 loopStart: $loopStart,
-                loopEnd: $loopEnd)
+                loopStartLocked: $loopStartLocked,
+                loopEnd: $loopEnd,
+                loopEndLocked: $loopEndLocked)
         }
     }
     
