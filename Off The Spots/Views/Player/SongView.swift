@@ -140,6 +140,10 @@ struct SongView: View {
             }
             .interactiveDismissDisabled(true)
         }
+        .onAppear() {
+            loopStartLocked = player.loopStart != nil
+            loopEndLocked = player.loopEnd != nil
+        }
     }
 }
 

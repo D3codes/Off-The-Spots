@@ -35,7 +35,7 @@ struct UISliderView: UIViewRepresentable {
             self.handleTouchUp = handleTouchUp
         }
         
-        @objc func valueChanged(_ sender: UISlider) {
+        @MainActor @objc func valueChanged(_ sender: UISlider) {
             self.value.wrappedValue = Double(sender.value)
         }
         
