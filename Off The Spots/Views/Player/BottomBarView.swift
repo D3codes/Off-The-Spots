@@ -9,21 +9,21 @@ import SwiftUI
 import AVFoundation
 
 struct BottomBarView: View {
-    @Binding var presentSongSheet: Bool
     var song: Song
     @ObservedObject var player: AudioHelper
     
+    var namespace: Namespace.ID
+    var sheetProgress: CGFloat = 0
+    
     var body: some View {
         HStack {
-            Button(action: { presentSongSheet = true }, label: {
-                Image(systemName: "chevron.up")
-                    .font(.title)
-            })
-            .padding(.horizontal, 10)
-            
             VStack(alignment: .leading) {
                 Text(song.name)
+                    .bold()
+//                    .matchedGeometryEffect(id: "name", in: namespace)
+                
                 Text(song.selectedTrack.name)
+//                    .matchedGeometryEffect(id: "track", in: namespace)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -55,16 +55,16 @@ struct BottomBarView: View {
             })
             .padding(.horizontal, 10)
         }
-        .onTapGesture { presentSongSheet = true }
         .padding(20)
-        .background(.thickMaterial)
-        .frame(maxWidth: .infinity, maxHeight: 50)
+        .ignoresSafeArea(.keyboard)
+        .opacity(1)
+        .scaleEffect(1 - 0.05 * sheetProgress)
+        .contentShape(Capsule())
     }
 }
 
 #Preview {
     struct BottomBarView_Preview: View {
-        @State var presentSongSheet: Bool = false
         @State var song: Song = Song(
             name: "After You've Gone",
             tracks: [Track(name: "Bass Left")],
@@ -72,12 +72,16 @@ struct BottomBarView: View {
         )
         @State var player: AudioHelper = AudioHelper()
         
+        @Namespace private var ns
+        
         var body: some View {
             BottomBarView(
-                presentSongSheet: $presentSongSheet,
                 song: song,
-                player: player
+                player: player,
+                namespace: ns,
+                sheetProgress: 0
             )
+            .background(.gray)
         }
     }
     

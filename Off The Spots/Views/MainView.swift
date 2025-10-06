@@ -10,6 +10,10 @@ import SwiftData
 import AVFoundation
 import MediaPlayer
 
+enum Tabs {
+    case songs, setLists, search
+}
+
 struct MainView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var songs: [Song]
@@ -18,104 +22,39 @@ struct MainView: View {
     @StateObject private var player: AudioHelper = AudioHelper()
     @State private var isEditingProgress: Bool = false
     
-    @State private var addSongInitialTrackUrl: URL?
+    @State private var presentPlayerSheet: Bool = false
     
-    @State private var presentSongSheet: Bool = false
-    @State private var isAddSongSheetPresented = false
-
+    @State var selectedTab: Tabs = .songs
+    
     var body: some View {
-        VStack {
-            if(songs.isEmpty) {
-                SplashScreenView(isSheetPresented: $isAddSongSheetPresented)
-                    .toolbar(.hidden)
-            } else {
-                List {
-                    ForEach(songs) { song in
-                        Button(action: {
-                            setSelectedSong(song: song)
-                            presentSongSheet = true
-                        }, label: {
-                            Text(song.name)
-                                .tint(.primary)
-                        })
-                    }
-                    .onDelete(perform: deleteSongs)
-                }
-                .navigationTitle(Text("Songs"))
-                .toolbar {
-                    NavigationLink(destination: SettingsView()) {
-                        Image(systemName: "gearshape")
-                    }
-                }
-                .safeAreaInset(edge: .bottom) {
-                    // Try to wrap in a VStack
-                    Button(action: { isAddSongSheetPresented.toggle() }) {
-                        HStack {
-                            Image(systemName: "plus")
-                            Text("Add Song")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding()
-                    
-                    if(selectedSong != nil) {
-                        BottomBarView(
-                            presentSongSheet: $presentSongSheet,
-                            song: selectedSong!,
-                            player: player
-                        )
-                    }
-                }
+        TabView(selection: $selectedTab) {
+            Tab("Songs", systemImage: "music.note", value: .songs) {
+                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong)
             }
+            
+            Tab("Set Lists", systemImage: "music.note.list", value: .setLists) { SetListsView() }
+            
+            Tab(value: .search, role: .search) { SearchView(presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong) }
         }
-        .sheet(isPresented: $presentSongSheet) {
-            SongView(
-                song: Binding($selectedSong)!,
-                isEditingProgress: $isEditingProgress,
+        .tabViewBottomAccessory {
+            PlayerAccessoryView(
+                selectedSong: $selectedSong,
+                presentPlayerSheet: $presentPlayerSheet,
                 player: player
             )
-            .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $isAddSongSheetPresented) {
-            NavigationView {
-                @State var newSong: Song = Song(
-                    id: UUID(),
-                    name: "",
-                    tracks: [],
-                    selectedTrack: Track(name: "")
-                )
-                
-                EditSongView(song: $newSong)
-            }
-            .interactiveDismissDisabled(true)
-        }
-        .onAppear() {
-            setSelectedSong(song: selectedSong)
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .sheet(isPresented: $presentPlayerSheet) {
+            ExpandedSheetView(song: Binding($selectedSong)!, isEditingProgress: $isEditingProgress, player: player)
         }
         .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
         }
     }
-
-    private func deleteSongs(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                if(selectedSong?.id == songs[index].id) {
-                    selectedSong = nil
-                    
-                    if(player.isPlaying) {
-                        player.stop()
-                    }
-                }
-                
-                modelContext.delete(songs[index])
-            }
-        }
-    }
     
     private func setSelectedSong(song: Song?) {
         guard let song else { return }
+        if selectedSong != nil && selectedSong!.id == song.id { return }
         selectedSong = song
         player.setSelectedSong(song: song)
     }

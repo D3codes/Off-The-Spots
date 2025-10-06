@@ -18,102 +18,84 @@ struct LoopView: View {
     @Binding var isLooping: Bool
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.thinMaterial)
+        VStack {
+            Text("Loop Section")
+                .font(.subheadline)
+                .padding(.bottom)
             
-            VStack {
-                Text("Loop Section")
-                    .font(.subheadline)
-                    .padding(.bottom)
+            HStack(spacing: 20) {
+                Button(action: handleLoopStartLockTap, label: {
+                    Text("\(loopStartLocked ? "Unlock" : "Lock")")
+                        .frame(width: 60)
+                })
+                .foregroundStyle(loopStart == nil ? .secondary : .primary)
+                .disabled(loopStart == nil)
+                .padding(.trailing)
                 
-                HStack(spacing: 20) {
-                    Button(action: handleLoopStartLockTap, label: {
-                        Text("\(loopStartLocked ? "Unlock" : "Lock")")
-                            .frame(width: 60)
-                    })
-                    .foregroundStyle(loopStart == nil ? .secondary : .primary)
-                    .disabled(loopStart == nil)
-                    .padding(.trailing)
-                    
-                    Button(action: handleLoopStartTap, label: {
-                        ZStack {
-                            Circle()
-                                .tint(.clear)
-                            
-                            Image(systemName: "chevron.right.to.line")
-                                .font(.title2)
-                                .foregroundColor(loopStart != nil ? .accentColor : .primary)
-                            
-                            if(loopStartLocked) {
-                                ZStack {
-                                    Circle()
-                                        .frame(width: 20, height: 20)
-                                        .foregroundStyle(.ultraThinMaterial)
-                                        .opacity(0.8)
-                                    Image(systemName: "lock.fill")
-                                        .font(.caption)
-                                        .bold()
-                                        .foregroundColor(.primary)
-                                }
-                            }
-                        }
-                    })
-                    .disabled(loopStartLocked)
-                    
-                    Button(action: {
-                        if isLooping {
-                            player.stopLoop()
-                        } else {
-                            player.startLoop()
-                        }
-                    }, label: {
-                        Image(systemName: "arrow.rectanglepath")
+                Button(action: handleLoopStartTap, label: {
+                    ZStack {
+                        Circle()
+                            .tint(.clear)
+                        
+                        Image(systemName: "chevron.right.to.line")
                             .font(.title2)
-                            .foregroundColor(
-                                loopStart == nil || loopEnd == nil
-                                ? .secondary
-                                : isLooping
-                                    ? .accentColor
-                                    : .primary)
-                    })
-                    .disabled(loopStart == nil || loopEnd == nil)
-                    
-                    Button(action: handleLoopEndTap, label: {
-                        ZStack {
-                            Circle()
-                                .tint(.clear)
-                            
-                            Image(systemName: "chevron.left.to.line")
-                                .font(.title2)
-                                .foregroundColor(loopEnd != nil ? .accentColor : .primary)
-                            
-                            if(loopEndLocked) {
-                                ZStack {
-                                    Circle()
-                                        .frame(width: 20, height: 20)
-                                        .foregroundStyle(.ultraThinMaterial)
-                                        .opacity(0.8)
-                                    Image(systemName: "lock.fill")
-                                        .font(.caption)
-                                        .bold()
-                                        .foregroundColor(.primary)
-                                }
-                            }
+                            .foregroundColor(loopStart != nil ? .accentColor : .primary)
+                        
+                        if(loopStartLocked) {
+                            Image(systemName: "lock.fill")
+                                .font(.caption)
+                                .bold()
+                                .foregroundColor(.primary)
                         }
-                    })
-                    .disabled(loopEndLocked)
-                    
-                    Button(action: handleLoopEndLockTap, label: {
-                        Text("\(loopEndLocked ? "Unlock" : "Lock")")
-                            .frame(width: 60)
-                    })
-                    .foregroundStyle(loopEnd == nil ? .secondary : .primary)
-                    .disabled(loopEnd == nil)
-                    .padding(.leading)
-                }
+                    }
+                })
+                .disabled(loopStartLocked)
+                
+                Button(action: {
+                    if isLooping {
+                        player.stopLoop()
+                    } else {
+                        player.startLoop()
+                    }
+                }, label: {
+                    Image(systemName: "arrow.rectanglepath")
+                        .font(.title2)
+                        .foregroundColor(
+                            loopStart == nil || loopEnd == nil
+                            ? .secondary
+                            : isLooping
+                                ? .accentColor
+                                : .primary)
+                })
+                .disabled(loopStart == nil || loopEnd == nil)
+                
+                Button(action: handleLoopEndTap, label: {
+                    ZStack {
+                        Circle()
+                            .tint(.clear)
+                        
+                        Image(systemName: "chevron.left.to.line")
+                            .font(.title2)
+                            .foregroundColor(loopEnd != nil ? .accentColor : .primary)
+                        
+                        if(loopEndLocked) {
+                            Image(systemName: "lock.fill")
+                                .font(.caption)
+                                .bold()
+                                .foregroundColor(.primary)
+                        }
+                    }
+                })
+                .disabled(loopEndLocked)
+                
+                Button(action: handleLoopEndLockTap, label: {
+                    Text("\(loopEndLocked ? "Unlock" : "Lock")")
+                        .frame(width: 60)
+                })
+                .foregroundStyle(loopEnd == nil ? .secondary : .primary)
+                .disabled(loopEnd == nil)
+                .padding(.leading)
             }
-            .padding(20)
         }
         .sensoryFeedback(.selection, trigger: loopStart)
         .sensoryFeedback(.selection, trigger: loopEnd)

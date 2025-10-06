@@ -1,5 +1,5 @@
 //
-//  SongView.swift
+//  ExpandedSheetView.swift
 //  Off The Spots
 //
 //  Created by David Freeman on 12/3/24.
@@ -8,7 +8,7 @@
 import SwiftUI
 import AVFoundation
 
-struct SongView: View {
+struct ExpandedSheetView: View {
     @Binding var song: Song
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
@@ -17,21 +17,32 @@ struct SongView: View {
     @State private var loopEndLocked: Bool = false
     @State private var isAddSongSheetPresented: Bool = false
     
+//    var namespace: Namespace.ID
+//    var sheetProgress: CGFloat = 1
+    
     var body: some View {
         VStack {
             HStack {
                 Text(song.name)
                     .font(.largeTitle)
+//                    .matchedGeometryEffect(id: "name", in: namespace)
                 Spacer()
                 Menu(content: {
-                    Button(action: {
-                        isAddSongSheetPresented = true
-                    }, label: { Label("Edit Song", systemImage: "pencil") })
+                    Button(
+                        action: { },
+                        label: { Label("Add to Set List", systemImage: "music.note.list") }
+                    )
+                    Button(
+                        action: { isAddSongSheetPresented = true },
+                        label: { Label("Edit Song", systemImage: "pencil") }
+                    )
                 }, label: {
-                    Image(systemName: "ellipsis.circle")
-                        .font(.title2)
-                        .foregroundColor(.primary)
+                    Image(systemName: "ellipsis")
+                        .font(.title3)
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(.foreground)
                 })
+                .glassEffect()
             }
             .padding(.top)
             
@@ -48,29 +59,40 @@ struct SongView: View {
                 
                 player.setSelectedSong(song: song)
             })
+            .tint(.primary)
+            .glassEffect()
             .frame(maxWidth: .infinity, alignment: .leading)
+//            .matchedGeometryEffect(id: "track", in: namespace)
             
             Spacer()
             Spacer()
             
-            PanningView(player: player, panningValue: $player.panningValue)
-                .frame(maxHeight: 80)
-            
-            Spacer()
-            
-            RateView(player: player, rateValue: $player.rateValue)
-                .frame(maxHeight: 80)
-            
-            Spacer()
-            
-            LoopView(
-                player: player,
-                loopStart: $player.loopStart,
-                loopStartLocked: $loopStartLocked,
-                loopEnd: $player.loopEnd,
-                loopEndLocked: $loopEndLocked,
-                isLooping: $player.isLooping)
-            .frame(maxHeight: 80)
+            GlassEffectContainer(spacing: 20.0) {
+                VStack(spacing: 20.0) {
+                    PanningView(player: player, panningValue: $player.panningValue)
+                        .frame(maxWidth: .infinity, maxHeight: 80)
+                        .padding()
+                        .glassEffect()
+//                        .offset(y: 80 * (1 - sheetProgress))
+
+                    RateView(player: player, rateValue: $player.rateValue)
+                        .frame(maxWidth: .infinity, maxHeight: 80)
+                        .padding()
+                        .glassEffect()
+//                        .offset(y: 40 * (1 - sheetProgress))
+                    
+                    LoopView(
+                        player: player,
+                        loopStart: $player.loopStart,
+                        loopStartLocked: $loopStartLocked,
+                        loopEnd: $player.loopEnd,
+                        loopEndLocked: $loopEndLocked,
+                        isLooping: $player.isLooping)
+                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .padding()
+                    .glassEffect()
+                }
+            }
             
             Spacer()
             
@@ -133,22 +155,26 @@ struct SongView: View {
             .padding(.bottom)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.keyboard)
         .padding(20)
         .sheet(isPresented: $isAddSongSheetPresented) {
-            NavigationView {
-                EditSongView(song: $song)
-            }
-            .interactiveDismissDisabled(true)
+            EditSongView(song: $song)
+//                .presentationBackground(.ultraThinMaterial)
+                .interactiveDismissDisabled(true)
         }
         .onAppear() {
             loopStartLocked = player.loopStart != nil
             loopEndLocked = player.loopEnd != nil
         }
+        .presentationDragIndicator(.visible)
+//        .presentationBackground(LinearGradient(gradient: Gradient(colors: [.clear, .blue, .blue, .blue, .blue]/*[.otsblue, .clear, .clear, .clear, .clear]*/), startPoint: .top, endPoint: .bottom))
+//        .opacity(sheetProgress)
+//        .scaleEffect(0.85 + 0.15 * sheetProgress)
     }
 }
 
 #Preview {
-    struct SongView_Preview: View {
+    struct ExpandedSheetView_Preview: View {
         @State var song: Song = Song(
             name: "After You've Gone",
             tracks: [
@@ -162,14 +188,27 @@ struct SongView: View {
         @State var isEditingProgress: Bool = false
         @StateObject var player: AudioHelper = AudioHelper()
         
+        @State var showSheet: Bool = true
+        
+        @Namespace private var ns
+        
         var body: some View {
-            SongView(
-                song: $song,
-                isEditingProgress: $isEditingProgress,
-                player: player
-            )
+            VStack {
+                Text("Test")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .sheet(isPresented: $showSheet) {
+                ExpandedSheetView(
+                    song: $song,
+                    isEditingProgress: $isEditingProgress,
+                    player: player,
+//                    namespace: ns,
+//                    sheetProgress: 1
+                )
+                .presentationBackground(.ultraThinMaterial)
+            }
         }
     }
     
-    return SongView_Preview()
+    return ExpandedSheetView_Preview()
 }

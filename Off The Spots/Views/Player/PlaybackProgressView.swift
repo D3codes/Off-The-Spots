@@ -54,7 +54,7 @@ struct PlaybackProgressView: View {
                             minValue: 0.0,
                             maxValue: duration,
                             thumbImage: loopStartImage,
-                            thumbColor: .green,
+                            thumbColor: .primary,
                             minTrackColor: .clear,
                             maxTrackColor: .clear
                         )
@@ -71,7 +71,7 @@ struct PlaybackProgressView: View {
                             minValue: 0.0,
                             maxValue: duration,
                             thumbImage: loopEndImage,
-                            thumbColor: .red,
+                            thumbColor: .primary,
                             minTrackColor: .clear,
                             maxTrackColor: .clear
                         )

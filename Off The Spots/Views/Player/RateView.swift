@@ -14,58 +14,44 @@ struct RateView: View {
     @Binding var rateValue: Float
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.thinMaterial)
+        VStack {
+            Text("Playback Speed")
+                .font(.subheadline)
+                .padding(.bottom)
             
-            VStack {
-                Text("Playback Speed")
-                    .font(.subheadline)
-                    .padding(.bottom)
-                
-                HStack(spacing: 20) {
-                    Button(action: {
-                        if(rateValue > 0.2) {
-                            withAnimation {
-                                rateValue -= 0.1
-                            }
-                            player.setRate(value: rateValue)
+            HStack(spacing: 20) {
+                Button(action: {
+                    if(rateValue > 0.2) {
+                        withAnimation {
+                            rateValue -= 0.1
                         }
-                    }, label: {
-                        ZStack {
-                            Circle()
-                                .tint(.clear)
-                            
-                            Image(systemName: "minus")
-                                .font(.title2)
-                                .foregroundColor(rateValue > 0.2 ? .primary : .secondary)
-                        }
-                    })
-                    
-                    Text("\(String(format: "%.1f", rateValue))x")
+                        player.setRate(value: rateValue)
+                    }
+                }, label: {
+                    Image(systemName: "minus")
                         .font(.title2)
-                        .contentTransition(.numericText())
-                    
-                    Button(action: {
-                        if(rateValue < 2) {
-                            withAnimation {
-                                rateValue += 0.1
-                            }
-                            player.setRate(value: rateValue)
+                        .foregroundColor(rateValue > 0.2 ? .primary : .secondary)
+                        .frame(width: 30, height: 30)
+                })
+                
+                Text("\(String(format: "%.1f", rateValue))x")
+                    .font(.title2)
+                    .contentTransition(.numericText())
+                
+                Button(action: {
+                    if(rateValue < 2) {
+                        withAnimation {
+                            rateValue += 0.1
                         }
-                    }, label: {
-                        ZStack {
-                            Circle()
-                                .tint(.clear)
-                            
-                            Image(systemName: "plus")
-                                .font(.title2)
-                                .foregroundColor(rateValue < 2 ? .primary : .secondary)
-                        }
-                    })
-                }
+                        player.setRate(value: rateValue)
+                    }
+                }, label: {
+                    Image(systemName: "plus")
+                        .font(.title2)
+                        .foregroundColor(rateValue < 2 ? .primary : .secondary)
+                        .frame(width: 30, height: 30)
+                })
             }
-            .padding()
         }
         .sensoryFeedback(.increase, trigger: rateValue) { oldValue, newValue in
             return newValue > oldValue

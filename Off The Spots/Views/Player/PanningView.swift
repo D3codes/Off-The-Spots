@@ -15,51 +15,45 @@ struct PanningView: View {
     @State var vibrated: Bool = false
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.thinMaterial)
+        VStack {
+            Text("Panning")
+                .font(.subheadline)
+                .padding(.bottom)
             
-            VStack {
-                Text("Panning")
-                    .font(.subheadline)
-                    .padding(.bottom)
+            HStack {
+                Image(systemName: "wave.3.left", variableValue: panningValue <= 0 ? 1 : 1-panningValue)
+                    .scaleEffect(1.5)
                 
-                HStack {
-                    Image(systemName: "wave.3.left", variableValue: panningValue <= 0 ? 1 : 1-panningValue)
-                        .scaleEffect(1.5)
+                UISliderView(
+                    value: $panningValue,
+                    handleTouchUp: handleTouchUp,
+                    minValue: -1.0,
+                    maxValue: 1.0,
+                    thumbColor: .white.opacity(0.8),
+                    minTrackColor: .clear,
+                    maxTrackColor: .secondary
+                )
+                .onChange(of: panningValue) { value,_ in
+                    panningValue = value
                     
-                    UISliderView(
-                        value: $panningValue,
-                        handleTouchUp: handleTouchUp,
-                        minValue: -1.0,
-                        maxValue: 1.0,
-                        thumbColor: .white,
-                        minTrackColor: .secondary,
-                        maxTrackColor: .secondary
-                    )
-                    .onChange(of: panningValue) { value,_ in
-                        panningValue = value
-                        
-                        if (value > -0.1 && value < 0.1) {
-                            if (!vibrated) {
-                                let generator = UIImpactFeedbackGenerator(style: .light)
-                                generator.impactOccurred()
-                                vibrated = true
-                            }
-                            panningValue = 0
-                        } else {
-                            vibrated = false
+                    if (value > -0.1 && value < 0.1) {
+                        if (!vibrated) {
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                            vibrated = true
                         }
-                        
-                        player.setPan(value: panningValue)
+                        panningValue = 0
+                    } else {
+                        vibrated = false
                     }
                     
-                    Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : panningValue.map(from: -1...0, to: 0...1))
-                        .scaleEffect(1.5)
+                    player.setPan(value: panningValue)
                 }
-                .padding(.horizontal)
+                
+                Image(systemName: "wave.3.right", variableValue: panningValue >= 0 ? 1 : panningValue.map(from: -1...0, to: 0...1))
+                    .scaleEffect(1.5)
             }
-            .padding()
+            .padding(.horizontal)
         }
     }
     

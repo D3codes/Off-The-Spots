@@ -144,7 +144,7 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         nowPlayingInfo[MPMediaItemPropertyTitle] = song.name
         nowPlayingInfo[MPMediaItemPropertyArtist] = song.selectedTrack.name
 
-        if let image = UIImage(named: "splash") {
+        if let image = UIImage(named: "logo") {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
                 return image
             }
