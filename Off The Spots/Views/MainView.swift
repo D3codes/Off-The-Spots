@@ -38,17 +38,16 @@ struct MainView: View {
             Tab(value: .search, role: .search) { SearchView(presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong) }
         }
         .tabViewBottomAccessory {
-            if !hideMiniPlayer {
-                PlayerAccessoryView(
-                    selectedSong: $selectedSong,
-                    presentPlayerSheet: $presentPlayerSheet,
-                    player: player
-                )
-            }
+            PlayerAccessoryView(
+                selectedSong: $selectedSong,
+                presentPlayerSheet: $presentPlayerSheet,
+                hideMiniPlayer: $hideMiniPlayer,
+                player: player
+            )
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $presentPlayerSheet) {
-            ExpandedSheetView(song: Binding($selectedSong)!, isEditingProgress: $isEditingProgress, player: player)
+            PlayerView(song: Binding($selectedSong)!, isEditingProgress: $isEditingProgress, player: player)
         }
         .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()

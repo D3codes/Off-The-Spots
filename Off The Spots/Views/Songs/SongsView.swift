@@ -48,13 +48,13 @@ struct SongsView: View {
                         }
                         .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)
-                        Section {
-                            Spacer()
-                                .listRowBackground(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .opacity(0)
-                                )
-                        }
+//                        Section {
+//                            Spacer()
+//                                .listRowBackground(
+//                                    RoundedRectangle(cornerRadius: 20)
+//                                        .opacity(0)
+//                                )
+//                        }
                     }
                     .scrollContentBackground(.hidden)
                     .listSectionSpacing(.compact)

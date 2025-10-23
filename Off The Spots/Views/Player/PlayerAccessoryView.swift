@@ -12,14 +12,15 @@ struct PlayerAccessoryView: View {
     
     @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
+    @Binding var hideMiniPlayer: Bool
     
     @ObservedObject var player: AudioHelper
 
     var body: some View {
-        if selectedSong != nil {
+        if selectedSong != nil && !hideMiniPlayer {
             Group {
-                switch tabViewBottomAccessoryPlacement {
-                case .expanded:
+//                switch tabViewBottomAccessoryPlacement {
+//                case .expanded:
                     HStack {
                         VStack(alignment: .leading) {
                             Text(selectedSong!.name)
@@ -58,45 +59,44 @@ struct PlayerAccessoryView: View {
                         })
                         .padding(.leading, 10)
                     }
-                default:
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(selectedSong!.name)
-                                .font(.headline)
-            //                    .matchedGeometryEffect(id: "name", in: namespace)
-                            
-                            Text(selectedSong!.selectedTrack.name)
-                                .font(.subheadline)
-            //                    .matchedGeometryEffect(id: "track", in: namespace)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            if(player.isPlaying) {
-                                player.pause()
-                            } else {
-                                player.play()
-                            }
-                        }, label: {
-                            if(player.isPlaying) {
-                                Image(systemName: "pause.fill")
-                                    .font(.title2)
-                                    .tint(.primary)
-                            } else {
-                                Image(systemName: "play.fill")
-                                    .font(.title2)
-                                    .tint(.primary)
-                            }
-                        })
-                    }
-                }
+//                default:
+//                    HStack {
+//                        VStack(alignment: .leading) {
+//                            Text(selectedSong!.name)
+//                                .font(.headline)
+//                            
+//                            Text(selectedSong!.selectedTrack.name)
+//                                .font(.subheadline)
+//                        }
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                        
+//                        
+//                        Spacer()
+//                        
+//                        Button(action: {
+//                            if(player.isPlaying) {
+//                                player.pause()
+//                            } else {
+//                                player.play()
+//                            }
+//                        }, label: {
+//                            if(player.isPlaying) {
+//                                Image(systemName: "pause.fill")
+//                                    .font(.title2)
+//                                    .tint(.primary)
+//                            } else {
+//                                Image(systemName: "play.fill")
+//                                    .font(.title2)
+//                                    .tint(.primary)
+//                            }
+//                        })
+//                    }
+//                }
             }
             .padding(.horizontal)
             .contentShape(Capsule())
             .onTapGesture { presentPlayerSheet = true }
+            .id(player.isPlaying)
         }
     }
 }
