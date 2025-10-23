@@ -1,5 +1,5 @@
 //
-//  ExpandedSheetView.swift
+//  PlayerView.swift
 //  Off The Spots
 //
 //  Created by David Freeman on 12/3/24.
@@ -8,7 +8,7 @@
 import SwiftUI
 import AVFoundation
 
-struct ExpandedSheetView: View {
+struct PlayerView: View {
     @Binding var song: Song
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
@@ -167,7 +167,7 @@ struct ExpandedSheetView: View {
 }
 
 #Preview {
-    struct ExpandedSheetView_Preview: View {
+    struct PlayerView_Preview: View {
         @State var song: Song = Song(
             name: "After You've Gone",
             tracks: [
@@ -191,7 +191,7 @@ struct ExpandedSheetView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .sheet(isPresented: $showSheet) {
-                ExpandedSheetView(
+                PlayerView(
                     song: $song,
                     isEditingProgress: $isEditingProgress,
                     player: player,
@@ -203,5 +203,5 @@ struct ExpandedSheetView: View {
         }
     }
     
-    return ExpandedSheetView_Preview()
+    return PlayerView_Preview()
 }
