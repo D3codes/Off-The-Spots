@@ -15,6 +15,7 @@ struct SongsView: View {
     @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
     var setSelectedSong: (_ song: Song) -> Void = {song in }
+    @Binding var hideMiniPlayer: Bool
     
     @State private var selection = Set<Song.ID>()
     
@@ -36,7 +37,6 @@ struct SongsView: View {
                 } else {
                     List(selection: $selection) {
                         ForEach(songs) { song in
-                            //Section {
                             Button(action: {
                                 setSelectedSong(song)
                                 presentPlayerSheet = true
@@ -45,12 +45,6 @@ struct SongsView: View {
                                     .font(.title2)
                                     .tint(.primary)
                             })
-                            //                                .listRowBackground(
-                            //                                    RoundedRectangle(cornerRadius: 20)
-                            //                                        .fill(.ultraThinMaterial)
-                            //                                        .glassEffect(.regular.interactive())
-                            //                                )
-                            //}
                         }
                         .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)
@@ -67,41 +61,10 @@ struct SongsView: View {
                     .ignoresSafeArea(.keyboard)
                 }
             }
-//            List(selection: $selection) {
-//                ForEach(songs) { song in
-//                    //Section {
-//                    Button(action: {
-//                        setSelectedSong(song: song)
-//                        presentPlayerSheet = true
-//                    }, label: {
-//                        Text(song.name)
-//                            .font(.title2)
-//                            .tint(.primary)
-//                    })
-//                    //                                .listRowBackground(
-//                    //                                    RoundedRectangle(cornerRadius: 20)
-//                    //                                        .fill(.ultraThinMaterial)
-//                    //                                        .glassEffect(.regular.interactive())
-//                    //                                )
-//                    //}
-//                }
-//                .onMove(perform: moveSongs)
-//                .onDelete(perform: deleteSongs)
-//                Section {
-//                    Spacer()
-//                        .listRowBackground(
-//                            RoundedRectangle(cornerRadius: 20)
-//                                .opacity(0)
-//                        )
-//                }
-//            }
-//            .scrollContentBackground(.hidden)
-//            .listSectionSpacing(.compact)
-//            .ignoresSafeArea(.keyboard)
             .navigationTitle("Songs")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink(destination: SettingsView(), label: {Image(systemName: "gearshape") })
+                    NavigationLink(destination: SettingsView(hideMiniPlayer: $hideMiniPlayer), label: {Image(systemName: "gearshape") })
                 }
                 
                 if(!songs.isEmpty) {
@@ -119,7 +82,6 @@ struct SongsView: View {
                             selectedTrack: Track(name: "")
                         )
                         
-//                        presentPlayerSheet = false
                         presentAddSongSheet = true
                     }, label: {
                         Image(systemName: "plus")
@@ -132,11 +94,8 @@ struct SongsView: View {
                     }
                 }
             }
+            .onAppear { hideMiniPlayer = false }
         }
-//        .sheet(isPresented: $presentAddSongSheet) {
-//            EditSongView(song: $newSong)
-//                .interactiveDismissDisabled(true)
-//        }
     }
     
     private func deleteSongs(offsets: IndexSet) {
@@ -177,10 +136,11 @@ struct SongsView: View {
         @StateObject private var player: AudioHelper = AudioHelper()
         @State private var selectedSong: Song? = nil
         @State private var presentPlayerSheet: Bool = false
+        @State private var hideMiniPlayer: Bool = false
         
         var body: some View {
             NavigationStack {
-                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet)
+                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet, hideMiniPlayer: $hideMiniPlayer)
                     .modelContainer(for: Song.self, inMemory: true)
             }
         }

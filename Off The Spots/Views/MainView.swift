@@ -23,25 +23,28 @@ struct MainView: View {
     @State private var isEditingProgress: Bool = false
     
     @State private var presentPlayerSheet: Bool = false
+    @State private var hideMiniPlayer: Bool = false
     
     @State var selectedTab: Tabs = .songs
     
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Songs", systemImage: "music.note", value: .songs) {
-                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong)
+                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong, hideMiniPlayer: $hideMiniPlayer)
             }
             
-            Tab("Set Lists", systemImage: "music.note.list", value: .setLists) { SetListsView() }
+            Tab("Set Lists", systemImage: "music.note.list", value: .setLists) { SetListsView(hideMiniPlayer: $hideMiniPlayer) }
             
             Tab(value: .search, role: .search) { SearchView(presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong) }
         }
         .tabViewBottomAccessory {
-            PlayerAccessoryView(
-                selectedSong: $selectedSong,
-                presentPlayerSheet: $presentPlayerSheet,
-                player: player
-            )
+            if !hideMiniPlayer {
+                PlayerAccessoryView(
+                    selectedSong: $selectedSong,
+                    presentPlayerSheet: $presentPlayerSheet,
+                    player: player
+                )
+            }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $presentPlayerSheet) {

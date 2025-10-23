@@ -12,6 +12,7 @@ struct SettingsView: View {
     @Environment(\.requestReview) var requestReview
     @Environment(\.openURL) var openURL
     @State private var showMail = false
+    @Binding var hideMiniPlayer: Bool
 
     var body: some View {
         List {
@@ -144,11 +145,18 @@ struct SettingsView: View {
         .sheet(isPresented: $showMail) { MailView() }
         .navigationTitle(Text("Settings"))
         .toolbar(.hidden, for: .tabBar)
+        .onAppear { hideMiniPlayer = true }
     }
 }
 
 #Preview {
-    NavigationStack {
-        SettingsView()
+    struct SettingsView_Preview: View {
+        @State private var hideMiniPlayer: Bool = false
+        
+        var body: some View {
+            SettingsView(hideMiniPlayer: $hideMiniPlayer)
+        }
     }
+    
+    return SettingsView_Preview()
 }

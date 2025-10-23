@@ -17,15 +17,11 @@ struct ExpandedSheetView: View {
     @State private var loopEndLocked: Bool = false
     @State private var isAddSongSheetPresented: Bool = false
     
-//    var namespace: Namespace.ID
-//    var sheetProgress: CGFloat = 1
-    
     var body: some View {
         VStack {
             HStack {
                 Text(song.name)
                     .font(.largeTitle)
-//                    .matchedGeometryEffect(id: "name", in: namespace)
                 Spacer()
                 Menu(content: {
                     Button(
@@ -62,7 +58,6 @@ struct ExpandedSheetView: View {
             .tint(.primary)
             .glassEffect()
             .frame(maxWidth: .infinity, alignment: .leading)
-//            .matchedGeometryEffect(id: "track", in: namespace)
             
             Spacer()
             Spacer()
@@ -73,13 +68,11 @@ struct ExpandedSheetView: View {
                         .frame(maxWidth: .infinity, maxHeight: 80)
                         .padding()
                         .glassEffect()
-//                        .offset(y: 80 * (1 - sheetProgress))
 
                     RateView(player: player, rateValue: $player.rateValue)
                         .frame(maxWidth: .infinity, maxHeight: 80)
                         .padding()
                         .glassEffect()
-//                        .offset(y: 40 * (1 - sheetProgress))
                     
                     LoopView(
                         player: player,
