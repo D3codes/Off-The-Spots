@@ -151,9 +151,10 @@ struct PlayerView: View {
         .ignoresSafeArea(.keyboard)
         .padding(20)
         .sheet(isPresented: $isAddSongSheetPresented) {
-            EditSongView(song: $song)
-//                .presentationBackground(.ultraThinMaterial)
-                .interactiveDismissDisabled(true)
+            NavigationStack {
+                EditSongView(song: $song)
+                    .interactiveDismissDisabled(true)
+            }
         }
         .onAppear() {
             loopStartLocked = player.loopStart != nil
