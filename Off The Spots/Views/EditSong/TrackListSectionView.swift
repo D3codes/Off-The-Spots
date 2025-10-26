@@ -22,6 +22,8 @@ struct TrackListSectionView: View {
             .scrollContentBackground(.hidden)
         } header: {
             HStack {
+                Image(systemName: "music.note.square.stack.fill")
+                    .font(.subheadline)
                 Text("Tracks")
                     .font(.subheadline)
                 

@@ -8,8 +8,13 @@
 import SwiftUI
 
 struct SheetMusicView: View {
-    @State var sheetMusicFile: Data
-    @State var dismissSheetMusicView: () -> Void
+    let sheetMusicFile: Data
+    let dismissSheetMusicView: () -> Void
+
+    init(sheetMusicFile: Data, dismissSheetMusicView: @escaping () -> Void) {
+        self.sheetMusicFile = sheetMusicFile
+        self.dismissSheetMusicView = dismissSheetMusicView
+    }
     
     var body: some View {
         NavigationStack {
