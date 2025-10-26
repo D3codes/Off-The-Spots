@@ -41,9 +41,25 @@ struct SongsView: View {
                                 setSelectedSong(song)
                                 presentPlayerSheet = true
                             }, label: {
-                                Text(song.name)
-                                    .font(.title2)
-                                    .tint(.primary)
+                                VStack(alignment: .leading) {
+                                    Text(song.name)
+                                        .font(.title2)
+                                        .tint(.primary)
+                                        .multilineTextAlignment(.leading)
+                                    
+                                    HStack {
+                                        Text("Tracks: \(song.tracks.count)")
+                                            .font(.footnote)
+                                            .tint(.primary)
+                                        
+                                        if song.sheetMusic != nil {
+                                            Image(systemName: "text.document.fill")
+                                                .font(.footnote)
+                                                .tint(.primary)
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             })
                         }
                         .onMove(perform: moveSongs)
@@ -132,20 +148,22 @@ struct SongsView: View {
 }
 
 #Preview {
-    struct SongsView_Preview: View {
-        @StateObject private var player: AudioHelper = AudioHelper()
-        @State private var selectedSong: Song? = nil
-        @State private var presentPlayerSheet: Bool = false
-        @State private var hideMiniPlayer: Bool = false
-        
-        var body: some View {
-            NavigationStack {
-                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet, hideMiniPlayer: $hideMiniPlayer)
-                    .modelContainer(for: Song.self, inMemory: true)
-            }
+    let container: ModelContainer = {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: Song.self, configurations: config)
+        for i in 1..<10 {
+            let track = Track(name: "Track 1", file: nil)
+            let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
+            container.mainContext.insert(song)
         }
-    }
-    
-    return SongsView_Preview()
-}
+        return container
+    }()
 
+    SongsView(
+        player: AudioHelper(),
+        selectedSong: .constant(nil),
+        presentPlayerSheet: .constant(false),
+        hideMiniPlayer: .constant(false)
+    )
+    .modelContainer(container)
+}
