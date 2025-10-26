@@ -88,11 +88,9 @@ struct SongsView: View {
                     })
                     .accessibilityLabel("Add Song")
                     .popover(isPresented: $presentAddSongSheet) {
-                        NavigationStack {
-                            EditSongView(song: $newSong)
-                                .interactiveDismissDisabled(true)
-                                .presentationCompactAdaptation(.sheet)
-                        }
+                        EditSongView(song: $newSong)
+                            .interactiveDismissDisabled(true)
+                            .presentationCompactAdaptation(.sheet)
                     }
                 }
             }

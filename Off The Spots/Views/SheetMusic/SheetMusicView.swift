@@ -45,13 +45,34 @@ struct SheetMusicView: View {
     }
 }
 
-//#Preview {
-//    struct SheetMusicView_Preview: View {
-//        
-//        var body: some View {
-//            SheetMusicView()
-//        }
-//    }
-//    
-//    return SheetMusicView_Preview()
-//}
+#Preview {
+    struct SheetMusicView_Preview: View {
+        @State private var presentSheetMusicViewer: Bool = false
+        @State private var sheetMusicData: Data?
+        
+        var body: some View {
+            if sheetMusicData == nil {
+                ProgressView()
+                    .onAppear {
+                        do {
+                            try sheetMusicData = Data(contentsOf: Bundle.main.url(forResource: "TestSheetMusic", withExtension: "pdf")!)
+                        } catch { }
+                    }
+            } else {
+                Button(action: { presentSheetMusicViewer = true }) {
+                    Text("Show Sheet Music")
+                }
+                .buttonStyle(.glass)
+                .fullScreenCover(isPresented: $presentSheetMusicViewer) {
+                    SheetMusicView(
+                        sheetMusicFile: sheetMusicData!,
+                        dismissSheetMusicView: { presentSheetMusicViewer = false }
+                    )
+                    .interactiveDismissDisabled(true)
+                }
+            }
+        }
+    }
+    
+    return SheetMusicView_Preview()
+}

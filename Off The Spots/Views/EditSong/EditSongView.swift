@@ -17,35 +17,37 @@ struct EditSongView: View {
     @FocusState var isSongFieldFocused: Bool
 
     var body: some View {
-        List {
-            Section {
-                TextField("New Song", text: $song.name)
-                    .focused($isSongFieldFocused)
-            } header: {
-                Text("Name")
-                    .font(.subheadline)
+        NavigationStack {
+            List {
+                Section {
+                    TextField("New Song", text: $song.name)
+                        .focused($isSongFieldFocused)
+                } header: {
+                    Text("Name")
+                        .font(.subheadline)
+                }
+                
+                SheetMusicListSectionView(song: song)
+                
+                TrackListSectionView(song: song)
             }
-            
-            SheetMusicListSectionView(song: song)
-            
-            TrackListSectionView(song: song)
-        }
-        .scrollContentBackground(.hidden)
-        .navigationTitle(Text(sheetTitle))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(role: .cancel, action: { dismiss() })
-            }
-            
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(role: .confirm, action: {
-                    song.selectedTrack = song.tracks[0]
-                    modelContext.delete(song)
-                    modelContext.insert(song)
-                    dismiss()
-                })
-                .disabled(song.name.isEmpty || song.tracks.isEmpty)
+            .scrollContentBackground(.hidden)
+            .navigationTitle(Text(sheetTitle))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .cancel, action: { dismiss() })
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .confirm, action: {
+                        song.selectedTrack = song.tracks[0]
+                        modelContext.delete(song)
+                        modelContext.insert(song)
+                        dismiss()
+                    })
+                    .disabled(song.name.isEmpty || song.tracks.isEmpty)
+                }
             }
         }
         .onAppear {
@@ -74,11 +76,8 @@ struct EditSongView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .sheet(isPresented : $presentAddSongPopover) {
-                NavigationStack {
-                    EditSongView(song: $song)
-                        .interactiveDismissDisabled(true)
-                        .presentationBackground(.ultraThinMaterial)
-                }
+                EditSongView(song: $song)
+                    .interactiveDismissDisabled(true)
             }
         }
     }

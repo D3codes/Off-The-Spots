@@ -16,7 +16,7 @@ struct PDFKitView: UIViewRepresentable {
         self.pdfDocument = pdfDoc
     }
 
-    //you could also have inits that take a URL or Data
+    //could also have inits that take a URL or Data
 
     func makeUIView(context: Context) -> PDFView {
         let pdfView = PDFView()

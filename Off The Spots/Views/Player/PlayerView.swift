@@ -151,10 +151,8 @@ struct PlayerView: View {
         .ignoresSafeArea(.keyboard)
         .padding(20)
         .sheet(isPresented: $isAddSongSheetPresented) {
-            NavigationStack {
-                EditSongView(song: $song)
-                    .interactiveDismissDisabled(true)
-            }
+            EditSongView(song: $song)
+                .interactiveDismissDisabled(true)
         }
         .onAppear() {
             loopStartLocked = player.loopStart != nil
@@ -162,8 +160,6 @@ struct PlayerView: View {
         }
         .presentationDragIndicator(.visible)
 //        .presentationBackground(LinearGradient(gradient: Gradient(colors: [.clear, .blue, .blue, .blue, .blue]/*[.otsblue, .clear, .clear, .clear, .clear]*/), startPoint: .top, endPoint: .bottom))
-//        .opacity(sheetProgress)
-//        .scaleEffect(0.85 + 0.15 * sheetProgress)
     }
 }
 
@@ -195,9 +191,7 @@ struct PlayerView: View {
                 PlayerView(
                     song: $song,
                     isEditingProgress: $isEditingProgress,
-                    player: player,
-//                    namespace: ns,
-//                    sheetProgress: 1
+                    player: player
                 )
                 .presentationBackground(.ultraThinMaterial)
             }
