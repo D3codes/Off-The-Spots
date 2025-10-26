@@ -15,13 +15,15 @@ final class Song {
     var name: String
     var tracks: [Track]
     var selectedTrack: Track
+    var sheetMusic: SheetMusic?
     
-    init(id: UUID = UUID(), name: String, tracks: [Track], selectedTrack: Track, order: Int = 0) {
+    init(id: UUID = UUID(), name: String, tracks: [Track], selectedTrack: Track, order: Int = 0, sheetMusic: SheetMusic? = nil) {
         self.id = id
         self.order = order
         self.name = name
         self.tracks = tracks
         self.selectedTrack = selectedTrack
+        self.sheetMusic = sheetMusic
     }
 }
 
