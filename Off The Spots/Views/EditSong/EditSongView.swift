@@ -21,15 +21,14 @@ struct EditSongView: View {
             Section {
                 TextField("New Song", text: $song.name)
                     .focused($isSongFieldFocused)
-                    .onAppear { isSongFieldFocused = true }
             } header: {
                 Text("Name")
                     .font(.subheadline)
             }
             
-            SheetMusicListView(song: song)
+            SheetMusicListSectionView(song: song)
             
-            TrackListView(song: song)
+            TrackListSectionView(song: song)
         }
         .scrollContentBackground(.hidden)
         .navigationTitle(Text(sheetTitle))
@@ -52,6 +51,8 @@ struct EditSongView: View {
         .onAppear {
             if(!song.name.isEmpty) {
                 sheetTitle = "Edit Song"
+            } else {
+                isSongFieldFocused = true
             }
         }
     }

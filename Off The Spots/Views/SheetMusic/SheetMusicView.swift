@@ -12,29 +12,36 @@ struct SheetMusicView: View {
     @State var dismissSheetMusicView: () -> Void
     
     var body: some View {
-        ZStack {
+        NavigationStack {
             PDFUIView(pdfData: sheetMusicFile)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
-            VStack {
-                HStack {
-                    Button(role: .cancel, action: dismissSheetMusicView, label: {
-                        Image(systemName: "xmark")
-                            .frame(width: 20, height: 30)
-                            .font(.title2)
-                    })
-                    .buttonStyle(.glass)
-                    .padding()
-                    
-                    Spacer()
+                .ignoresSafeArea(edges: .all)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(role: .cancel, action: dismissSheetMusicView)
+                    }
                 }
-                
-                Spacer()
+        }
+        .statusBar(hidden: true)
+        .onAppear {
+            DispatchQueue.main.async {
+                AppDelegate.orientationLock = UIInterfaceOrientationMask.allButUpsideDown
+                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let root = scene.keyWindow?.rootViewController {
+                    root.setNeedsUpdateOfSupportedInterfaceOrientations()
+                }
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(edges: .all)
-        .statusBar(hidden: true)
+        .onDisappear {
+            DispatchQueue.main.async {
+                AppDelegate.orientationLock = UIInterfaceOrientationMask.portrait
+                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let root = scene.keyWindow?.rootViewController {
+                    root.setNeedsUpdateOfSupportedInterfaceOrientations()
+                }
+            }
+        }
     }
 }
 

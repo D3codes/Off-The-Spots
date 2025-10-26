@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct Off_The_SpotsApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Song.self,

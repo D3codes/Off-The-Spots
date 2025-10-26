@@ -1,5 +1,5 @@
 //
-//  SheetMusicListView.swift
+//  SheetMusicListSectionView.swift
 //  Off The Spots
 //
 //  Created by David Freeman on 10/24/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SheetMusicListView: View {
+struct SheetMusicListSectionView: View {
     @State var song: Song
     
     @State private var presentSheetMusicFileImporter: Bool = false
@@ -21,6 +21,13 @@ struct SheetMusicListView: View {
                         Text(song.sheetMusic!.name)
                     }
                     .buttonStyle(.plain)
+                    .fullScreenCover(isPresented: $presentSheetMusicViewer) {
+                        SheetMusicView(
+                            sheetMusicFile: song.sheetMusic!.file!,
+                            dismissSheetMusicView: { presentSheetMusicViewer = false }
+                        )
+                        .interactiveDismissDisabled(true)
+                    }
                 }
             }
             .onDelete(perform: deleteSheetMusic)
@@ -42,14 +49,6 @@ struct SheetMusicListView: View {
                     .font(.subheadline)
                     .buttonStyle(.bordered)
                 }
-            }
-        }
-        .fullScreenCover(isPresented: $presentSheetMusicViewer) {
-            if song.sheetMusic != nil {
-                SheetMusicView(
-                    sheetMusicFile: song.sheetMusic!.file!,
-                    dismissSheetMusicView: { presentSheetMusicViewer = false }
-                )
             }
         }
         .fileImporter(
@@ -99,7 +98,7 @@ struct SheetMusicListView: View {
         
         var body: some View {
             List {
-                SheetMusicListView(song: song)
+                SheetMusicListSectionView(song: song)
             }
         }
     }

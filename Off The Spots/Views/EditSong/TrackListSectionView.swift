@@ -1,5 +1,5 @@
 //
-//  TrackListView.swift
+//  TrackListSectionView.swift
 //  Off The Spots
 //
 //  Created by David Freeman on 10/24/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TrackListView: View {
+struct TrackListSectionView: View {
     @State var song: Song
     
     @State private var presentTrackFileImporter: Bool = false
@@ -100,7 +100,7 @@ struct TrackListView: View {
         
         var body: some View {
             List {
-                TrackListView(song: song)
+                TrackListSectionView(song: song)
             }
         }
     }
