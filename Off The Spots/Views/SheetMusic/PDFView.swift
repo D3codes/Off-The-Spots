@@ -22,6 +22,9 @@ struct PDFKitView: UIViewRepresentable {
         let pdfView = PDFView()
         pdfView.document = pdfDocument
         pdfView.autoScales = true
+//        pdfView.displayMode = .singlePageContinuous
+//        pdfView.displayDirection = .vertical
+//        pdfView.usePageViewController(false)
         return pdfView
     }
 
@@ -35,7 +38,7 @@ struct PDFUIView: View {
     let pdfDoc: PDFDocument
 
     init(pdfData: Data) {
-        pdfDoc = PDFDocument(data: pdfData)!
+        self.pdfDoc = PDFDocument(data: pdfData)!
 //        let url = Bundle.main.url(forResource: "Lipsum", withExtension: "pdf")!
 //        pdfDoc = PDFDocument(url: url)!
     }

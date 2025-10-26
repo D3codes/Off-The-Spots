@@ -48,12 +48,14 @@ struct SongsView: View {
                                         .multilineTextAlignment(.leading)
                                     
                                     HStack {
-                                        Text("Tracks: \(song.tracks.count)")
+                                        Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.tracks.count)")
                                             .font(.footnote)
                                             .tint(.primary)
                                         
                                         if song.sheetMusic != nil {
-                                            Image(systemName: "text.document.fill")
+                                            Divider()
+                                            
+                                            Image(systemName: "music.pages.fill")
                                                 .font(.footnote)
                                                 .tint(.primary)
                                         }

@@ -34,6 +34,8 @@ struct SheetMusicListSectionView: View {
             .scrollContentBackground(.hidden)
         } header: {
             HStack {
+                Image(systemName: "music.pages.fill")
+                    .font(.subheadline)
                 Text("Sheet Music")
                     .font(.subheadline)
                 

@@ -42,28 +42,34 @@ struct PlayerView: View {
             }
             .padding(.top)
             
-            Picker("Select a Track", selection: $song.selectedTrack) {
-                ForEach(song.tracks, id: \.self) { track in
-                    Text(track.name).tag(track.id)
+            HStack {
+                Picker("Select a Track", selection: $song.selectedTrack) {
+                    ForEach(song.tracks, id: \.self) { track in
+                        Text(track.name).tag(track.id)
+                    }
                 }
-            }
-            .pickerStyle(.menu)
-            .onChange(of: song.selectedTrack, {
-                if(player.isPlaying) {
-                    player.stop()
-                }
+                .pickerStyle(.menu)
+                .onChange(of: song.selectedTrack, {
+                    if(player.isPlaying) {
+                        player.stop()
+                    }
+                    
+                    player.setSelectedSong(song: song)
+                })
+                .tint(.primary)
+//                .glassEffect()
                 
-                player.setSelectedSong(song: song)
-            })
-            .tint(.primary)
-            .glassEffect()
+                Spacer()
+                
+                SheetMusicButtonView(sheetMusicFile: song.sheetMusic?.file)
+            }
             .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
             Spacer()
             
-            GlassEffectContainer(spacing: 20.0) {
-                VStack(spacing: 20.0) {
+            GlassEffectContainer(spacing: 10.0) {
+                VStack(spacing: 10.0) {
                     PanningView(player: player, panningValue: $player.panningValue)
                         .frame(maxWidth: .infinity, maxHeight: 80)
                         .padding()
@@ -184,7 +190,10 @@ struct PlayerView: View {
         
         var body: some View {
             VStack {
-                Text("Test")
+                Button(action: { showSheet = true }) {
+                    Text("Show Player Sheet")
+                }
+                .buttonStyle(.glass)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .sheet(isPresented: $showSheet) {
@@ -193,7 +202,6 @@ struct PlayerView: View {
                     isEditingProgress: $isEditingProgress,
                     player: player
                 )
-                .presentationBackground(.ultraThinMaterial)
             }
         }
     }
