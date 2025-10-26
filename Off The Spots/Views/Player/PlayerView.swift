@@ -17,8 +17,6 @@ struct PlayerView: View {
     @State private var loopEndLocked: Bool = false
     @State private var isAddSongSheetPresented: Bool = false
     
-    @State private var presentSheetMusic: Bool = false
-    
     var body: some View {
         VStack {
             HStack {
