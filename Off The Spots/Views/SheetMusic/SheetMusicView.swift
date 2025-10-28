@@ -10,25 +10,63 @@ import SwiftUI
 struct SheetMusicView: View {
     let sheetMusicFile: Data
     let dismissSheetMusicView: () -> Void
+    
+    let player: AudioHelper?
 
-    init(sheetMusicFile: Data, dismissSheetMusicView: @escaping () -> Void) {
+    init(sheetMusicFile: Data, dismissSheetMusicView: @escaping () -> Void, player: AudioHelper? = nil) {
         self.sheetMusicFile = sheetMusicFile
         self.dismissSheetMusicView = dismissSheetMusicView
+        self.player = player
     }
     
     var body: some View {
         NavigationStack {
-            PDFUIView(pdfData: sheetMusicFile)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea(edges: .all)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button(role: .cancel, action: dismissSheetMusicView)
+            ZStack {
+                PDFUIView(pdfData: sheetMusicFile)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea(edges: .all)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button(role: .cancel, action: dismissSheetMusicView)
+                        }
                     }
+                
+                if player != nil {
+                    Circle().opacity(0)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .topBarTrailing) {
+                                    Button(
+                                        action: { player!.skip(seconds: -15) },
+                                        label: { Image(systemName: "15.arrow.trianglehead.counterclockwise") }
+                                    )
+                                
+                                    Button(action: {
+                                        if(player!.isPlaying) {
+                                            player!.pause()
+                                        } else {
+                                            player!.play()
+                                        }
+                                    }, label: {
+                                        if(player!.isPlaying) {
+                                            Image(systemName: "pause.fill")
+                                        } else {
+                                            Image(systemName: "play.fill")
+                                        }
+                                    })
+                                
+                                    Button(
+                                        action: { player!.skip(seconds: 15) },
+                                        label: { Image(systemName: "15.arrow.trianglehead.clockwise") }
+                                    )
+                            }
+                        }
                 }
+            }
         }
         .statusBar(hidden: true)
         .onAppear {
+            player?.publishProgressChanges = false
+            
             DispatchQueue.main.async {
                 AppDelegate.orientationLock = UIInterfaceOrientationMask.allButUpsideDown
                 if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -38,6 +76,8 @@ struct SheetMusicView: View {
             }
         }
         .onDisappear {
+            player?.publishProgressChanges = true
+            
             DispatchQueue.main.async {
                 AppDelegate.orientationLock = UIInterfaceOrientationMask.portrait
                 UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
@@ -55,6 +95,8 @@ struct SheetMusicView: View {
         @State private var presentSheetMusicViewer: Bool = false
         @State private var sheetMusicData: Data?
         
+        let player: AudioHelper = AudioHelper()
+        
         var body: some View {
             if sheetMusicData == nil {
                 ProgressView()
@@ -71,7 +113,8 @@ struct SheetMusicView: View {
                 .fullScreenCover(isPresented: $presentSheetMusicViewer) {
                     SheetMusicView(
                         sheetMusicFile: sheetMusicData!,
-                        dismissSheetMusicView: { presentSheetMusicViewer = false }
+                        dismissSheetMusicView: { presentSheetMusicViewer = false },
+                        player: player
                     )
                     .interactiveDismissDisabled(true)
                 }
