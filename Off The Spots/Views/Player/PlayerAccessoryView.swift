@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MarqueeText
 
 struct PlayerAccessoryView: View {
     @Environment(\.tabViewBottomAccessoryPlacement) var tabViewBottomAccessoryPlacement
@@ -22,12 +23,22 @@ struct PlayerAccessoryView: View {
                 switch tabViewBottomAccessoryPlacement {
                 case .expanded:
                     HStack {
-                        VStack(alignment: .leading) {
-                            Text(selectedSong!.name)
-                                .font(.headline)
+                        VStack(alignment: .leading, spacing: 0) {
+                            MarqueeText(
+                                text: selectedSong!.name,
+                                font: UIFont.preferredFont(forTextStyle: .headline),
+                                leftFade: 16,
+                                rightFade: 16,
+                                startDelay: 3
+                            )
                             
-                            Text(selectedSong!.selectedTrack.name)
-                                .font(.subheadline)
+                            MarqueeText(
+                                text: selectedSong!.selectedTrack.name,
+                                font: UIFont.preferredFont(forTextStyle: .subheadline),
+                                leftFade: 16,
+                                rightFade: 16,
+                                startDelay: 3
+                            )
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         
@@ -61,12 +72,22 @@ struct PlayerAccessoryView: View {
                     }
                 default:
                     HStack {
-                        VStack(alignment: .leading) {
-                            Text(selectedSong!.name)
-                                .font(.headline)
+                        VStack(alignment: .leading, spacing: 0) {
+                            MarqueeText(
+                                text: selectedSong!.name,
+                                font: UIFont.preferredFont(forTextStyle: .headline),
+                                leftFade: 16,
+                                rightFade: 16,
+                                startDelay: 3
+                            )
                             
-                            Text(selectedSong!.selectedTrack.name)
-                                .font(.subheadline)
+                            MarqueeText(
+                                text: selectedSong!.selectedTrack.name,
+                                font: UIFont.preferredFont(forTextStyle: .subheadline),
+                                leftFade: 16,
+                                rightFade: 16,
+                                startDelay: 3
+                            )
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         
@@ -99,4 +120,37 @@ struct PlayerAccessoryView: View {
             .id(player.isPlaying)
         }
     }
+}
+
+#Preview {
+    struct PlayerAccessoryView_Preview: View {
+        let track: Track = Track(name: "Bass Left")
+        @State private var selectedSong: Song? = nil
+        
+        var body: some View {
+            TabView {
+                Tab("Tab 1", systemImage: "1.circle") {
+                    List(0..<100) { i in
+                        Text("Row \(i)")
+                    }
+                }
+                
+                Tab(role: .search) {
+                    
+                }
+            }
+            .tabViewBottomAccessory {
+                PlayerAccessoryView(
+                    selectedSong: $selectedSong,
+                    presentPlayerSheet: .constant(false),
+                    hideMiniPlayer: .constant(false),
+                    player: AudioHelper()
+                )
+            }
+            .tabBarMinimizeBehavior(.onScrollDown)
+            .onAppear { selectedSong = Song(name: "After You've Gone", tracks: [track], selectedTrack: track) }
+        }
+    }
+    
+    return PlayerAccessoryView_Preview()
 }

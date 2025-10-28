@@ -60,12 +60,15 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         progress = value
     }
     
-    func updateProgress() {
+    func updateProgress(publishUpdate: Bool) {
         if (isLooping && (audioPlayer.currentTime > loopEnd! || audioPlayer.currentTime < loopStart!)) {
             audioPlayer.currentTime = loopStart!
         }
         
-        progress = audioPlayer.currentTime
+        if publishUpdate {
+            progress = audioPlayer.currentTime
+        }
+        
         updateNowPlaying()
     }
     

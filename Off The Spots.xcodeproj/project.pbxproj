@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0EA34AF82EB0388900F897B7 /* MarqueeText in Frameworks */ = {isa = PBXBuildFile; productRef = 0EA34AF72EB0388900F897B7 /* MarqueeText */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		0E68504F2CFFD1050005A85C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0EA34AF82EB0388900F897B7 /* MarqueeText in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = "Off The Spots";
 			packageProductDependencies = (
+				0EA34AF72EB0388900F897B7 /* MarqueeText */,
 			);
 			productName = "Off The Spots";
 			productReference = 0E68503A2CFFD1040005A85C /* Off The Spots.app */;
@@ -209,6 +215,7 @@
 			mainGroup = 0E6850312CFFD1040005A85C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				0EA34AF62EB0388900F897B7 /* XCRemoteSwiftPackageReference "MarqueeText" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E68503B2CFFD1040005A85C /* Products */;
@@ -585,6 +592,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0EA34AF62EB0388900F897B7 /* XCRemoteSwiftPackageReference "MarqueeText" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/joekndy/MarqueeText";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0EA34AF72EB0388900F897B7 /* MarqueeText */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0EA34AF62EB0388900F897B7 /* XCRemoteSwiftPackageReference "MarqueeText" */;
+			productName = MarqueeText;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0E6850322CFFD1040005A85C /* Project object */;
 }

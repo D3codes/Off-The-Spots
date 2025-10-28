@@ -63,7 +63,7 @@ struct MainView: View {
     
     private func updateProgress() {
         guard player.isPlaying, !isEditingProgress else { return }
-        player.updateProgress()
+        player.updateProgress(publishUpdate: presentPlayerSheet)
     }
 }
 
