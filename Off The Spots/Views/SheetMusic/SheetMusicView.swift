@@ -12,7 +12,6 @@ struct SheetMusicView: View {
     let dismissSheetMusicView: () -> Void
     
     let player: AudioHelper?
-    private var isPlaying: Bool = false
 
     init(sheetMusicFile: Data, dismissSheetMusicView: @escaping () -> Void, player: AudioHelper? = nil) {
         self.sheetMusicFile = sheetMusicFile
