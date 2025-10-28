@@ -63,8 +63,6 @@ struct PlayerView: View {
                 
                 Spacer()
                 
-//                SheetMusicButtonView(sheetMusicFile: song.sheetMusic?.file)
-                
                 Button(action: { presentSheetMusic = true }) {
                     Image(systemName: "music.pages.fill")
                     Text("Sheet Music")
