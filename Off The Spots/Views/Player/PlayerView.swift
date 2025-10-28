@@ -17,6 +17,8 @@ struct PlayerView: View {
     @State private var loopEndLocked: Bool = false
     @State private var isAddSongSheetPresented: Bool = false
     
+    @State private var presentSheetMusic: Bool = false
+    
     var body: some View {
         VStack {
             HStack {
@@ -61,7 +63,21 @@ struct PlayerView: View {
                 
                 Spacer()
                 
-                SheetMusicButtonView(sheetMusicFile: song.sheetMusic?.file)
+//                SheetMusicButtonView(sheetMusicFile: song.sheetMusic?.file)
+                
+                Button(action: { presentSheetMusic = true }) {
+                    Image(systemName: "music.pages.fill")
+                    Text("Sheet Music")
+                }
+                .tint(.primary)
+                .disabled(song.sheetMusic?.file == nil)
+                .fullScreenCover(isPresented: $presentSheetMusic) {
+                    SheetMusicView(
+                        sheetMusicFile: song.sheetMusic!.file!,
+                        dismissSheetMusicView: { presentSheetMusic = false },
+                        player: player
+                    )
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -163,6 +179,10 @@ struct PlayerView: View {
         .onAppear() {
             loopStartLocked = player.loopStart != nil
             loopEndLocked = player.loopEnd != nil
+            player.publishProgressChanges = true
+        }
+        .onDisappear {
+            player.publishProgressChanges = false
         }
         .presentationDragIndicator(.visible)
 //        .presentationBackground(LinearGradient(gradient: Gradient(colors: [.clear, .blue, .blue, .blue, .blue]/*[.otsblue, .clear, .clear, .clear, .clear]*/), startPoint: .top, endPoint: .bottom))

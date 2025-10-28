@@ -20,6 +20,8 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var loopStart: Double? = nil
     @Published var loopEnd: Double? = nil
     
+    var publishProgressChanges: Bool = false
+    
     override init() {
         super.init()
         setupRemoteTransportControls()
@@ -47,12 +49,7 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func skip(seconds: Double) {
         audioPlayer.currentTime += seconds
         
-        if (isLooping && (audioPlayer.currentTime > loopEnd! || audioPlayer.currentTime < loopStart!)) {
-            audioPlayer.currentTime = loopStart!
-        }
-        
-        progress = audioPlayer.currentTime
-        updateNowPlaying()
+        updateProgress()
     }
     
     func setCurrentTime(value: Double) {
@@ -60,12 +57,12 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         progress = value
     }
     
-    func updateProgress(publishUpdate: Bool) {
+    func updateProgress() {
         if (isLooping && (audioPlayer.currentTime > loopEnd! || audioPlayer.currentTime < loopStart!)) {
             audioPlayer.currentTime = loopStart!
         }
         
-        if publishUpdate {
+        if publishProgressChanges {
             progress = audioPlayer.currentTime
         }
         
