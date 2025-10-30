@@ -61,7 +61,7 @@ struct MainView: View {
         .sheet(isPresented: $presentPlayerSheet) {
             PlayerView(song: Binding($selectedSong)!, isEditingProgress: $isEditingProgress, player: player)
         }
-        .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
+        .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
         }
     }
