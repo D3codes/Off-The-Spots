@@ -33,9 +33,7 @@ struct SetListsView: View {
                 } else {
                     List(selection: $selection) {
                         ForEach(setLists) { setList in
-                            Button(action: {
-                                // do something on selection
-                            }, label: {
+                            NavigationLink(destination: SetListView(setList: setList)) {
                                 VStack(alignment: .leading) {
                                     Text(setList.name)
                                         .font(.title2)
@@ -49,7 +47,7 @@ struct SetListsView: View {
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                            })
+                            }
                         }
                         .onMove(perform: moveSetLists)
                         .onDelete(perform: deleteSetLists)
