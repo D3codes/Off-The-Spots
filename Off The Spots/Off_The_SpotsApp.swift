@@ -15,6 +15,7 @@ struct Off_The_SpotsApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Song.self,
+            SetList.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
