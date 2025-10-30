@@ -13,9 +13,9 @@ final class SetList {
     var id: UUID
     var order: Int
     var name: String
-    var songs: [Song]
+    var songs: [UUID]
     
-    init(id: UUID = UUID(), order: Int = 0, name: String, songs: [Song]) {
+    init(id: UUID = UUID(), order: Int = 0, name: String, songs: [UUID]) {
         self.id = id
         self.order = order
         self.name = name

@@ -85,8 +85,8 @@ struct SetListsView: View {
                     })
                     .accessibilityLabel("Add Song")
                     .sheet(isPresented: $presentAddSetListSheet) {
-//                        EditSetListView(setList: $newSong)
-//                            .interactiveDismissDisabled(true)
+                        EditSetListView(setList: $newSetList)
+                            .interactiveDismissDisabled(true)
                     }
                 }
             }
@@ -124,7 +124,7 @@ struct SetListsView: View {
         for i in 1..<10 {
             let track = Track(name: "Track 1", file: nil)
             let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
-            let setList = SetList(name: "Set List \(i)", songs: [song])
+            let setList = SetList(name: "Set List \(i)", songs: [song.id])
             container.mainContext.insert(setList)
         }
         return container
