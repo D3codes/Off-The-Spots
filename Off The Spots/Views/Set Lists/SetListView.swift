@@ -21,27 +21,7 @@ struct SetListView: View {
             List(selection: $selection) {
                 ForEach(setList.songs, id: \.self) { songId in
                     if let song = songs.first(where: { $0.id == songId }) {
-                        VStack(alignment: .leading) {
-                            Text(song.name)
-                                .font(.title2)
-                                .tint(.primary)
-                                .multilineTextAlignment(.leading)
-                            
-                            HStack {
-                                Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.tracks.count)")
-                                    .font(.footnote)
-                                    .tint(.primary)
-                                
-                                if song.sheetMusic != nil {
-                                    Divider()
-                                    
-                                    Image(systemName: "music.pages.fill")
-                                        .font(.footnote)
-                                        .tint(.primary)
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        SongListItemView(song: song)
                     }
                 }
                 .onMove(perform: moveSongs)
