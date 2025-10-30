@@ -15,6 +15,7 @@ struct SetListsView: View {
     @ObservedObject var player: AudioHelper
     @Binding var presentPlayerSheet: Bool
     @Binding var hideMiniPlayer: Bool
+    @Binding var setListNavPath: NavigationPath
     
     @State private var selection = Set<SetList.ID>()
     
@@ -26,27 +27,15 @@ struct SetListsView: View {
     )
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $setListNavPath) {
             Group {
                 if setLists.isEmpty {
                     SplashScreenView()
                 } else {
                     List(selection: $selection) {
                         ForEach(setLists) { setList in
-                            NavigationLink(destination: SetListView(setList: setList)) {
-                                VStack(alignment: .leading) {
-                                    Text(setList.name)
-                                        .font(.title2)
-                                        .tint(.primary)
-                                        .multilineTextAlignment(.leading)
-                                    
-                                    HStack {
-                                        Text("\(Image(systemName: "music.note")) \(setList.songs.count)")
-                                            .font(.footnote)
-                                            .tint(.primary)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Button(action: { setListNavPath.append(setList) }) {
+                                SetListItemView(setList: setList)
                             }
                         }
                         .onMove(perform: moveSetLists)
@@ -55,6 +44,9 @@ struct SetListsView: View {
                     .scrollContentBackground(.hidden)
                     .listSectionSpacing(.compact)
                     .ignoresSafeArea(.keyboard)
+                    .navigationDestination(for: SetList.self) { setList in
+                        SetListView(setList: setList)
+                    }
                 }
             }
             .navigationTitle("Set Lists")
@@ -116,6 +108,8 @@ struct SetListsView: View {
 }
 
 #Preview {
+    @Previewable @State var path = NavigationPath()
+    
     let container: ModelContainer = {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: SetList.self, configurations: config)
@@ -128,10 +122,11 @@ struct SetListsView: View {
         return container
     }()
 
-    SetListsView(
+    return SetListsView(
         player: AudioHelper(),
         presentPlayerSheet: .constant(false),
-        hideMiniPlayer: .constant(false)
+        hideMiniPlayer: .constant(false),
+        setListNavPath: $path
     )
     .modelContainer(container)
 }
