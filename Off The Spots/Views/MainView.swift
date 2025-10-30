@@ -30,10 +30,22 @@ struct MainView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Songs", systemImage: "music.note", value: .songs) {
-                SongsView(player: player, selectedSong: $selectedSong, presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong, hideMiniPlayer: $hideMiniPlayer)
+                SongsView(
+                    player: player,
+                    selectedSong: $selectedSong,
+                    presentPlayerSheet: $presentPlayerSheet,
+                    setSelectedSong: setSelectedSong,
+                    hideMiniPlayer: $hideMiniPlayer
+                )
             }
             
-            Tab("Set Lists", systemImage: "music.note.list", value: .setLists) { SetListsView(hideMiniPlayer: $hideMiniPlayer) }
+            Tab("Set Lists", systemImage: "music.note.list", value: .setLists) {
+                SetListsView(
+                    player: player,
+                    presentPlayerSheet: $presentPlayerSheet,
+                    hideMiniPlayer: $hideMiniPlayer
+                )
+            }
             
             Tab(value: .search, role: .search) { SearchView(presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong) }
         }

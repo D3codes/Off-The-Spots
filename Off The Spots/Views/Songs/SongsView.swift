@@ -105,10 +105,9 @@ struct SongsView: View {
                         Image(systemName: "plus")
                     })
                     .accessibilityLabel("Add Song")
-                    .popover(isPresented: $presentAddSongSheet) {
+                    .sheet(isPresented: $presentAddSongSheet) {
                         EditSongView(song: $newSong)
                             .interactiveDismissDisabled(true)
-                            .presentationCompactAdaptation(.sheet)
                     }
                 }
             }
