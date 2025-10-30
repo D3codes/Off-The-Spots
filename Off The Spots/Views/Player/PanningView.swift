@@ -33,16 +33,13 @@ struct PanningView: View {
                     minTrackColor: .clear,
                     maxTrackColor: .secondary
                 )
-                .onChange(of: panningValue) { value,_ in
-                    panningValue = value
-                    
-                    if (value > -0.1 && value < 0.1) {
-                        if (!vibrated) {
+                .onChange(of: panningValue) { value, _ in
+                    if value > -0.1 && value < 0.1 {
+                        if !vibrated {
                             let generator = UIImpactFeedbackGenerator(style: .light)
                             generator.impactOccurred()
                             vibrated = true
                         }
-                        panningValue = 0
                     } else {
                         vibrated = false
                     }
@@ -59,7 +56,6 @@ struct PanningView: View {
     
     func handleTouchUp() {
         vibrated = false
-        player.setPan(value: panningValue)
     }
 }
 
