@@ -24,6 +24,7 @@ struct MainView: View {
     
     @State private var presentPlayerSheet: Bool = false
     @State private var hideMiniPlayer: Bool = false
+    @State var setListNavPath: NavigationPath = NavigationPath()
     
     @State var selectedTab: Tabs = .songs
     
@@ -43,11 +44,19 @@ struct MainView: View {
                 SetListsView(
                     player: player,
                     presentPlayerSheet: $presentPlayerSheet,
-                    hideMiniPlayer: $hideMiniPlayer
+                    hideMiniPlayer: $hideMiniPlayer,
+                    setListNavPath: $setListNavPath
                 )
             }
             
-            Tab(value: .search, role: .search) { SearchView(presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong) }
+            Tab(value: .search, role: .search) {
+                SearchView(
+                    presentPlayerSheet: $presentPlayerSheet,
+                    setSelectedSong: setSelectedSong,
+                    selectedTab: $selectedTab,
+                    setListNavPath: $setListNavPath
+                )
+            }
         }
         .tabViewBottomAccessory {
             PlayerAccessoryView(

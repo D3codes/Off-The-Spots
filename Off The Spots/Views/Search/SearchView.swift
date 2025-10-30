@@ -10,8 +10,12 @@ import SwiftData
 
 struct SearchView: View {
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
+    @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
+    
     @Binding var presentPlayerSheet: Bool
     var setSelectedSong: (_ song: Song) -> Void = {song in }
+    @Binding var selectedTab: Tabs
+    @Binding var setListNavPath: NavigationPath
     
     @State private var searchText: String = ""
     
@@ -23,27 +27,34 @@ struct SearchView: View {
         }
     }
     
+    var filteredSetLists: [SetList] {
+        if searchText.isEmpty {
+            return setLists
+        } else {
+            return setLists.filter { $0.name.contains(searchText) }
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             List() {
                 Section {
                     ForEach(filteredSongs) { song in
                         Button(action: {
+                            selectedTab = .songs
                             setSelectedSong(song)
                             presentPlayerSheet = true
                         }, label: {
-                            Text(song.name)
-                                .font(.title2)
-                                .tint(.primary)
+                            SongListItemView(song: song)
                         })
-                        //                                .listRowBackground(
-                        //                                    RoundedRectangle(cornerRadius: 20)
-                        //                                        .fill(.ultraThinMaterial)
-                        //                                        .glassEffect(.regular.interactive())
-                        //                                )
                     }
                 }
-                header: { Text("Songs") }
+                header: {
+                    HStack {
+                        Image(systemName: "music.note")
+                        Text("Songs")
+                    }
+                }
                 footer: {
                     if filteredSongs.isEmpty {
                         Text("No Songs")
@@ -55,11 +66,24 @@ struct SearchView: View {
                 }
                 
                 Section {
-                    
+                    ForEach(filteredSetLists) { setList in
+                        Button(action: {
+                            setListNavPath = NavigationPath()
+                            setListNavPath.append(setList)
+                            selectedTab = .setLists
+                        }, label: {
+                            SetListItemView(setList: setList)
+                        })
+                    }
                 }
-                header: { Text("Set Lists") }
+                header: {
+                    HStack {
+                        Image(systemName: "music.note.list")
+                        Text("Set Lists")
+                    }
+                }
                 footer: {
-                    if true {
+                    if filteredSetLists.isEmpty  {
                         Text("No Set Lists")
                             .foregroundStyle(.secondary)
                             .font(.title3)
@@ -67,14 +91,6 @@ struct SearchView: View {
                             .padding(.top)
                     }
                 }
-                
-                //            Section {
-                //                Spacer()
-                //                    .listRowBackground(
-                //                        RoundedRectangle(cornerRadius: 20)
-                //                            .opacity(0)
-                //                    )
-                //            }
             }
             .searchable(text: $searchText)
             .scrollContentBackground(.hidden)
@@ -86,13 +102,31 @@ struct SearchView: View {
 }
 
 #Preview {
-    struct SearchView_Preview: View {
-        @State var presentPlayerSheet: Bool = false
-        
-        var body: some View {
-            SearchView(presentPlayerSheet: $presentPlayerSheet)
-        }
-    }
+    @Previewable @State var path = NavigationPath()
     
-    return SearchView_Preview()
+    let container: ModelContainer = {
+        let schema = Schema([
+            Song.self,
+            SetList.self
+        ])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: schema, configurations: config)
+        for i in 1..<10 {
+            let track = Track(name: "Track 1", file: nil)
+            let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
+            container.mainContext.insert(song)
+        }
+        for i in 1..<10 {
+            let setList = SetList(name: "Set List \(i)", songs: [])
+            container.mainContext.insert(setList)
+        }
+        return container
+    }()
+    
+    SearchView(
+        presentPlayerSheet: .constant(false),
+        selectedTab: .constant(.search),
+        setListNavPath: $path
+    )
+    .modelContainer(container)
 }
