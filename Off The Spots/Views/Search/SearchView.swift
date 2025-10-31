@@ -69,8 +69,8 @@ struct SearchView: View {
                     ForEach(filteredSetLists) { setList in
                         Button(action: {
                             setListNavPath = NavigationPath()
-                            setListNavPath.append(setList)
                             selectedTab = .setLists
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { setListNavPath.append(setList) }
                         }, label: {
                             SetListItemView(setList: setList)
                         })
