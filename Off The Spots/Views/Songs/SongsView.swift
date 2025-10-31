@@ -10,8 +10,10 @@ import SwiftData
 
 struct SongsView: View {
     @Environment(\.modelContext) private var modelContext
-    @ObservedObject var player: AudioHelper
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
+    @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
+    
+    @ObservedObject var player: AudioHelper
     @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
     var setSelectedSong: (_ song: Song) -> Void = {song in }
@@ -46,13 +48,6 @@ struct SongsView: View {
                         }
                         .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)
-//                        Section {
-//                            Spacer()
-//                                .listRowBackground(
-//                                    RoundedRectangle(cornerRadius: 20)
-//                                        .opacity(0)
-//                                )
-//                        }
                     }
                     .scrollContentBackground(.hidden)
                     .listSectionSpacing(.compact)
@@ -98,7 +93,10 @@ struct SongsView: View {
     private func deleteSongs(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                if(selectedSong?.id == songs[index].id) {
+                let songId = songs[index].id
+                
+                // Stop playing deleted song, if it is playing
+                if(selectedSong?.id == songId) {
                     presentPlayerSheet = false
                     
                     if(player.isPlaying) {
@@ -108,7 +106,17 @@ struct SongsView: View {
                     selectedSong = nil
                 }
                 
+                // Remove deleted song from any set lists
+                setLists.forEach { setList in
+                    if setList.songs.contains(songId) {
+                        setList.songs.removeAll(where: { $0 == songId })
+                    }
+                }
+                
+                // Delete song
                 modelContext.delete(songs[index])
+                
+                try? modelContext.save()
             }
         }
     }
