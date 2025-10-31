@@ -37,7 +37,8 @@ struct MainView: View {
                     selectedSong: $selectedSong,
                     presentPlayerSheet: $presentPlayerSheet,
                     setSelectedSong: setSelectedSong,
-                    hideMiniPlayer: $hideMiniPlayer
+                    hideMiniPlayer: $hideMiniPlayer,
+                    selectedSetList: selectedSetList
                 )
             }
             
@@ -46,7 +47,9 @@ struct MainView: View {
                     setSelectedSong: setSelectedSong,
                     presentPlayerSheet: $presentPlayerSheet,
                     hideMiniPlayer: $hideMiniPlayer,
-                    setListNavPath: $setListNavPath
+                    setListNavPath: $setListNavPath,
+                    selectedSong: selectedSong,
+                    selectedSetList: selectedSetList
                 )
             }
             
