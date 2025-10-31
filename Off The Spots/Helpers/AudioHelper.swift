@@ -22,6 +22,8 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     var publishProgressChanges: Bool = false
     
+    var handlePlayerDidFinishPlaying: () -> Void = {}
+    
     override init() {
         super.init()
         setupRemoteTransportControls()
@@ -210,9 +212,7 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         if (flag) {
-            isPlaying = false
-            progress = 0
-            updateNowPlaying()
+            handlePlayerDidFinishPlaying()
         }
     }
 }

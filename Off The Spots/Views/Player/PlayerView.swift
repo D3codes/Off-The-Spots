@@ -12,12 +12,16 @@ struct PlayerView: View {
     @Binding var song: Song
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
+    @State var setList: SetList?
+    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     
     @State private var loopStartLocked: Bool = false
     @State private var loopEndLocked: Bool = false
     @State private var isAddSongSheetPresented: Bool = false
     
     @State private var presentSheetMusic: Bool = false
+    
+    @State private var showPlaybackProgress: Bool = true
     
     var body: some View {
         VStack {
@@ -109,20 +113,31 @@ struct PlayerView: View {
             
             Spacer()
             
-            PlaybackProgressView(
-                player: player,
-                duration: $player.duration,
-                progress: $player.progress,
-                isEditingProgress: $isEditingProgress,
-                loopStart: $player.loopStart,
-                loopStartLocked: $loopStartLocked,
-                loopEnd: $player.loopEnd,
-                loopEndLocked: $loopEndLocked)
+            if showPlaybackProgress {
+                PlaybackProgressView(
+                    player: player,
+                    duration: $player.duration,
+                    progress: $player.progress,
+                    isEditingProgress: $isEditingProgress,
+                    loopStart: $player.loopStart,
+                    loopStartLocked: $loopStartLocked,
+                    loopEnd: $player.loopEnd,
+                    loopEndLocked: $loopEndLocked)
+            } else {
+                PlaybackProgressView(
+                    player: player,
+                    duration: $player.duration,
+                    progress: $player.progress,
+                    isEditingProgress: $isEditingProgress,
+                    loopStart: $player.loopStart,
+                    loopStartLocked: $loopStartLocked,
+                    loopEnd: $player.loopEnd,
+                    loopEndLocked: $loopEndLocked)
+            }
             
             HStack {
-                Rectangle()
+                AirPlayButton()
                     .frame(width: 40, height: 40)
-                    .foregroundColor(.clear)
                 
                 Spacer()
                 
@@ -161,8 +176,12 @@ struct PlayerView: View {
                 
                 Spacer()
                 
-                AirPlayButton()
-                    .frame(width: 40, height: 40)
+                SetListMenuView(
+                    setList: setList,
+                    currentSong: song,
+                    setSelectedSong: setSelectedSong
+                )
+                .frame(width: 40, height: 40)
             }
             .frame(maxWidth: .infinity)
             .padding(.bottom)
@@ -183,6 +202,10 @@ struct PlayerView: View {
             player.publishProgressChanges = false
         }
         .presentationDragIndicator(.visible)
+        .onChange(of: song) {
+            showPlaybackProgress = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showPlaybackProgress = true }
+        }
 //        .presentationBackground(LinearGradient(gradient: Gradient(colors: [.clear, .blue, .blue, .blue, .blue]/*[.otsblue, .clear, .clear, .clear, .clear]*/), startPoint: .top, endPoint: .bottom))
     }
 }

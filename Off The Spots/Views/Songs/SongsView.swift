@@ -16,7 +16,7 @@ struct SongsView: View {
     @ObservedObject var player: AudioHelper
     @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
-    var setSelectedSong: (_ song: Song) -> Void = {song in }
+    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     @Binding var hideMiniPlayer: Bool
     
     @State private var selection = Set<Song.ID>()
@@ -40,7 +40,7 @@ struct SongsView: View {
                     List(selection: $selection) {
                         ForEach(songs) { song in
                             Button(action: {
-                                setSelectedSong(song)
+                                setSelectedSong(song, nil)
                                 presentPlayerSheet = true
                             }, label: {
                                 SongListItemView(song: song)

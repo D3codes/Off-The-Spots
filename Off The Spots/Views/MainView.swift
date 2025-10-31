@@ -18,6 +18,7 @@ struct MainView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var songs: [Song]
     @State var selectedSong: Song?
+    @State var selectedSetList: SetList?
     
     @StateObject private var player: AudioHelper = AudioHelper()
     @State private var isEditingProgress: Bool = false
@@ -42,7 +43,7 @@ struct MainView: View {
             
             Tab("Set Lists", systemImage: "music.note.list", value: .setLists) {
                 SetListsView(
-                    player: player,
+                    setSelectedSong: setSelectedSong,
                     presentPlayerSheet: $presentPlayerSheet,
                     hideMiniPlayer: $hideMiniPlayer,
                     setListNavPath: $setListNavPath
@@ -68,17 +69,42 @@ struct MainView: View {
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $presentPlayerSheet) {
-            PlayerView(song: Binding($selectedSong)!, isEditingProgress: $isEditingProgress, player: player)
+            PlayerView(
+                song: Binding($selectedSong)!,
+                isEditingProgress: $isEditingProgress,
+                player: player,
+                setList: selectedSetList,
+                setSelectedSong: setSelectedSong
+            )
         }
+        .onAppear { player.handlePlayerDidFinishPlaying = handlePlayerDidFinishPlaying }
         .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
         }
     }
     
-    private func setSelectedSong(song: Song?) {
+    private func handlePlayerDidFinishPlaying() {
+        player.isPlaying = false
+        player.progress = 0
+//        player.updateNowPlaying()
+        
+        if selectedSetList != nil {
+            let currentSongIndex = selectedSetList!.songs.firstIndex(of: selectedSong!.id)!
+            if currentSongIndex == selectedSetList!.songs.count - 1 { return }
+            
+            let nextSong: Song? = songs.first(where: { $0.id == selectedSetList!.songs[currentSongIndex + 1] })
+            guard let nextSong else { return }
+            
+            setSelectedSong(song: nextSong, setList: selectedSetList)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { player.play() }
+        }
+    }
+    
+    private func setSelectedSong(song: Song?, setList: SetList?) {
         guard let song else { return }
         if selectedSong != nil && selectedSong!.id == song.id { return }
         selectedSong = song
+        selectedSetList = setList
         player.setSelectedSong(song: song)
     }
     
