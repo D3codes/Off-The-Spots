@@ -15,6 +15,8 @@ struct EditSetListView: View {
     @State private var sheetTitle: String = "Add Set List"
     
     @Binding var setList: SetList
+    var dismissSubView: () -> Void = { }
+    
     @FocusState var isNameFieldFocused: Bool
 
     var body: some View {
@@ -43,6 +45,7 @@ struct EditSetListView: View {
                         modelContext.delete(setList)
                         modelContext.insert(setList)
                         dismiss()
+                        dismissSubView()
                     })
                     .disabled(setList.name.isEmpty)
                 }

@@ -17,7 +17,8 @@ struct PlayerView: View {
     
     @State private var loopStartLocked: Bool = false
     @State private var loopEndLocked: Bool = false
-    @State private var isAddSongSheetPresented: Bool = false
+    @State private var isEditSongSheetPresented: Bool = false
+    @State private var isAddToSetListSheetPresented: Bool = false
     
     @State private var presentSheetMusic: Bool = false
     
@@ -31,11 +32,11 @@ struct PlayerView: View {
                 Spacer()
                 Menu(content: {
                     Button(
-                        action: { },
+                        action: { isAddToSetListSheetPresented = true },
                         label: { Label("Add to Set List", systemImage: "music.note.list") }
                     )
                     Button(
-                        action: { isAddSongSheetPresented = true },
+                        action: { isEditSongSheetPresented = true },
                         label: { Label("Edit Song", systemImage: "pencil") }
                     )
                 }, label: {
@@ -190,7 +191,10 @@ struct PlayerView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.keyboard)
         .padding(20)
-        .sheet(isPresented: $isAddSongSheetPresented) {
+        .sheet(isPresented: $isAddToSetListSheetPresented) {
+            AddToSetListView(song: song)
+        }
+        .sheet(isPresented: $isEditSongSheetPresented) {
             EditSongView(song: $song)
                 .interactiveDismissDisabled(true)
         }

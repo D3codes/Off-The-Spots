@@ -73,7 +73,7 @@ struct SetListsView: View {
                     }, label: {
                         Image(systemName: "plus")
                     })
-                    .accessibilityLabel("Add Song")
+                    .accessibilityLabel("Add Set List")
                     .sheet(isPresented: $presentAddSetListSheet) {
                         EditSetListView(setList: $newSetList)
                             .interactiveDismissDisabled(true)
