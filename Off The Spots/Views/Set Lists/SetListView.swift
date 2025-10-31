@@ -12,6 +12,8 @@ struct SetListView: View {
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
     
     @State var setList: SetList
+    @Binding var presentPlayerSheet: Bool
+    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     
     @State private var selection = Set<Song.ID>()
     @State private var presentEditSetListSheet: Bool = false
@@ -21,7 +23,12 @@ struct SetListView: View {
             List(selection: $selection) {
                 ForEach(setList.songs, id: \.self) { songId in
                     if let song = songs.first(where: { $0.id == songId }) {
-                        SongListItemView(song: song)
+                        Button(action: {
+                            setSelectedSong(song, setList)
+                            presentPlayerSheet = true
+                        }) {
+                            SongListItemView(song: song)
+                        }
                     }
                 }
                 .onMove(perform: moveSongs)
@@ -70,7 +77,7 @@ struct SetListView: View {
     }()
 
     NavigationStack {
-        SetListView(setList: setList)
+        SetListView(setList: setList, presentPlayerSheet: .constant(false))
             .modelContainer(container)
     }
 }

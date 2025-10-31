@@ -12,7 +12,7 @@ struct SetListsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
-    @ObservedObject var player: AudioHelper
+    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     @Binding var presentPlayerSheet: Bool
     @Binding var hideMiniPlayer: Bool
     @Binding var setListNavPath: NavigationPath
@@ -45,7 +45,7 @@ struct SetListsView: View {
                     .listSectionSpacing(.compact)
                     .ignoresSafeArea(.keyboard)
                     .navigationDestination(for: SetList.self) { setList in
-                        SetListView(setList: setList)
+                        SetListView(setList: setList, presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong)
                     }
                 }
             }
@@ -123,7 +123,6 @@ struct SetListsView: View {
     }()
 
     return SetListsView(
-        player: AudioHelper(),
         presentPlayerSheet: .constant(false),
         hideMiniPlayer: .constant(false),
         setListNavPath: $path

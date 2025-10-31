@@ -13,7 +13,7 @@ struct SearchView: View {
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
     @Binding var presentPlayerSheet: Bool
-    var setSelectedSong: (_ song: Song) -> Void = {song in }
+    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     @Binding var selectedTab: Tabs
     @Binding var setListNavPath: NavigationPath
     
@@ -42,7 +42,7 @@ struct SearchView: View {
                     ForEach(filteredSongs) { song in
                         Button(action: {
                             selectedTab = .songs
-                            setSelectedSong(song)
+                            setSelectedSong(song, nil)
                             presentPlayerSheet = true
                         }, label: {
                             SongListItemView(song: song)
