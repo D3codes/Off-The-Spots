@@ -49,7 +49,11 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func skip(seconds: Double) {
-        audioPlayer.currentTime += seconds
+        if progress + seconds >= duration {
+            audioPlayer.currentTime = duration - 0.5
+        } else {
+            audioPlayer.currentTime += seconds
+        }
         
         updateProgress()
     }

@@ -86,7 +86,6 @@ struct MainView: View {
     private func handlePlayerDidFinishPlaying() {
         player.isPlaying = false
         player.progress = 0
-//        player.updateNowPlaying()
         
         if selectedSetList != nil {
             let currentSongIndex = selectedSetList!.songs.firstIndex(of: selectedSong!.id)!
@@ -101,10 +100,11 @@ struct MainView: View {
     }
     
     private func setSelectedSong(song: Song?, setList: SetList?) {
+        selectedSetList = setList
+        
         guard let song else { return }
         if selectedSong != nil && selectedSong!.id == song.id { return }
         selectedSong = song
-        selectedSetList = setList
         player.setSelectedSong(song: song)
     }
     

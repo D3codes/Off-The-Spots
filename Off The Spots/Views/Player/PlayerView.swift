@@ -113,6 +113,7 @@ struct PlayerView: View {
             
             Spacer()
             
+            // Necessary to force rerender when song changes
             if showPlaybackProgress {
                 PlaybackProgressView(
                     player: player,
