@@ -17,6 +17,9 @@ struct SetListsView: View {
     @Binding var hideMiniPlayer: Bool
     @Binding var setListNavPath: NavigationPath
     
+    var selectedSong: Song?
+    var selectedSetList: SetList?
+    
     @State private var selection = Set<SetList.ID>()
     
     @State private var presentAddSetListSheet: Bool = false
@@ -35,7 +38,7 @@ struct SetListsView: View {
                     List(selection: $selection) {
                         ForEach(setLists) { setList in
                             Button(action: { setListNavPath.append(setList) }) {
-                                SetListItemView(setList: setList)
+                                SetListItemView(setList: setList, selectedSetList: selectedSetList)
                             }
                         }
                         .onMove(perform: moveSetLists)
@@ -45,7 +48,13 @@ struct SetListsView: View {
                     .listSectionSpacing(.compact)
                     .ignoresSafeArea(.keyboard)
                     .navigationDestination(for: SetList.self) { setList in
-                        SetListView(setList: setList, presentPlayerSheet: $presentPlayerSheet, setSelectedSong: setSelectedSong)
+                        SetListView(
+                            setList: setList,
+                            presentPlayerSheet: $presentPlayerSheet,
+                            setSelectedSong: setSelectedSong,
+                            selectedSong: selectedSong,
+                            selectedSetList: selectedSetList
+                        )
                     }
                 }
             }

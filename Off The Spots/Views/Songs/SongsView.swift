@@ -19,6 +19,8 @@ struct SongsView: View {
     var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     @Binding var hideMiniPlayer: Bool
     
+    var selectedSetList: SetList?
+    
     @State private var selection = Set<Song.ID>()
     
     @State private var presentAddSongSheet = false
@@ -43,7 +45,7 @@ struct SongsView: View {
                                 setSelectedSong(song, nil)
                                 presentPlayerSheet = true
                             }, label: {
-                                SongListItemView(song: song)
+                                SongListItemView(song: song, selectedSong: selectedSetList == nil ? selectedSong : nil)
                             })
                         }
                         .onMove(perform: moveSongs)

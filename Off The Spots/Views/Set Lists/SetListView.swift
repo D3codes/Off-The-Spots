@@ -15,6 +15,9 @@ struct SetListView: View {
     @Binding var presentPlayerSheet: Bool
     var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     
+    var selectedSong: Song?
+    var selectedSetList: SetList?
+    
     @State private var selection = Set<Song.ID>()
     @State private var presentEditSetListSheet: Bool = false
     
@@ -27,7 +30,7 @@ struct SetListView: View {
                             setSelectedSong(song, setList)
                             presentPlayerSheet = true
                         }) {
-                            SongListItemView(song: song)
+                            SongListItemView(song: song, selectedSong: selectedSetList != nil ? selectedSong : nil)
                         }
                     }
                 }

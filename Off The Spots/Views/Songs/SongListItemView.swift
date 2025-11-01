@@ -9,26 +9,35 @@ import SwiftUI
 
 struct SongListItemView: View {
     var song: Song
+    var selectedSong: Song? = nil
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(song.name)
-                .font(.title2)
-                .tint(.primary)
-                .multilineTextAlignment(.leading)
-            
-            HStack {
-                Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.tracks.count)")
-                    .font(.footnote)
+        HStack {
+            VStack(alignment: .leading) {
+                Text(song.name)
+                    .font(.title2)
                     .tint(.primary)
+                    .multilineTextAlignment(.leading)
                 
-                if song.sheetMusic != nil {
-                    Divider()
-                    
-                    Image(systemName: "music.pages.fill")
+                HStack {
+                    Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.tracks.count)")
                         .font(.footnote)
                         .tint(.primary)
+                    
+                    if song.sheetMusic != nil {
+                        Divider()
+                        
+                        Image(systemName: "music.pages.fill")
+                            .font(.footnote)
+                            .tint(.primary)
+                    }
                 }
+            }
+            
+            if selectedSong != nil && selectedSong!.id == song.id {
+                Spacer()
+                AudioVizualizerView(color: .accentColor)
+                    .scaleEffect(0.4)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
