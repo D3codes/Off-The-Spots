@@ -36,8 +36,8 @@ struct SongListItemView: View {
             
             if selectedSong != nil && selectedSong!.id == song.id {
                 Spacer()
-                AudioVizualizerView(color: .accentColor)
-                    .scaleEffect(0.4)
+                AnimatedWaveformView(color: .accentColor)
+                    .scaleEffect(0.3)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

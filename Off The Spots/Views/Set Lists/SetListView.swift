@@ -30,7 +30,7 @@ struct SetListView: View {
                             setSelectedSong(song, setList)
                             presentPlayerSheet = true
                         }) {
-                            SongListItemView(song: song, selectedSong: selectedSetList != nil ? selectedSong : nil)
+                            SongListItemView(song: song, selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil)
                         }
                     }
                 }

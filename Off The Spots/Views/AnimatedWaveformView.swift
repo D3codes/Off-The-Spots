@@ -1,5 +1,5 @@
 //
-//  AudioVisualizerView.swift
+//  AnimatedWaveformView.swift
 //  Off The Spots
 //
 //  Created by David Freeman on 10/31/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AudioVizualizerView: View {
+struct AnimatedWaveformView: View {
  
     var color: Color
     
@@ -45,5 +45,5 @@ struct AudioVizualizerView: View {
 }
 
 #Preview {
-    AudioVizualizerView(color: .accentColor)
+    AnimatedWaveformView(color: .accentColor)
 }
