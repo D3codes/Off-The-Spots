@@ -28,8 +28,8 @@ struct SetListItemView: View {
             
             if selectedSetList != nil && selectedSetList!.id == setList.id {
                 Spacer()
-                AudioVizualizerView(color: .accentColor)
-                    .scaleEffect(0.4)
+                AnimatedWaveformView(color: .accentColor)
+                    .scaleEffect(0.3)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
