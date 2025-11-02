@@ -117,17 +117,6 @@ struct MainView: View {
     }
 }
 
-//#Preview {
-//    struct MainView_Preview: View {
-//        var body: some View {
-//            MainView()
-//            .modelContainer(for: Song.self, inMemory: true)
-//        }
-//    }
-//    
-//    return MainView_Preview()
-//}
-
 #Preview {
     let container: ModelContainer = {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)

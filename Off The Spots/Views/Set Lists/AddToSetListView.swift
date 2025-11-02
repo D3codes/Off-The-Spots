@@ -74,7 +74,6 @@ struct AddToSetListView: View {
             }
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
-            .ignoresSafeArea(.keyboard)
             .searchable(text: $searchText)
             .navigationTitle(Text("Add to Set List"))
             .navigationBarTitleDisplayMode(.inline)

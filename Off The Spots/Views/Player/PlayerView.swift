@@ -211,6 +211,7 @@ struct PlayerView: View {
             showPlaybackProgress = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showPlaybackProgress = true }
         }
+        .ignoresSafeArea(.keyboard)
         .presentationBackground(backgroundGradient)
     }
 }
