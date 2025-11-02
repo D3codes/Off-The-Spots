@@ -100,6 +100,7 @@ struct AboutView: View {
         }
         .navigationTitle("About")
         .padding(.horizontal)
+        .background(backgroundGradient)
     }
 }
 

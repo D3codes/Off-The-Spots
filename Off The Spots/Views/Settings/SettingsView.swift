@@ -40,6 +40,7 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
+            .listRowBackground(listItemBackground)
             
             Section {
                 NavigationLink(destination: WhatsNewView(), label: {
@@ -70,6 +71,7 @@ struct SettingsView: View {
                     }
                 })
             }
+            .listRowBackground(listItemBackground)
             
             Section {
                 Button(action: { showMail = true }, label: {
@@ -102,6 +104,7 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
+            .listRowBackground(listItemBackground)
             
             Section {
                 Button(action: { openURL(URL(string: "https://d3.codes")!) }, label: {
@@ -122,6 +125,7 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
+            .listRowBackground(listItemBackground)
             
             Section("More by D3codes") {
                 Button(action: { openURL(URL(string: "itms-apps://itunes.apple.com/app/id1492605892")!) }, label: {
@@ -141,11 +145,15 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
+            .listRowBackground(listItemBackground)
         }
         .sheet(isPresented: $showMail) { MailView() }
         .navigationTitle(Text("Settings"))
         .toolbar(.hidden, for: .tabBar)
         .onAppear { hideMiniPlayer = true }
+        .scrollContentBackground(.hidden)
+        .ignoresSafeArea(.keyboard)
+        .background(backgroundGradient)
     }
 }
 
@@ -154,7 +162,9 @@ struct SettingsView: View {
         @State private var hideMiniPlayer: Bool = false
         
         var body: some View {
-            SettingsView(hideMiniPlayer: $hideMiniPlayer)
+            NavigationStack {
+                SettingsView(hideMiniPlayer: $hideMiniPlayer)
+            }
         }
     }
     

@@ -40,6 +40,7 @@ struct SetListsView: View {
                             Button(action: { setListNavPath.append(setList) }) {
                                 SetListItemView(setList: setList, selectedSetList: selectedSetList)
                             }
+                            .listRowBackground(Color.clear)
                         }
                         .onMove(perform: moveSetLists)
                         .onDelete(perform: deleteSetLists)
@@ -90,6 +91,7 @@ struct SetListsView: View {
                 }
             }
             .onAppear { hideMiniPlayer = false }
+            .background(backgroundGradient)
         }
     }
     

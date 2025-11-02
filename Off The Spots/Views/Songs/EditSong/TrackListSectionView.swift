@@ -20,6 +20,8 @@ struct TrackListSectionView: View {
             .onMove(perform: moveTracks)
             .onDelete(perform: deleteTracks)
             .scrollContentBackground(.hidden)
+            .listSectionSpacing(.compact)
+            .listRowBackground(listItemBackground)
         } header: {
             HStack {
                 Image(systemName: "music.note.square.stack.fill")

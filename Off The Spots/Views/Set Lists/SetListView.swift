@@ -32,11 +32,15 @@ struct SetListView: View {
                         }) {
                             SongListItemView(song: song, selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil)
                         }
+                        .listRowBackground(Color.clear)
                     }
                 }
                 .onMove(perform: moveSongs)
                 .onDelete(perform: deleteSongs)
             }
+            .scrollContentBackground(.hidden)
+            .listSectionSpacing(.compact)
+            .ignoresSafeArea(.keyboard)
         }
         .navigationTitle(setList.name)
         .toolbar {
@@ -48,6 +52,7 @@ struct SetListView: View {
             EditSetListView(setList: $setList)
                 .interactiveDismissDisabled(true)
         }
+        .background(backgroundGradient)
     }
     
     private func deleteSongs(offsets: IndexSet) {

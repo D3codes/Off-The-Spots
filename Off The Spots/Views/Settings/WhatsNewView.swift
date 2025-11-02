@@ -10,6 +10,7 @@ import SwiftUI
 struct WhatsNewView: View {
     var body: some View {
         Text("WhatsNewView")
+            .background(backgroundGradient)
     }
 }
 

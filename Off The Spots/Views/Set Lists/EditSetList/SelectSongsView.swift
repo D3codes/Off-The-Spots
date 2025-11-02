@@ -29,8 +29,11 @@ struct SelectSongsView: View {
         List(selection: $songSelection) {
             ForEach(filteredSongs) { song in
                 Text(song.name)
+                    .listRowBackground(listItemBackground)
             }
         }
+        .scrollContentBackground(.hidden)
+        .listSectionSpacing(.compact)
         .environment(\.editMode, .constant(EditMode.active))
         .searchable(text: $searchText)
         .navigationTitle("Songs")
@@ -51,6 +54,7 @@ struct SelectSongsView: View {
                 songSelection = Set<Song.ID>(setList.songs)
             }
         }
+        .background(backgroundGradient)
     }
 }
 

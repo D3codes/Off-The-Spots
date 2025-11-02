@@ -47,6 +47,8 @@ struct SongsView: View {
                             }, label: {
                                 SongListItemView(song: song, selectedSong: selectedSetList == nil ? selectedSong : nil)
                             })
+//                            .listRowBackground(Color(uiColor: UIColor.systemBackground).opacity(0.1))
+                            .listRowBackground(Color.clear)
                         }
                         .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)
@@ -89,6 +91,7 @@ struct SongsView: View {
                 }
             }
             .onAppear { hideMiniPlayer = false }
+            .background(backgroundGradient)
         }
     }
     
