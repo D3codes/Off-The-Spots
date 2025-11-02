@@ -64,6 +64,7 @@ struct SearchView: View {
                             .padding(.top)
                     }
                 }
+                .listRowBackground(listItemBackground)
                 
                 Section {
                     ForEach(filteredSetLists) { setList in
@@ -91,12 +92,13 @@ struct SearchView: View {
                             .padding(.top)
                     }
                 }
+                .listRowBackground(listItemBackground)
             }
             .searchable(text: $searchText)
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
-            .ignoresSafeArea(.keyboard)
             .navigationTitle("Search")
+            .background(backgroundGradient)
         }
     }
 }

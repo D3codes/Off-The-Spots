@@ -57,6 +57,7 @@ struct AddToSetListView: View {
                             .interactiveDismissDisabled(true)
                     }
                 }
+                .listRowBackground(listItemBackground)
                 
                 ForEach(filteredSetLists) { setList in
                     Button(action: {
@@ -68,8 +69,11 @@ struct AddToSetListView: View {
                             .contentShape(Capsule())
                     })
                     .buttonStyle(.plain)
+                    .listRowBackground(listItemBackground)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .listSectionSpacing(.compact)
             .searchable(text: $searchText)
             .navigationTitle(Text("Add to Set List"))
             .navigationBarTitleDisplayMode(.inline)
@@ -78,6 +82,7 @@ struct AddToSetListView: View {
                     Button(role: .close, action: { dismiss() })
                 }
             }
+            .background(backgroundGradient)
         }
     }
     

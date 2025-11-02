@@ -1,11 +1,17 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:0.19192,0.44703,0.82865,1.00000"
+    "automatic-gradient" : "display-p3:0.34510,0.48235,0.92941,1.00000"
   },
   "groups" : [
     {
       "layers" : [
         {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
           "glass" : true,
           "image-name" : "nose.png",
           "name" : "nose"
@@ -20,7 +26,15 @@
               "value" : "normal"
             }
           ],
-          "fill" : "none",
+          "fill-specializations" : [
+            {
+              "value" : "none"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
           "glass" : true,
           "hidden" : false,
           "image-name" : "notes.png",
@@ -45,7 +59,15 @@
         },
         {
           "blend-mode" : "normal",
-          "fill" : "automatic",
+          "fill-specializations" : [
+            {
+              "value" : "automatic"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
           "glass" : true,
           "image-name" : "ear.png",
           "name" : "ear",

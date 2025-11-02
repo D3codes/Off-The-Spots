@@ -118,12 +118,17 @@ struct MainView: View {
 }
 
 #Preview {
-    struct MainView_Preview: View {
-        var body: some View {
-            MainView()
-            .modelContainer(for: Song.self, inMemory: true)
+    let container: ModelContainer = {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: Song.self, configurations: config)
+        for i in 1..<10 {
+            let track = Track(name: "Track 1", file: nil)
+            let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
+            container.mainContext.insert(song)
         }
-    }
-    
-    return MainView_Preview()
+        return container
+    }()
+
+    MainView()
+        .modelContainer(container)
 }

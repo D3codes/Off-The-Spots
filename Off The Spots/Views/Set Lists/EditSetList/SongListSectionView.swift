@@ -18,9 +18,7 @@ struct SongListSectionView: View {
             ForEach(setList.songs, id: \.self) { songId in
                 if let song = songs.first(where: { $0.id == songId }) {
                     Text(song.name)
-                } else {
-                    Text("Missing song")
-                        .foregroundStyle(.secondary)
+                        .listRowBackground(listItemBackground)
                 }
             }
             .onMove(perform: moveSongs)

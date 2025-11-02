@@ -26,12 +26,14 @@ struct EditSongView: View {
                     Text("Name")
                         .font(.subheadline)
                 }
+                .listRowBackground(listItemBackground)
                 
                 SheetMusicListSectionView(song: song)
                 
                 TrackListSectionView(song: song)
             }
             .scrollContentBackground(.hidden)
+            .listSectionSpacing(.compact)
             .navigationTitle(Text(sheetTitle))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -57,6 +59,7 @@ struct EditSongView: View {
                 isSongFieldFocused = true
             }
         }
+        .background(backgroundGradient)
     }
 }
 
