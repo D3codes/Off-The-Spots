@@ -45,7 +45,11 @@ struct SongsView: View {
                                 setSelectedSong(song, nil)
                                 presentPlayerSheet = true
                             }, label: {
-                                SongListItemView(song: song, selectedSong: selectedSetList == nil ? selectedSong : nil)
+                                SongListItemView(
+                                    song: song,
+                                    selectedSong: selectedSetList == nil ? selectedSong : nil,
+                                    isSongPlaying: player.isPlaying
+                                )
                             })
                             .listRowBackground(Color.clear)
                         }

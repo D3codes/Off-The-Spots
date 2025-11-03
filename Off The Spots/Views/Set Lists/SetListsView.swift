@@ -19,6 +19,7 @@ struct SetListsView: View {
     
     var selectedSong: Song?
     var selectedSetList: SetList?
+    var isSongPlaying: Bool
     
     @State private var selection = Set<SetList.ID>()
     
@@ -38,7 +39,11 @@ struct SetListsView: View {
                     List(selection: $selection) {
                         ForEach(setLists) { setList in
                             Button(action: { setListNavPath.append(setList) }) {
-                                SetListItemView(setList: setList, selectedSetList: selectedSetList)
+                                SetListItemView(
+                                    setList: setList,
+                                    selectedSetList: selectedSetList,
+                                    isSongPlaying: isSongPlaying
+                                )
                             }
                             .listRowBackground(Color.clear)
                         }
@@ -54,7 +59,8 @@ struct SetListsView: View {
                             presentPlayerSheet: $presentPlayerSheet,
                             setSelectedSong: setSelectedSong,
                             selectedSong: selectedSong,
-                            selectedSetList: selectedSetList
+                            selectedSetList: selectedSetList,
+                            isSongPlaying: isSongPlaying
                         )
                     }
                 }
@@ -136,7 +142,8 @@ struct SetListsView: View {
     return SetListsView(
         presentPlayerSheet: .constant(false),
         hideMiniPlayer: .constant(false),
-        setListNavPath: $path
+        setListNavPath: $path,
+        isSongPlaying: false
     )
     .modelContainer(container)
 }

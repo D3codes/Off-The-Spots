@@ -17,6 +17,7 @@ struct SetListView: View {
     
     var selectedSong: Song?
     var selectedSetList: SetList?
+    var isSongPlaying: Bool
     
     @State private var selection = Set<Song.ID>()
     @State private var presentEditSetListSheet: Bool = false
@@ -30,7 +31,11 @@ struct SetListView: View {
                             setSelectedSong(song, setList)
                             presentPlayerSheet = true
                         }) {
-                            SongListItemView(song: song, selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil)
+                            SongListItemView(
+                                song: song,
+                                selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil,
+                                isSongPlaying: isSongPlaying
+                            )
                         }
                         .listRowBackground(Color.clear)
                     }
@@ -85,7 +90,7 @@ struct SetListView: View {
     }()
 
     NavigationStack {
-        SetListView(setList: setList, presentPlayerSheet: .constant(false))
+        SetListView(setList: setList, presentPlayerSheet: .constant(false), isSongPlaying: false)
             .modelContainer(container)
     }
 }

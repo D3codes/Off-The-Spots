@@ -10,6 +10,7 @@ import SwiftUI
 struct AnimatedWaveformView: View {
  
     var color: Color
+    var animate: Bool
     
     @State private var drawingHeight = true
  
@@ -18,20 +19,35 @@ struct AnimatedWaveformView: View {
     }
  
     var body: some View {
-        HStack {
-            bar(color: color, low: 0.4)
-                .animation(animation.speed(1.5), value: drawingHeight)
-            bar(color: color, low: 0.3)
-                .animation(animation.speed(1.2), value: drawingHeight)
-            bar(color: color, low: 0.5)
-                .animation(animation.speed(1.0), value: drawingHeight)
-            bar(color: color, low: 0.3)
-                .animation(animation.speed(1.7), value: drawingHeight)
-            bar(color: color, low: 0.5)
-                .animation(animation.speed(1.0), value: drawingHeight)
+        Group {
+            if animate {
+                HStack {
+                    bar(color: color, low: 0.4)
+                        .animation(animation.speed(1.5), value: drawingHeight)
+                    bar(color: color, low: 0.3)
+                        .animation(animation.speed(1.2), value: drawingHeight)
+                    bar(color: color, low: 0.5)
+                        .animation(animation.speed(1.0), value: drawingHeight)
+                    bar(color: color, low: 0.3)
+                        .animation(animation.speed(1.7), value: drawingHeight)
+                    bar(color: color, low: 0.5)
+                        .animation(animation.speed(1.0), value: drawingHeight)
+                }
+            } else {
+                HStack {
+                    bar(color: color, low: 0.1, high: 0.1)
+                    bar(color: color, low: 0.1, high: 0.1)
+                    bar(color: color, low: 0.1, high: 0.1)
+                    bar(color: color, low: 0.1, high: 0.1)
+                    bar(color: color, low: 0.1, high: 0.1)
+                }
+            }
         }
         .frame(width: 60)
         .onAppear{
+            drawingHeight.toggle()
+        }
+        .onChange(of: animate) {
             drawingHeight.toggle()
         }
     }
@@ -45,5 +61,12 @@ struct AnimatedWaveformView: View {
 }
 
 #Preview {
-    AnimatedWaveformView(color: .accentColor)
+    @Previewable @State var animate: Bool = true
+    
+    VStack {
+        AnimatedWaveformView(color: .accentColor, animate: animate)
+        
+        Button(action: { animate.toggle() }) { Text("Toggle Animation") }
+            .buttonStyle(.glass)
+    }
 }
