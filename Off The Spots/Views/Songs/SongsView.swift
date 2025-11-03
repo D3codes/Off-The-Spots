@@ -51,7 +51,8 @@ struct SongsView: View {
                                     isSongPlaying: player.isPlaying
                                 )
                             })
-                            .listRowBackground(Color.clear)
+//                            .listRowBackground(Color.clear)
+                            .listRowBackground(listItemBackground)
                         }
                         .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)

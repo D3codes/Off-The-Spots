@@ -26,7 +26,7 @@ struct EditSongView: View {
                     Text("Name")
                         .font(.subheadline)
                 }
-                .listRowBackground(listItemBackground)
+//                .listRowBackground(listItemBackground)
                 
                 SheetMusicListSectionView(song: song)
                 
@@ -59,7 +59,7 @@ struct EditSongView: View {
                 isSongFieldFocused = true
             }
         }
-        .background(backgroundGradient)
+//        .background(backgroundGradient)
     }
 }
 

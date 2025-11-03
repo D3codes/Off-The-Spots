@@ -29,7 +29,7 @@ struct SelectSongsView: View {
         List(selection: $songSelection) {
             ForEach(filteredSongs) { song in
                 Text(song.name)
-                    .listRowBackground(listItemBackground)
+//                    .listRowBackground(listItemBackground)
             }
         }
         .scrollContentBackground(.hidden)
@@ -54,7 +54,7 @@ struct SelectSongsView: View {
                 songSelection = Set<Song.ID>(setList.songs)
             }
         }
-        .background(backgroundGradient)
+//        .background(backgroundGradient)
     }
 }
 
