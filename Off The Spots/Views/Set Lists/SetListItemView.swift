@@ -10,6 +10,7 @@ import SwiftUI
 struct SetListItemView: View {
     var setList: SetList
     var selectedSetList: SetList?
+    var isSongPlaying: Bool = false
     
     var body: some View {
         HStack {
@@ -28,7 +29,7 @@ struct SetListItemView: View {
             
             if selectedSetList != nil && selectedSetList!.id == setList.id {
                 Spacer()
-                AnimatedWaveformView(color: .accentColor)
+                AnimatedWaveformView(color: .accentColor, animate: isSongPlaying)
                     .scaleEffect(0.3)
             }
         }

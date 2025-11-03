@@ -49,7 +49,8 @@ struct MainView: View {
                     hideMiniPlayer: $hideMiniPlayer,
                     setListNavPath: $setListNavPath,
                     selectedSong: selectedSong,
-                    selectedSetList: selectedSetList
+                    selectedSetList: selectedSetList,
+                    isSongPlaying: player.isPlaying
                 )
             }
             

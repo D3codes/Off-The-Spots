@@ -10,6 +10,7 @@ import SwiftUI
 struct SongListItemView: View {
     var song: Song
     var selectedSong: Song? = nil
+    var isSongPlaying: Bool = false
     
     var body: some View {
         HStack {
@@ -36,7 +37,7 @@ struct SongListItemView: View {
             
             if selectedSong != nil && selectedSong!.id == song.id {
                 Spacer()
-                AnimatedWaveformView(color: .accentColor)
+                AnimatedWaveformView(color: .accentColor, animate: isSongPlaying)
                     .scaleEffect(0.3)
             }
         }
@@ -46,10 +47,10 @@ struct SongListItemView: View {
 
 #Preview {
     List {
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")))
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")))
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")))
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")))
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")))
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
     }
 }
