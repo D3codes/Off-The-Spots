@@ -29,7 +29,7 @@ struct EditSetListView: View {
                     Text("Name")
                         .font(.subheadline)
                 }
-                .listRowBackground(listItemBackground)
+//                .listRowBackground(listItemBackground)
                 
                 SongListSectionView(setList: setList)
             }
@@ -51,7 +51,7 @@ struct EditSetListView: View {
                     .disabled(setList.name.isEmpty)
                 }
             }
-            .background(backgroundGradient)
+//            .background(backgroundGradient)
         }
         .onAppear {
             if(!setList.name.isEmpty) {

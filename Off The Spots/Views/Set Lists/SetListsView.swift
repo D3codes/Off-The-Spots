@@ -45,7 +45,8 @@ struct SetListsView: View {
                                     isSongPlaying: isSongPlaying
                                 )
                             }
-                            .listRowBackground(Color.clear)
+//                            .listRowBackground(Color.clear)
+                            .listRowBackground(listItemBackground)
                         }
                         .onMove(perform: moveSetLists)
                         .onDelete(perform: deleteSetLists)

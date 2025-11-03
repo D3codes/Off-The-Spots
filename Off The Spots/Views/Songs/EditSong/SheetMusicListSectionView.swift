@@ -33,11 +33,12 @@ struct SheetMusicListSectionView: View {
             .onDelete(perform: deleteSheetMusic)
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
-            .listRowBackground(listItemBackground)
+//            .listRowBackground(listItemBackground)
         } header: {
             HStack {
                 Image(systemName: "music.pages.fill")
                     .font(.subheadline)
+                    .foregroundStyle(.accent)
                 Text("Sheet Music")
                     .font(.subheadline)
                 

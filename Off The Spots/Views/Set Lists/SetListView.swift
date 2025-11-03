@@ -37,7 +37,8 @@ struct SetListView: View {
                                 isSongPlaying: isSongPlaying
                             )
                         }
-                        .listRowBackground(Color.clear)
+//                        .listRowBackground(Color.clear)
+                        .listRowBackground(listItemBackground)
                     }
                 }
                 .onMove(perform: moveSongs)

@@ -18,7 +18,7 @@ struct SongListSectionView: View {
             ForEach(setList.songs, id: \.self) { songId in
                 if let song = songs.first(where: { $0.id == songId }) {
                     Text(song.name)
-                        .listRowBackground(listItemBackground)
+//                        .listRowBackground(listItemBackground)
                 }
             }
             .onMove(perform: moveSongs)
@@ -28,6 +28,7 @@ struct SongListSectionView: View {
             HStack {
                 Image(systemName: "music.note")
                     .font(.subheadline)
+                    .foregroundStyle(.accent)
                 Text("Songs")
                     .font(.subheadline)
                 

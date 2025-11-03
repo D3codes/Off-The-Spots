@@ -21,11 +21,12 @@ struct TrackListSectionView: View {
             .onDelete(perform: deleteTracks)
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
-            .listRowBackground(listItemBackground)
+//            .listRowBackground(listItemBackground)
         } header: {
             HStack {
                 Image(systemName: "music.note.square.stack.fill")
                     .font(.subheadline)
+                    .foregroundStyle(.accent)
                 Text("Tracks")
                     .font(.subheadline)
                 
