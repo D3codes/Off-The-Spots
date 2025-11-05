@@ -52,22 +52,28 @@ struct TrackListSectionView: View {
         }
         .fileImporter(
             isPresented: $presentTrackFileImporter,
-            allowedContentTypes: [.mp3],
-            allowsMultipleSelection: false,
+            allowedContentTypes: [
+                .mp3,
+                .aiff,
+                .wav,
+                .midi
+            ],
+            allowsMultipleSelection: true,
             onCompletion: { results in
                 switch results {
                 case .success(let fileUrls):
-                    // gain access to the directory
-                    let gotAccess = fileUrls[0].startAccessingSecurityScopedResource()
-                    if(!gotAccess) {
-                        return
+                    
+                    fileUrls.forEach { file in
+                        // gain access to the directory
+                        let gotAccess = file.startAccessingSecurityScopedResource()
+                        if gotAccess {
+                            // access the directory URL
+                            addTrack(fileUrl: file)
+                            
+                            // release access
+                            file.stopAccessingSecurityScopedResource()
+                        }
                     }
-                    
-                    // access the directory URL
-                    addTrack(fileUrl: fileUrls[0])
-                    
-                    // release access
-                    fileUrls[0].stopAccessingSecurityScopedResource()
                     
                 case .failure(let error):
                     print("Error: \(error)")
