@@ -98,6 +98,7 @@ struct AboutView: View {
                     .padding(.top)
             }
         }
+        .scrollIndicators(.hidden)
         .navigationTitle("About")
         .padding(.horizontal)
         .background(backgroundGradient)

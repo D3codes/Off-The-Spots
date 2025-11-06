@@ -1,0 +1,107 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "5171AA9E",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6748107053",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "26333RDE2B",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 784098253.41588295,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21825638",
+      "localizations" : [
+
+      ],
+      "name" : "Off The Spots Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6754954203",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Off The Spots Pro (1 Month)",
+              "displayName" : "Off The Spots Pro (1 Month)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "OTS_PRO_SUBSCRIPTION_MONTH",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "OTS_PRO_SUBSCRIPTION_MONTH",
+          "subscriptionGroupID" : "21825638",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6754953761",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Off The Spots Pro (1 Year)",
+              "displayName" : "Off The Spots Pro (1 Year)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "OTS_PRO_SUBSCRIPTION_YEAR",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "OTS_PRO_SUBSCRIPTION_YEAR",
+          "subscriptionGroupID" : "21825638",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

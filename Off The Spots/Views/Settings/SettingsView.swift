@@ -17,20 +17,19 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section {
-                Button(action: {}, label: {
+                NavigationLink(destination: SubscriptionView(), label: {
                     HStack {
                         Image(systemName: "creditcard")
                         VStack {
                             Text("Subscribe to Pro")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
-                            Text("Set Lists, App Icons, and More!")
+                            Text("More Songs, Set Lists, Sheet Music, and More!")
                                 .font(.footnote)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                 })
-                .buttonStyle(.plain)
                 
                 Button(action: {}, label: {
                     HStack {
