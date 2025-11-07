@@ -14,6 +14,10 @@ struct SettingsView: View {
     @State private var showMail = false
     @Binding var hideMiniPlayer: Bool
 
+    func restore() async -> Bool {
+        return ((try? await AppStore.sync()) != nil)
+    }
+    
     var body: some View {
         List {
             Section {
@@ -31,11 +35,13 @@ struct SettingsView: View {
                     }
                 })
                 
-                Button(action: {}, label: {
+                Button(action: { Task { await restore() } }, label: {
                     HStack {
                         Image(systemName: "arrow.trianglehead.2.counterclockwise")
                         Text("Restore Purchases")
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Capsule())
                 })
                 .buttonStyle(.plain)
             }
@@ -85,6 +91,8 @@ struct SettingsView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Capsule())
                 })
                 .buttonStyle(.plain)
                 
@@ -100,6 +108,8 @@ struct SettingsView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Capsule())
                 })
                 .buttonStyle(.plain)
             }
@@ -112,6 +122,7 @@ struct SettingsView: View {
                         Spacer()
                         Image(systemName: "link")
                     }
+                    .contentShape(Capsule())
                 })
                 .buttonStyle(.plain)
                 
@@ -121,6 +132,7 @@ struct SettingsView: View {
                         Spacer()
                         Image(systemName: "link")
                     }
+                    .contentShape(Capsule())
                 })
                 .buttonStyle(.plain)
             }
