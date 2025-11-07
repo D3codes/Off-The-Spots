@@ -41,6 +41,20 @@
 			);
 			target = 0E6850392CFFD1040005A85C /* Off The Spots */;
 		};
+		0EBD87AD2EBC4D1E00CCB083 /* Exceptions for "Off The Spots" folder in "Off The SpotsTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Off The Spots.storekit",
+			);
+			target = 0E68504D2CFFD1050005A85C /* Off The SpotsTests */;
+		};
+		0EBD87AE2EBC4D1E00CCB083 /* Exceptions for "Off The Spots" folder in "Off The SpotsUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Off The Spots.storekit",
+			);
+			target = 0E6850572CFFD1050005A85C /* Off The SpotsUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -48,6 +62,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				0E6850602CFFD1050005A85C /* Exceptions for "Off The Spots" folder in "Off The Spots" target */,
+				0EBD87AD2EBC4D1E00CCB083 /* Exceptions for "Off The Spots" folder in "Off The SpotsTests" target */,
+				0EBD87AE2EBC4D1E00CCB083 /* Exceptions for "Off The Spots" folder in "Off The SpotsUITests" target */,
 			);
 			path = "Off The Spots";
 			sourceTree = "<group>";
