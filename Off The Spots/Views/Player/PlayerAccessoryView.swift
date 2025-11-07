@@ -13,12 +13,11 @@ struct PlayerAccessoryView: View {
     
     @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
-    @Binding var hideMiniPlayer: Bool
     
     @ObservedObject var player: AudioHelper
 
     var body: some View {
-        if selectedSong != nil && !hideMiniPlayer {
+        if selectedSong != nil {
             Group {
                 switch tabViewBottomAccessoryPlacement {
                 case .expanded:
@@ -143,7 +142,6 @@ struct PlayerAccessoryView: View {
                 PlayerAccessoryView(
                     selectedSong: $selectedSong,
                     presentPlayerSheet: .constant(false),
-                    hideMiniPlayer: .constant(false),
                     player: AudioHelper()
                 )
             }

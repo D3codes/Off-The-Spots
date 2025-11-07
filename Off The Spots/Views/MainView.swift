@@ -63,11 +63,10 @@ struct MainView: View {
                 )
             }
         }
-        .tabViewBottomAccessory {
+        .tabViewBottomAccessory(isEnabled: selectedSong != nil && !hideMiniPlayer) {
             PlayerAccessoryView(
                 selectedSong: $selectedSong,
                 presentPlayerSheet: $presentPlayerSheet,
-                hideMiniPlayer: $hideMiniPlayer,
                 player: player
             )
         }
