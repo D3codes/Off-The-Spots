@@ -34,8 +34,9 @@ struct SubscriptionBenefitItemView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding()
+            .padding(10)
         }
+        .frame(maxWidth: 500)
     }
 }
 

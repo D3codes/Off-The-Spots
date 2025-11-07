@@ -14,31 +14,31 @@ struct SubscriptionBenefitsView: View {
             SubscriptionBenefitItemView(
                 image: Image(systemName: "music.note"),
                 title: "Unlimited Songs",
-                description: "Add all the songs you want"
+                description: "Store your entire repertoire"
             )
             
             SubscriptionBenefitItemView(
                 image: Image(systemName: "music.note.square.stack.fill"),
                 title: "Unlimited Tracks",
-                description: "Add all the tracks you want"
+                description: "Attach all your learning media"
             )
             
             SubscriptionBenefitItemView(
                 image: Image(systemName: "music.pages.fill"),
                 title: "Sheet Music",
-                description: "Add sheet music to songs"
+                description: "Follow along as you rehearse"
             )
             
             SubscriptionBenefitItemView(
                 image: Image(systemName: "music.note.list"),
                 title: "Set Lists",
-                description: "Create set lists"
+                description: "Organize songs for practice & performance"
             )
             
             SubscriptionBenefitItemView(
                 image: Image(systemName: "square"),
                 title: "Custom Icons",
-                description: "Custom app icons"
+                description: "Personalize your look"
             )
         }
     }

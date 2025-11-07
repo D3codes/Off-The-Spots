@@ -24,7 +24,7 @@
     "_developerTeamID" : "26333RDE2B",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 784098253.41588295,
+    "_lastSynchronizedDate" : 784143158.27858603,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
@@ -55,8 +55,8 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Off The Spots Pro (1 Month)",
-              "displayName" : "Off The Spots Pro (1 Month)",
+              "description" : "Off The Spots Pro (Monthly)",
+              "displayName" : "Monthly",
               "locale" : "en_US"
             }
           ],
@@ -83,8 +83,8 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Off The Spots Pro (1 Year)",
-              "displayName" : "Off The Spots Pro (1 Year)",
+              "description" : "Off The Spots Pro (Yearly)",
+              "displayName" : "Yearly (Save 16%)",
               "locale" : "en_US"
             }
           ],

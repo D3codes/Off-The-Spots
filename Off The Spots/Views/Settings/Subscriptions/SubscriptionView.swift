@@ -18,13 +18,24 @@ struct SubscriptionView: View {
                 Group {
                     Image("icon")
                         .resizable()
-                        .frame(width: 100, height: 100)
+                        .frame(width: 80, height: 80)
                     
-                    Text("Off The Spots Pro")
-                        .font(.title)
+                    HStack(spacing: 0) {
+                        Text("Off The Spots ")
+                            .font(.title)
+                        Text("Pro")
+                            .font(.title)
+                            .bold()
+                            .gradientForeground(colors: [.teal, Color.otsBlue])
+                    }
+                    
+                    Text("Advanced tools to master your music")
+                        .font(.footnote)
                 }
                 
                 SubscriptionBenefitsView()
+                
+                Text("Everything you need to stay in tune 🎵")
             }
             .containerBackground(for: .subscriptionStoreFullHeight) { backgroundGradient }
             .scrollIndicators(.hidden)
