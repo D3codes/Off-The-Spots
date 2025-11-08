@@ -63,6 +63,7 @@ struct SheetMusicView: View {
                 }
             }
         }
+        .interactiveDismissDisabled(true)
         .statusBar(hidden: true)
         .onAppear {
             player?.publishProgressChanges = false
@@ -116,7 +117,6 @@ struct SheetMusicView: View {
                         dismissSheetMusicView: { presentSheetMusicViewer = false },
                         player: player
                     )
-                    .interactiveDismissDisabled(true)
                 }
             }
         }

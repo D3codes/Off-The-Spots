@@ -20,6 +20,7 @@ struct PlayerView: View {
     @State private var isEditSongSheetPresented: Bool = false
     @State private var isAddToSetListSheetPresented: Bool = false
     
+    @Namespace var animation
     @State private var presentSheetMusic: Bool = false
     
     @State private var showPlaybackProgress: Bool = true
@@ -74,12 +75,14 @@ struct PlayerView: View {
                 }
                 .tint(.primary)
                 .disabled(song.sheetMusic?.file == nil)
+                .matchedTransitionSource(id: "sheetmusic", in: animation)
                 .fullScreenCover(isPresented: $presentSheetMusic) {
                     SheetMusicView(
                         sheetMusicFile: song.sheetMusic!.file!,
                         dismissSheetMusicView: { presentSheetMusic = false },
                         player: player
                     )
+                    .navigationTransition(.zoom(sourceID: "sheetmusic", in: animation))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
