@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0EA34AF82EB0388900F897B7 /* MarqueeText in Frameworks */ = {isa = PBXBuildFile; productRef = 0EA34AF72EB0388900F897B7 /* MarqueeText */; };
+		0EA6580A2EBEB29B0006047D /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 0EA658092EBEB29B0006047D /* Vortex */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0EA6580A2EBEB29B0006047D /* Vortex in Frameworks */,
 				0EA34AF82EB0388900F897B7 /* MarqueeText in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -147,6 +149,7 @@
 			name = "Off The Spots";
 			packageProductDependencies = (
 				0EA34AF72EB0388900F897B7 /* MarqueeText */,
+				0EA658092EBEB29B0006047D /* Vortex */,
 			);
 			productName = "Off The Spots";
 			productReference = 0E68503A2CFFD1040005A85C /* Off The Spots.app */;
@@ -232,6 +235,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0EA34AF62EB0388900F897B7 /* XCRemoteSwiftPackageReference "MarqueeText" */,
+				0EA658082EBEB29B0006047D /* XCRemoteSwiftPackageReference "Vortex" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E68503B2CFFD1040005A85C /* Products */;
@@ -618,6 +622,14 @@
 				kind = branch;
 			};
 		};
+		0EA658082EBEB29B0006047D /* XCRemoteSwiftPackageReference "Vortex" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/Vortex";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -625,6 +637,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0EA34AF62EB0388900F897B7 /* XCRemoteSwiftPackageReference "MarqueeText" */;
 			productName = MarqueeText;
+		};
+		0EA658092EBEB29B0006047D /* Vortex */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0EA658082EBEB29B0006047D /* XCRemoteSwiftPackageReference "Vortex" */;
+			productName = Vortex;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
