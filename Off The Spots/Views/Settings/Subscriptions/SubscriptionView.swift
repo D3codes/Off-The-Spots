@@ -12,6 +12,8 @@ struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
     let otsProGroupId: String = "21825638"
     
+    @Binding var presentThanksSheet: Bool
+    
     var body: some View {
         SubscriptionStoreView(groupID: otsProGroupId) {
             ScrollView {
@@ -46,9 +48,9 @@ struct SubscriptionView: View {
         .storeButton(.hidden, for: .cancellation)
         .onInAppPurchaseCompletion { (product: Product, result: Result<Product.PurchaseResult, Error>) in
             if case .success(.success(let transaction)) = result {
-//                    await BirdBrain.shared.process(transaction: transaction)
-                print(transaction)
+//                print(transaction)
                 dismiss()
+                presentThanksSheet = true
             }
         }
     }
@@ -56,7 +58,7 @@ struct SubscriptionView: View {
 
 #Preview {
     NavigationStack {
-        SubscriptionView()
+        SubscriptionView(presentThanksSheet: .constant(false))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {}) { Image(systemName: "chevron.left") }

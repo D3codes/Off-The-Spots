@@ -29,7 +29,9 @@ struct Off_The_SpotsApp: App {
     var body: some Scene {
         WindowGroup {
             MainView()
+                .frame(minHeight: 800)
         }
         .modelContainer(sharedModelContainer)
+        .windowResizability(.contentSize)
     }
 }

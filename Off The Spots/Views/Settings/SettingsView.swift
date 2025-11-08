@@ -13,6 +13,8 @@ struct SettingsView: View {
     @Environment(\.openURL) var openURL
     @State private var showMail = false
     @Binding var hideMiniPlayer: Bool
+    
+    @State private var presentThanksSheet: Bool = false
 
     func restore() async -> Bool {
         return ((try? await AppStore.sync()) != nil)
@@ -21,14 +23,14 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section {
-                NavigationLink(destination: SubscriptionView(), label: {
+                NavigationLink(destination: SubscriptionView(presentThanksSheet: $presentThanksSheet), label: {
                     HStack {
                         Image(systemName: "creditcard")
                         VStack {
                             Text("Subscribe to Pro")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
-                            Text("More Songs, Set Lists, Sheet Music, and More!")
+                            Text("Unlimited Songs and Tracks, Set Lists, and More!")
                                 .font(.footnote)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -159,6 +161,7 @@ struct SettingsView: View {
             .listRowBackground(listItemBackground)
         }
         .sheet(isPresented: $showMail) { MailView() }
+        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .navigationTitle(Text("Settings"))
         .toolbar(.hidden, for: .tabBar)
         .onAppear { hideMiniPlayer = true }

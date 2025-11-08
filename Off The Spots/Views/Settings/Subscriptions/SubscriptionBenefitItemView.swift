@@ -42,7 +42,7 @@ struct SubscriptionBenefitItemView: View {
 
 #Preview {
     NavigationStack {
-        SubscriptionView()
+        SubscriptionView(presentThanksSheet: .constant(false))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {}) { Image(systemName: "chevron.left") }
