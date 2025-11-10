@@ -12,6 +12,11 @@ struct TrackListSectionView: View {
     
     @State private var presentTrackFileImporter: Bool = false
     
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
+    
     var body: some View {
         Section {
             ForEach(0..<song.tracks.count, id: \.self) { index in
@@ -32,7 +37,13 @@ struct TrackListSectionView: View {
                 
                 Spacer()
                 
-                Button(action: { presentTrackFileImporter = true }) {
+                Button(action: {
+                    if isPro || song.tracks.count < 2 {
+                        presentTrackFileImporter = true
+                    } else {
+                        presentSubscription = true
+                    }
+                }) {
                     Image(systemName: "plus")
                         .font(.title2)
                         .foregroundStyle(.foreground)
@@ -64,21 +75,34 @@ struct TrackListSectionView: View {
                 case .success(let fileUrls):
                     
                     fileUrls.forEach { file in
-                        // gain access to the directory
-                        let gotAccess = file.startAccessingSecurityScopedResource()
-                        if gotAccess {
-                            // access the directory URL
-                            addTrack(fileUrl: file)
+                        if isPro || song.tracks.count < 2 {
                             
-                            // release access
-                            file.stopAccessingSecurityScopedResource()
+                            // gain access to the directory
+                            let gotAccess = file.startAccessingSecurityScopedResource()
+                            if gotAccess {
+                                // access the directory URL
+                                addTrack(fileUrl: file)
+                                
+                                // release access
+                                file.stopAccessingSecurityScopedResource()
+                            }
                         }
                     }
                     
                 case .failure(let error):
                     print("Error: \(error)")
                 }
-            })
+            }
+        )
+        .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+        .subscriptionStatusTask(for: otsProGroupId) { taskState in
+            if let statuses = taskState.value {
+                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+            } else {
+                isPro = false
+            }
+        }
     }
     
     func addTrack(fileUrl: URL) {
