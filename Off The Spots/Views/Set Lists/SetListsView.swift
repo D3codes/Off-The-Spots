@@ -57,7 +57,6 @@ struct SetListsView: View {
                                 )
                                 .foregroundStyle(isPro ? .primary : .secondary)
                             }
-//                            .listRowBackground(Color.clear)
                             .listRowBackground(listItemBackground)
                         }
                         .onMove(perform: moveSetLists)
