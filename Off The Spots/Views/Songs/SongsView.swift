@@ -26,6 +26,11 @@ struct SongsView: View {
     @State private var presentAddSongSheet = false
     @State private var addSongInitialTrackUrl: URL?
     
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
+    
     @State var newSong: Song = Song(
         id: UUID(),
         name: "",
@@ -40,18 +45,24 @@ struct SongsView: View {
                     SplashScreenView()
                 } else {
                     List(selection: $selection) {
-                        ForEach(songs) { song in
+                        ForEach(songs.enumerated(), id: \.offset) { index, song in
+                            let unlockSong = isPro || index < 3
+                            
                             Button(action: {
-                                setSelectedSong(song, nil)
-                                presentPlayerSheet = true
+                                if unlockSong {
+                                    setSelectedSong(song, nil)
+                                    presentPlayerSheet = true
+                                } else  {
+                                    presentSubscription = true
+                                }
                             }, label: {
                                 SongListItemView(
                                     song: song,
                                     selectedSong: selectedSetList == nil ? selectedSong : nil,
                                     isSongPlaying: player.isPlaying
                                 )
+                                .foregroundStyle(unlockSong ? .primary : .secondary)
                             })
-//                            .listRowBackground(Color.clear)
                             .listRowBackground(listItemBackground)
                         }
                         .onMove(perform: moveSongs)
@@ -76,14 +87,18 @@ struct SongsView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        newSong = Song(
-                            id: UUID(),
-                            name: "",
-                            tracks: [],
-                            selectedTrack: Track(name: "")
-                        )
-                        
-                        presentAddSongSheet = true
+                        if isPro || songs.count < 3 {
+                            newSong = Song(
+                                id: UUID(),
+                                name: "",
+                                tracks: [],
+                                selectedTrack: Track(name: "")
+                            )
+                            
+                            presentAddSongSheet = true
+                        } else {
+                            presentSubscription = true
+                        }
                     }, label: {
                         Image(systemName: "plus")
                     })
@@ -96,6 +111,15 @@ struct SongsView: View {
             }
             .onAppear { hideMiniPlayer = false }
             .background(backgroundGradient)
+            .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+            .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+            .subscriptionStatusTask(for: otsProGroupId) { taskState in
+                if let statuses = taskState.value {
+                    isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+                } else {
+                    isPro = false
+                }
+            }
         }
     }
     
