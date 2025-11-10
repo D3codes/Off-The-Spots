@@ -23,6 +23,7 @@ struct ThanksView: View {
         system.size = 1
         system.sizeVariation = 0.75
         system.birthRate = 1
+        system.colors = VortexSystem.ColorMode.random([.red, .yellow, .green, .blue, .white, .black, .orange, .pink, .purple, .teal])
         return system
     }
     
@@ -34,6 +35,7 @@ struct ThanksView: View {
                         .frame(width: 32)
                         .tag("note")
                 }
+                .foregroundStyle(.white)
                 .ignoresSafeArea(edges: .all)
                 
                 VStack {

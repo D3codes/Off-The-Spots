@@ -9,11 +9,15 @@ import SwiftUI
 import StoreKit
 
 struct SettingsView: View {
+    @Environment(\.otsProGroupId) var otsProGroupId
     @Environment(\.requestReview) var requestReview
     @Environment(\.openURL) var openURL
-    @State private var showMail = false
+    
     @Binding var hideMiniPlayer: Bool
     
+    @State private var showMail = false
+    
+    @State private var isPro: Bool = false
     @State private var presentThanksSheet: Bool = false
 
     func restore() async -> Bool {
@@ -168,6 +172,27 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .ignoresSafeArea(.keyboard)
         .background(backgroundGradient)
+        .toolbar {
+            if isPro {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { presentThanksSheet = true }) {
+                        Text("Pro")
+                            .font(.title)
+                            .bold()
+                            .gradientForeground(colors: [.teal, Color.otsBlue])
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.primary)
+                }
+            }
+        }
+        .subscriptionStatusTask(for: otsProGroupId) { taskState in
+            if let statuses = taskState.value {
+                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+            } else {
+                isPro = false
+            }
+        }
     }
 }
 

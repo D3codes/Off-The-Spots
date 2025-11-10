@@ -10,7 +10,7 @@ import StoreKit
 
 struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
-    let otsProGroupId: String = "21825638"
+    @Environment(\.otsProGroupId) var otsProGroupId
     
     @Binding var presentThanksSheet: Bool
     
@@ -43,7 +43,7 @@ struct SubscriptionView: View {
             .scrollIndicators(.hidden)
         }
         .backgroundStyle(.clear)
-        .subscriptionStoreControlStyle(.compactPicker)
+        .subscriptionStoreControlStyle(.compactPicker, placement: .bottomBar)
         .subscriptionStorePickerItemBackground(.thinMaterial)
         .storeButton(.hidden, for: .cancellation)
         .onInAppPurchaseCompletion { (product: Product, result: Result<Product.PurchaseResult, Error>) in
