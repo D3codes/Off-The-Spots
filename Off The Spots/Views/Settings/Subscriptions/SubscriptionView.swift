@@ -13,6 +13,7 @@ struct SubscriptionView: View {
     @Environment(\.otsProGroupId) var otsProGroupId
     
     @Binding var presentThanksSheet: Bool
+    var inSheet: Bool = false
     
     var body: some View {
         SubscriptionStoreView(groupID: otsProGroupId) {
@@ -41,6 +42,7 @@ struct SubscriptionView: View {
             }
             .containerBackground(for: .subscriptionStoreFullHeight) { backgroundGradient }
             .scrollIndicators(.hidden)
+            .padding(.top, inSheet ? 16 : 0)
         }
         .backgroundStyle(.clear)
         .subscriptionStoreControlStyle(.compactPicker, placement: .bottomBar)
@@ -48,9 +50,8 @@ struct SubscriptionView: View {
         .storeButton(.hidden, for: .cancellation)
         .onInAppPurchaseCompletion { (product: Product, result: Result<Product.PurchaseResult, Error>) in
             if case .success(.success(let transaction)) = result {
-//                print(transaction)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: { presentThanksSheet = true })
                 dismiss()
-                presentThanksSheet = true
             }
         }
     }

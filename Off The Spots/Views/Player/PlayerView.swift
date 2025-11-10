@@ -25,6 +25,11 @@ struct PlayerView: View {
     
     @State private var showPlaybackProgress: Bool = true
     
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
+    
     var body: some View {
         VStack {
             HStack {
@@ -33,7 +38,13 @@ struct PlayerView: View {
                 Spacer()
                 Menu(content: {
                     Button(
-                        action: { isAddToSetListSheetPresented = true },
+                        action: {
+                            if isPro {
+                                isAddToSetListSheetPresented = true
+                            } else {
+                                presentSubscription = true
+                            }
+                        },
                         label: { Label("Add to Set List", systemImage: "music.note.list") }
                     )
                     Button(
@@ -74,7 +85,7 @@ struct PlayerView: View {
                     Text("Sheet Music")
                 }
                 .tint(.primary)
-                .disabled(song.sheetMusic?.file == nil)
+                .disabled(song.sheetMusic?.file == nil || !isPro)
                 .matchedTransitionSource(id: "sheetmusic", in: animation)
                 .fullScreenCover(isPresented: $presentSheetMusic) {
                     SheetMusicView(
@@ -83,6 +94,11 @@ struct PlayerView: View {
                         player: player
                     )
                     .navigationTransition(.zoom(sourceID: "sheetmusic", in: animation))
+                }
+                .onTapGesture {
+                    if !isPro {
+                        presentSubscription = true
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -194,13 +210,8 @@ struct PlayerView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.keyboard)
         .padding(20)
-        .sheet(isPresented: $isAddToSetListSheetPresented) {
-            AddToSetListView(song: song)
-        }
-        .sheet(isPresented: $isEditSongSheetPresented) {
-            EditSongView(song: $song)
-                .interactiveDismissDisabled(true)
-        }
+        .sheet(isPresented: $isAddToSetListSheetPresented) { AddToSetListView(song: song) }
+        .sheet(isPresented: $isEditSongSheetPresented) { EditSongView(song: $song).interactiveDismissDisabled(true) }
         .onAppear() {
             loopStartLocked = player.loopStart != nil
             loopEndLocked = player.loopEnd != nil
@@ -216,6 +227,15 @@ struct PlayerView: View {
         }
         .ignoresSafeArea(.keyboard)
         .background(backgroundGradient)
+        .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+        .subscriptionStatusTask(for: otsProGroupId) { taskState in
+            if let statuses = taskState.value {
+                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+            } else {
+                isPro = false
+            }
+        }
     }
 }
 
