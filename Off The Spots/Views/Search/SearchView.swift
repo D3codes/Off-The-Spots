@@ -17,6 +17,11 @@ struct SearchView: View {
     @Binding var selectedTab: Tabs
     @Binding var setListNavPath: NavigationPath
     
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
+    
     @State private var searchText: String = ""
     
     var filteredSongs: [Song] {
@@ -69,11 +74,16 @@ struct SearchView: View {
                 Section {
                     ForEach(filteredSetLists) { setList in
                         Button(action: {
-                            setListNavPath = NavigationPath()
-                            selectedTab = .setLists
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { setListNavPath.append(setList) }
+                            if isPro {
+                                setListNavPath = NavigationPath()
+                                selectedTab = .setLists
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { setListNavPath.append(setList) }
+                            } else {
+                                presentSubscription = true
+                            }
                         }, label: {
                             SetListItemView(setList: setList)
+                                .foregroundStyle(isPro ? .primary : .secondary)
                         })
                     }
                 }
@@ -99,6 +109,15 @@ struct SearchView: View {
             .listSectionSpacing(.compact)
             .navigationTitle("Search")
             .background(backgroundGradient)
+            .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+            .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+            .subscriptionStatusTask(for: otsProGroupId) { taskState in
+                if let statuses = taskState.value {
+                    isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+                } else {
+                    isPro = false
+                }
+            }
         }
     }
 }

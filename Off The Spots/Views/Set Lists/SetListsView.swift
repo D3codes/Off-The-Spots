@@ -30,6 +30,11 @@ struct SetListsView: View {
         songs: []
     )
     
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
+    
     var body: some View {
         NavigationStack(path: $setListNavPath) {
             Group {
@@ -38,12 +43,19 @@ struct SetListsView: View {
                 } else {
                     List(selection: $selection) {
                         ForEach(setLists) { setList in
-                            Button(action: { setListNavPath.append(setList) }) {
+                            Button(action: {
+                                if isPro {
+                                    setListNavPath.append(setList)
+                                } else {
+                                    presentSubscription = true
+                                }
+                            }) {
                                 SetListItemView(
                                     setList: setList,
                                     selectedSetList: selectedSetList,
                                     isSongPlaying: isSongPlaying
                                 )
+                                .foregroundStyle(isPro ? .primary : .secondary)
                             }
 //                            .listRowBackground(Color.clear)
                             .listRowBackground(listItemBackground)
@@ -80,13 +92,17 @@ struct SetListsView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        newSetList = SetList(
-                            id: UUID(),
-                            name: "",
-                            songs: []
-                        )
-                        
-                        presentAddSetListSheet = true
+                        if isPro {
+                            newSetList = SetList(
+                                id: UUID(),
+                                name: "",
+                                songs: []
+                            )
+                            
+                            presentAddSetListSheet = true
+                        } else {
+                            presentSubscription = true
+                        }
                     }, label: {
                         Image(systemName: "plus")
                     })
@@ -99,6 +115,15 @@ struct SetListsView: View {
             }
             .onAppear { hideMiniPlayer = false }
             .background(backgroundGradient)
+            .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+            .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+            .subscriptionStatusTask(for: otsProGroupId) { taskState in
+                if let statuses = taskState.value {
+                    isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+                } else {
+                    isPro = false
+                }
+            }
         }
     }
     
