@@ -13,6 +13,11 @@ struct SheetMusicListSectionView: View {
     @State private var presentSheetMusicFileImporter: Bool = false
     @State private var presentSheetMusicViewer: Bool = false
     
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
+    
     var body: some View {
         Section {
             ForEach(0...0, id: \.self) { _ in
@@ -45,7 +50,13 @@ struct SheetMusicListSectionView: View {
                 Spacer()
                 
                 if song.sheetMusic == nil {
-                    Button(action: { presentSheetMusicFileImporter = true }) {
+                    Button(action: {
+                        if isPro {
+                            presentSheetMusicFileImporter = true
+                        } else {
+                            presentSubscription = true
+                        }
+                    }) {
                         Image(systemName: "plus")
                             .font(.title2)
                             .foregroundStyle(.foreground)
@@ -78,7 +89,17 @@ struct SheetMusicListSectionView: View {
                 case .failure(let error):
                     print("Error: \(error)")
                 }
-            })
+            }
+        )
+        .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+        .subscriptionStatusTask(for: otsProGroupId) { taskState in
+            if let statuses = taskState.value {
+                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+            } else {
+                isPro = false
+            }
+        }
     }
     
     func addSheetMusic(fileUrl: URL) {
