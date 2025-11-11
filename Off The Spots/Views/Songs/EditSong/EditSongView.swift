@@ -15,6 +15,11 @@ struct EditSongView: View {
     
     @Binding var song: Song
     @FocusState var isSongFieldFocused: Bool
+    
+    @Environment(\.otsProGroupId) var otsProGroupId
+    @State private var isPro: Bool = false
+    @State private var presentSubscription: Bool = false
+    @State private var presentThanksSheet: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -28,9 +33,9 @@ struct EditSongView: View {
                 }
 //                .listRowBackground(listItemBackground)
                 
-                SheetMusicListSectionView(song: song)
+                SheetMusicListSectionView(song: song, isPro: isPro, presentSubscription: $presentSubscription)
                 
-                TrackListSectionView(song: song)
+                TrackListSectionView(song: song, isPro: isPro, presentSubscription: $presentSubscription)
             }
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
@@ -57,6 +62,15 @@ struct EditSongView: View {
                 sheetTitle = "Edit Song"
             } else {
                 isSongFieldFocused = true
+            }
+        }
+        .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+        .subscriptionStatusTask(for: otsProGroupId) { taskState in
+            if let statuses = taskState.value {
+                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+            } else {
+                isPro = false
             }
         }
 //        .background(backgroundGradient)

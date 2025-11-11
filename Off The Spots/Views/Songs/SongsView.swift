@@ -46,7 +46,7 @@ struct SongsView: View {
                 } else {
                     List(selection: $selection) {
                         ForEach(songs.enumerated(), id: \.offset) { index, song in
-                            let unlockSong = isPro || index < 3
+                            let unlockSong: Bool = isPro || index < 3
                             
                             Button(action: {
                                 if unlockSong {

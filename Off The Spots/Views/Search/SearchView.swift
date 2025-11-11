@@ -44,13 +44,20 @@ struct SearchView: View {
         NavigationStack {
             List() {
                 Section {
-                    ForEach(filteredSongs) { song in
+                    ForEach(filteredSongs.enumerated(), id: \.offset) { index, song in
+                        let unlockSong: Bool = isPro || songs.prefix(3).contains(where: { $0.id == song.id })
+                        
                         Button(action: {
-                            selectedTab = .songs
-                            setSelectedSong(song, nil)
-                            presentPlayerSheet = true
+                            if unlockSong {
+                                selectedTab = .songs
+                                setSelectedSong(song, nil)
+                                presentPlayerSheet = true
+                            } else {
+                                presentSubscription = true
+                            }
                         }, label: {
                             SongListItemView(song: song)
+                                .foregroundStyle(unlockSong ? .primary : .secondary)
                         })
                     }
                 }
