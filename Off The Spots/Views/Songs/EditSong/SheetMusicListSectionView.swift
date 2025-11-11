@@ -9,14 +9,11 @@ import SwiftUI
 
 struct SheetMusicListSectionView: View {
     @State var song: Song
+    @State var isPro: Bool
+    @Binding var presentSubscription: Bool
     
     @State private var presentSheetMusicFileImporter: Bool = false
     @State private var presentSheetMusicViewer: Bool = false
-    
-    @Environment(\.otsProGroupId) var otsProGroupId
-    @State private var isPro: Bool = false
-    @State private var presentSubscription: Bool = false
-    @State private var presentThanksSheet: Bool = false
     
     var body: some View {
         Section {
@@ -91,15 +88,6 @@ struct SheetMusicListSectionView: View {
                 }
             }
         )
-        .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
-        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
-        .subscriptionStatusTask(for: otsProGroupId) { taskState in
-            if let statuses = taskState.value {
-                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
-            } else {
-                isPro = false
-            }
-        }
     }
     
     func addSheetMusic(fileUrl: URL) {
@@ -124,7 +112,7 @@ struct SheetMusicListSectionView: View {
         
         var body: some View {
             List {
-                SheetMusicListSectionView(song: song)
+                SheetMusicListSectionView(song: song, isPro: false, presentSubscription: .constant(false))
             }
         }
     }
