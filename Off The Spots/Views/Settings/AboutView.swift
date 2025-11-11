@@ -31,6 +31,7 @@ struct AboutView: View {
                 Text("Though it was written by me, Off The Spots wouldn't be possible without the influence of the following people:")
             }
             .padding(.bottom)
+            .padding(.horizontal)
             
             Group {
                 HStack {
@@ -39,11 +40,11 @@ struct AboutView: View {
                         .frame(width: 100, height: 80)
                         .clipShape(.rect(cornerRadius: 10))
                     
-                    Text("My father, Dave, for introducing me to singing.")
+                    Text("My father, Dave, for introducing me to singing and encouraging my passions.")
                 }
                 
                 HStack {
-                    Text("My daughter, Elizabeth, for sharing my love of music.")
+                    Text("My daughter, Elizabeth, for sharing my love of music and being a wonderful distraction when I needed one.")
                     
                     Image("david")
                         .resizable()
@@ -51,30 +52,33 @@ struct AboutView: View {
                         .clipShape(.rect(cornerRadius: 10))
                 }
             }
+            .padding(.horizontal)
             
             Divider()
+                .padding(.horizontal)
             
             Group {
-                HStack {
-                    Image("n4n")
-                        .resizable()
-                        .frame(width: 120, height: 80)
-                        .clipShape(.rect(cornerRadius: 10))
-                    
-                    Text("My first quartet, Not For Nothing, for singing with me.")
-                }
+                Text("Everyone person I've shared a chord with. Whether on a stage, at a convention, or just in a stairwell.")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
                 
-                HStack {
-                    Text("My second quartet, The Brovertones, for singing with me.")
-                    
-                    Image("brovertones")
-                        .resizable()
-                        .frame(width: 120, height: 80)
-                        .clipShape(.rect(cornerRadius: 10))
-                }
+                CarouselView(images: [
+                    Image("n4n"),
+                    Image("centralStandard"),
+                    Image("brovertones"),
+                    Image("n4nHarmonyExplosion"),
+                    Image("brosAward"),
+                    Image("midwinter"),
+                    Image("zombieProm"),
+                    Image("n4nSleeping"),
+                    Image("choraliers"),
+                    Image("singingValentine")
+                ])
+                .frame(maxHeight: 250)
             }
             
             Divider()
+                .padding(.horizontal)
             
             Group {
                 HStack {
@@ -83,24 +87,65 @@ struct AboutView: View {
                         .frame(width: 80, height: 80)
                         .clipShape(.rect(cornerRadius: 10))
                     
-                    Text("The [Barbershop Harmony Society](https://barbershop.org) for enhancing my love of music.")
+                    Text("The [Barbershop Harmony Society](https://barbershop.org) for giving me a community of talented musicians and great friends.")
                 }
             }
+            .padding(.horizontal)
+            
+            Divider()
+                .padding(.horizontal)
             
             Group {
-//                Image("david")
-//                    .resizable()
-//                    .scaledToFit()
-//                    .clipShape(.rect(cornerRadius: 10))
-//                    .padding()
-                
-                Text("Thank you for trying Off The Spots! 💈")
-                    .padding(.top)
+                HStack {
+                    VStack {
+                        Text("Testers")
+                            .font(.headline)
+                            .padding(.bottom, 2)
+                        
+                        Text("• aasdfa dafsd")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text("• bdd  asdfasdf")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text("• casdfasd ddssd")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding()
+                    .glassEffect(in: RoundedRectangle(cornerRadius: 10))
+                    .containerRelativeFrame(.horizontal) { length, axis in
+                        length * 0.45
+                    }
+                    
+                    VStack {
+                        Text("Packages")
+                            .font(.headline)
+                            .padding(.bottom, 2)
+                        
+                        Text("MarqueeText")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text("by Joe Kennedy")
+                            .font(.footnote)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        Text("Vortex")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text("by Paul Hudson")
+                            .font(.footnote)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding()
+                    .glassEffect(in: RoundedRectangle(cornerRadius: 10))
+                    .containerRelativeFrame(.horizontal) { length, axis in
+                        length * 0.45
+                    }
+                }
             }
+            .padding(.horizontal)
+            
+            Text("Thank you for trying Off The Spots! 💈")
+                .padding(.top)
         }
         .scrollIndicators(.hidden)
         .navigationTitle("About")
-        .padding(.horizontal)
         .background(backgroundGradient)
     }
 }
