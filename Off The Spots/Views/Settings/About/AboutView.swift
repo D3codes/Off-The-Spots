@@ -58,7 +58,7 @@ struct AboutView: View {
                 .padding(.horizontal)
             
             Group {
-                Text("Everyone person I've shared a chord with. Whether on a stage, at a convention, or just in a stairwell.")
+                Text("Every person I've shared a chord with. Whether on a stage, at a convention, or just in a stairwell.")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
                 
@@ -97,43 +97,12 @@ struct AboutView: View {
             
             Group {
                 HStack {
-                    VStack {
-                        Text("Testers")
-                            .font(.headline)
-                            .padding(.bottom, 2)
-                        
-                        Text("• aasdfa dafsd")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text("• bdd  asdfasdf")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text("• casdfasd ddssd")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding()
-                    .glassEffect(in: RoundedRectangle(cornerRadius: 10))
+                    TestersView()
                     .containerRelativeFrame(.horizontal) { length, axis in
                         length * 0.45
                     }
                     
-                    VStack {
-                        Text("Packages")
-                            .font(.headline)
-                            .padding(.bottom, 2)
-                        
-                        Text("MarqueeText")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text("by Joe Kennedy")
-                            .font(.footnote)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        Text("Vortex")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text("by Paul Hudson")
-                            .font(.footnote)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding()
-                    .glassEffect(in: RoundedRectangle(cornerRadius: 10))
+                    PackagesView()
                     .containerRelativeFrame(.horizontal) { length, axis in
                         length * 0.45
                     }
