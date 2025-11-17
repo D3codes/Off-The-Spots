@@ -82,11 +82,15 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func setPan(value: Double) {
+        if value < -1 || value > 1 { return }
+        
         audioPlayer.pan = Float(value)
         panningValue = value
     }
     
     func setRate(value: Float) {
+        if value < 0.2 || value > 2 { return }
+        
         audioPlayer.enableRate = true
         audioPlayer.rate = value
         rateValue = value
