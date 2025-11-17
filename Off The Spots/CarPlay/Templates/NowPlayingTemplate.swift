@@ -19,4 +19,46 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             CPNowPlayingTemplate.shared.isUpNextButtonEnabled = false
         }
     }
+    
+    func nowPlayingButtons() -> [CPNowPlayingButton] {
+        let panLeftButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.backward")!, handler: { _ in
+            let currentPan = AudioHelper.sharedController.panningValue
+            var newPan = currentPan - 0.25
+            if newPan < -1 {
+                newPan = -1
+            }
+            AudioHelper.sharedController.setPan(value: newPan)
+        })
+        
+        let panRightButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.forward")!, handler: { _ in
+            let currentPan = AudioHelper.sharedController.panningValue
+            var newPan = currentPan + 0.25
+            if newPan > 1 {
+                newPan = 1
+            }
+            AudioHelper.sharedController.setPan(value: newPan)
+        })
+        
+        let tracksButton = CPNowPlayingImageButton(image: UIImage(systemName: "music.note.square.stack.fill")!, handler: { _ in print("Tacks") })
+        
+        let decreaseRateButton = CPNowPlayingImageButton(image: UIImage(systemName: "tortoise.fill")!, handler: { _ in
+            let currentRate = AudioHelper.sharedController.rateValue
+            var newRate = currentRate - 0.1
+            if newRate < 0.5 {
+                newRate = 0.5
+            }
+            AudioHelper.sharedController.setRate(value: newRate)
+        })
+        
+        let increaseRateButton = CPNowPlayingImageButton(image: UIImage(systemName: "hare.fill")!, handler: { _ in
+            let currentRate = AudioHelper.sharedController.rateValue
+            var newRate = currentRate + 0.1
+            if newRate > 1.5 {
+                newRate = 1.5
+            }
+            AudioHelper.sharedController.setRate(value: newRate)
+        })
+        
+        return [panLeftButton, panRightButton, tracksButton, decreaseRateButton, increaseRateButton]
+    }
 }

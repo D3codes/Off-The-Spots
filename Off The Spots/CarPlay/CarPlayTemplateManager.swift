@@ -37,6 +37,7 @@ final class CarPlayTemplateManager: NSObject {
     func connect() -> Void {
         interfaceController.delegate = self
         CPNowPlayingTemplate.shared.add(self)
+        CPNowPlayingTemplate.shared.updateNowPlayingButtons(self.nowPlayingButtons())
     }
     
     func disconnect() -> Void {
