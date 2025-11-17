@@ -20,7 +20,7 @@ func songsListTemplate(modelContext: ModelContext, interfaceController: CPInterf
         
         songListItem.handler = { listItem, completion in
             if !AudioHelper.sharedController.isPlaying || AudioHelper.sharedController.selectedSong?.id != song.id {
-                AudioHelper.sharedController.setSelectedSong(song: song)
+                AudioHelper.sharedController.setSelectedSong(song: song, setList: nil)
                 AudioHelper.sharedController.play()
             }
             
