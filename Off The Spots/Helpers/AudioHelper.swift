@@ -10,7 +10,10 @@ import MediaPlayer
 import SwiftUI
 
 class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
+    @MainActor static let sharedController = AudioHelper()
+    
     private var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+    @Published var selectedSong: Song? = nil
     @Published var isPlaying: Bool = false
     @Published var progress: Double = 0
     @Published var duration: Double = 0
@@ -142,6 +145,7 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
         
         duration = audioPlayer.duration
+        selectedSong = song
         setupNowPlaying(song: song)
     }
     

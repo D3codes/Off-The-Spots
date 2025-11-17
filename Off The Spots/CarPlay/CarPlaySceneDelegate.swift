@@ -15,9 +15,10 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
                                   didConnect interfaceController: CPInterfaceController) {
         
         self.interfaceController = interfaceController
+        let dataProvider = CarPlayDataProvider()
         
         var tabTemplates: [CPTemplate] = []
-        tabTemplates.append(songsListTemplate())
+        tabTemplates.append(dataProvider.makeSongsTemplate(interfaceController: interfaceController))
         tabTemplates.append(setListsListTemplate())
 
         let carPlayUI = CPTabBarTemplate(templates: tabTemplates)
