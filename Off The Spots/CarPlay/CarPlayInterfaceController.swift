@@ -13,6 +13,7 @@ extension CarPlayTemplateManager: CPInterfaceControllerDelegate {
         
         if aTemplate is CPNowPlayingTemplate {
             CPNowPlayingTemplate.shared.isUpNextButtonEnabled = AudioHelper.sharedController.selectedSetList != nil
+            self.setNowPlayingButtons()
         }
         
         if let list = aTemplate as? CPListTemplate {
@@ -26,6 +27,11 @@ extension CarPlayTemplateManager: CPInterfaceControllerDelegate {
 
     func templateDidAppear(_ aTemplate: CPTemplate, animated: Bool) {
 //        print("Template \(aTemplate.classForCoder) did appear.")
+        
+        if aTemplate is CPNowPlayingTemplate {
+            CPNowPlayingTemplate.shared.isUpNextButtonEnabled = AudioHelper.sharedController.selectedSetList != nil
+            self.setNowPlayingButtons()
+        }
     }
 
     func templateWillDisappear(_ aTemplate: CPTemplate, animated: Bool) {

@@ -6,6 +6,7 @@
 //
 
 import CarPlay
+import SwiftUI
 
 @MainActor
 extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
@@ -20,26 +21,30 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
         }
     }
     
-    func nowPlayingButtons() -> [CPNowPlayingButton] {
-        let panLeftButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.backward")!, handler: { _ in
+    func setNowPlayingButtons() -> Void {
+        let leftFillValue = AudioHelper.sharedController.panningValue <= 0 ? 1 : 1-AudioHelper.sharedController.panningValue
+        let panLeftButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.left", variableValue: leftFillValue)!, handler: { _ in
             let currentPan = AudioHelper.sharedController.panningValue
-            var newPan = currentPan - 0.25
+            var newPan = currentPan - 0.33
             if newPan < -1 {
                 newPan = -1
             }
             AudioHelper.sharedController.setPan(value: newPan)
+            self.setNowPlayingButtons()
         })
         
-        let panRightButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.forward")!, handler: { _ in
+        let rightFillValue = AudioHelper.sharedController.panningValue >= 0 ? 1 : AudioHelper.sharedController.panningValue.map(from: -1...0, to: 0...1)
+        let panRightButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.right", variableValue: rightFillValue)!, handler: { _ in
             let currentPan = AudioHelper.sharedController.panningValue
-            var newPan = currentPan + 0.25
+            var newPan = currentPan + 0.33
             if newPan > 1 {
                 newPan = 1
             }
             AudioHelper.sharedController.setPan(value: newPan)
+            self.setNowPlayingButtons()
         })
         
-        let tracksButton = CPNowPlayingImageButton(image: UIImage(systemName: "music.note.square.stack.fill")!, handler: { _ in print("Tacks") })
+//        let tracksButton = CPNowPlayingImageButton(image: UIImage(systemName: "music.note.square.stack.fill")!, handler: { _ in print("Tacks") })
         
         let decreaseRateButton = CPNowPlayingImageButton(image: UIImage(systemName: "tortoise.fill")!, handler: { _ in
             let currentRate = AudioHelper.sharedController.rateValue
@@ -48,7 +53,12 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
                 newRate = 0.5
             }
             AudioHelper.sharedController.setRate(value: newRate)
+//            self.setNowPlayingButtons()
         })
+        
+        let rate = CPNowPlayingPlaybackRateButton() { _ in
+            
+        }
         
         let increaseRateButton = CPNowPlayingImageButton(image: UIImage(systemName: "hare.fill")!, handler: { _ in
             let currentRate = AudioHelper.sharedController.rateValue
@@ -57,8 +67,9 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
                 newRate = 1.5
             }
             AudioHelper.sharedController.setRate(value: newRate)
+            self.setNowPlayingButtons()
         })
         
-        return [panLeftButton, panRightButton, tracksButton, decreaseRateButton, increaseRateButton]
+        CPNowPlayingTemplate.shared.updateNowPlayingButtons([panLeftButton, panRightButton, decreaseRateButton, rate, increaseRateButton])
     }
 }
