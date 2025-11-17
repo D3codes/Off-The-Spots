@@ -22,7 +22,7 @@ struct PlayerAccessoryView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
                         MarqueeText(
-                            text: player.selectedSong!.name,
+                            text: player.selectedSong?.name ?? "",
                             font: UIFont.preferredFont(forTextStyle: .headline),
                             leftFade: 16,
                             rightFade: 16,
@@ -30,7 +30,7 @@ struct PlayerAccessoryView: View {
                         )
                         
                         MarqueeText(
-                            text: player.selectedSong!.selectedTrack.name,
+                            text: player.selectedSong?.selectedTrack.name ?? "",
                             font: UIFont.preferredFont(forTextStyle: .subheadline),
                             leftFade: 16,
                             rightFade: 16,
@@ -71,7 +71,7 @@ struct PlayerAccessoryView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
                         MarqueeText(
-                            text: player.selectedSong!.name,
+                            text: player.selectedSong?.name ?? "",
                             font: UIFont.preferredFont(forTextStyle: .headline),
                             leftFade: 16,
                             rightFade: 16,
@@ -79,7 +79,7 @@ struct PlayerAccessoryView: View {
                         )
                         
                         MarqueeText(
-                            text: player.selectedSong!.selectedTrack.name,
+                            text: player.selectedSong?.selectedTrack.name ?? "",
                             font: UIFont.preferredFont(forTextStyle: .subheadline),
                             leftFade: 16,
                             rightFade: 16,
