@@ -11,8 +11,6 @@ import AVFoundation
 struct PlayerView: View {
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
-//    @State var setList: SetList?
-//    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     
     @State private var loopStartLocked: Bool = false
     @State private var loopEndLocked: Bool = false
@@ -65,7 +63,7 @@ struct PlayerView: View {
                     get: { player.selectedSong!.selectedTrack.id },
                     set: { newId in
                         if let newTrack = player.selectedSong!.tracks.first(where: { $0.id == newId }) {
-                            player.selectedSong!.selectedTrack = newTrack
+                            player.setSelectedTrack(track: newTrack)
                         }
                     }
                 )) {
@@ -74,13 +72,6 @@ struct PlayerView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .onChange(of: player.selectedSong!.selectedTrack, {
-                    if(player.isPlaying) {
-                        player.stop()
-                    }
-                    
-                    player.setSelectedSong(song: player.selectedSong!)
-                })
                 .tint(.primary)
 //                .glassEffect()
                 
@@ -288,7 +279,7 @@ struct PlayerView: View {
                     )
                 }
             }
-            .onAppear { player.setSelectedSong(song: song) }
+            .onAppear { player.setSelectedSong(song: song, setList: nil) }
         }
     }
     

@@ -144,7 +144,7 @@ struct PlayerAccessoryView: View {
                 )
             }
             .tabBarMinimizeBehavior(.onScrollDown)
-            .onAppear { player.setSelectedSong(song: Song(name: "After You've Gone", tracks: [track], selectedTrack: track)) }
+            .onAppear { player.setSelectedSong(song: Song(name: "After You've Gone", tracks: [track], selectedTrack: track), setList: nil) }
         }
     }
     

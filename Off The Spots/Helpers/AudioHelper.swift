@@ -124,7 +124,15 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         isLooping = false
     }
     
-    func setSelectedSong(song: Song, setList: SetList? = nil) {
+    func setSelectedTrack(track: Track) {
+        if track.id == selectedSong?.selectedTrack.id { return }
+        
+        stop()
+        selectedSong!.selectedTrack = track
+        setSelectedSong(song: selectedSong!, setList: selectedSetList)
+    }
+    
+    func setSelectedSong(song: Song, setList: SetList?) {
         selectedSetList = setList
         
         isPlaying = false
