@@ -11,7 +11,6 @@ import MarqueeText
 struct PlayerAccessoryView: View {
     @Environment(\.tabViewBottomAccessoryPlacement) var tabViewBottomAccessoryPlacement
     
-    @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
     
     @ObservedObject var player: AudioHelper
@@ -23,7 +22,7 @@ struct PlayerAccessoryView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
                         MarqueeText(
-                            text: selectedSong!.name,
+                            text: player.selectedSong!.name,
                             font: UIFont.preferredFont(forTextStyle: .headline),
                             leftFade: 16,
                             rightFade: 16,
@@ -31,7 +30,7 @@ struct PlayerAccessoryView: View {
                         )
                         
                         MarqueeText(
-                            text: selectedSong!.selectedTrack.name,
+                            text: player.selectedSong!.selectedTrack.name,
                             font: UIFont.preferredFont(forTextStyle: .subheadline),
                             leftFade: 16,
                             rightFade: 16,
@@ -72,7 +71,7 @@ struct PlayerAccessoryView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
                         MarqueeText(
-                            text: selectedSong!.name,
+                            text: player.selectedSong!.name,
                             font: UIFont.preferredFont(forTextStyle: .headline),
                             leftFade: 16,
                             rightFade: 16,
@@ -80,7 +79,7 @@ struct PlayerAccessoryView: View {
                         )
                         
                         MarqueeText(
-                            text: selectedSong!.selectedTrack.name,
+                            text: player.selectedSong!.selectedTrack.name,
                             font: UIFont.preferredFont(forTextStyle: .subheadline),
                             leftFade: 16,
                             rightFade: 16,
@@ -124,6 +123,8 @@ struct PlayerAccessoryView: View {
         let track: Track = Track(name: "Bass Left")
         @State private var selectedSong: Song? = nil
         
+        let player: AudioHelper = AudioHelper()
+        
         var body: some View {
             TabView {
                 Tab("Tab 1", systemImage: "1.circle") {
@@ -138,13 +139,12 @@ struct PlayerAccessoryView: View {
             }
             .tabViewBottomAccessory {
                 PlayerAccessoryView(
-                    selectedSong: $selectedSong,
                     presentPlayerSheet: .constant(false),
-                    player: AudioHelper()
+                    player: player
                 )
             }
             .tabBarMinimizeBehavior(.onScrollDown)
-            .onAppear { selectedSong = Song(name: "After You've Gone", tracks: [track], selectedTrack: track) }
+            .onAppear { player.setSelectedSong(song: Song(name: "After You've Gone", tracks: [track], selectedTrack: track)) }
         }
     }
     

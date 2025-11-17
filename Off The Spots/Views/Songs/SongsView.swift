@@ -14,12 +14,8 @@ struct SongsView: View {
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
     @ObservedObject var player: AudioHelper
-    @Binding var selectedSong: Song?
     @Binding var presentPlayerSheet: Bool
-    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     @Binding var hideMiniPlayer: Bool
-    
-    var selectedSetList: SetList?
     
     @State private var selection = Set<Song.ID>()
     
@@ -50,7 +46,7 @@ struct SongsView: View {
                             
                             Button(action: {
                                 if unlockSong {
-                                    setSelectedSong(song, nil)
+                                    player.setSelectedSong(song: song, setList: nil)
                                     presentPlayerSheet = true
                                 } else  {
                                     presentSubscription = true
@@ -58,7 +54,7 @@ struct SongsView: View {
                             }, label: {
                                 SongListItemView(
                                     song: song,
-                                    selectedSong: selectedSetList == nil ? selectedSong : nil,
+                                    selectedSong: player.selectedSetList == nil ? player.selectedSong : nil,
                                     isSongPlaying: player.isPlaying
                                 )
                                 .foregroundStyle(unlockSong ? .primary : .secondary)
@@ -129,14 +125,14 @@ struct SongsView: View {
                 let songId = songs[index].id
                 
                 // Stop playing deleted song, if it is playing
-                if(selectedSong?.id == songId) {
+                if(player.selectedSong?.id == songId) {
                     presentPlayerSheet = false
                     
                     if(player.isPlaying) {
                         player.stop()
                     }
                     
-                    selectedSong = nil
+                    player.selectedSong = nil
                 }
                 
                 // Remove deleted song from any set lists
@@ -183,7 +179,6 @@ struct SongsView: View {
 
     SongsView(
         player: AudioHelper(),
-        selectedSong: .constant(nil),
         presentPlayerSheet: .constant(false),
         hideMiniPlayer: .constant(false)
     )

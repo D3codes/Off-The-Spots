@@ -13,7 +13,10 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @MainActor static let sharedController = AudioHelper()
     
     private var audioPlayer: AVAudioPlayer = AVAudioPlayer()
+    
     @Published var selectedSong: Song? = nil
+    @Published var selectedSetList: SetList? = nil
+    
     @Published var isPlaying: Bool = false
     @Published var progress: Double = 0
     @Published var duration: Double = 0
@@ -121,7 +124,9 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         isLooping = false
     }
     
-    func setSelectedSong(song: Song) {
+    func setSelectedSong(song: Song, setList: SetList? = nil) {
+        selectedSetList = setList
+        
         isPlaying = false
         progress = 0
         setPan(value: 0.0)

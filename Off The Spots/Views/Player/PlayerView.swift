@@ -9,11 +9,10 @@ import SwiftUI
 import AVFoundation
 
 struct PlayerView: View {
-    @Binding var song: Song
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
-    @State var setList: SetList?
-    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
+//    @State var setList: SetList?
+//    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
     
     @State private var loopStartLocked: Bool = false
     @State private var loopEndLocked: Bool = false
@@ -33,7 +32,7 @@ struct PlayerView: View {
     var body: some View {
         VStack {
             HStack {
-                Text(song.name)
+                Text(player.selectedSong!.name)
                     .font(.largeTitle)
                 Spacer()
                 Menu(content: {
@@ -62,18 +61,25 @@ struct PlayerView: View {
             .padding(.top)
             
             HStack {
-                Picker("Select a Track", selection: $song.selectedTrack) {
-                    ForEach(song.tracks, id: \.self) { track in
+                Picker("Select a Track", selection: Binding(
+                    get: { player.selectedSong!.selectedTrack.id },
+                    set: { newId in
+                        if let newTrack = player.selectedSong!.tracks.first(where: { $0.id == newId }) {
+                            player.selectedSong!.selectedTrack = newTrack
+                        }
+                    }
+                )) {
+                    ForEach(player.selectedSong!.tracks, id: \.id) { track in
                         Text(track.name).tag(track.id)
                     }
                 }
                 .pickerStyle(.menu)
-                .onChange(of: song.selectedTrack, {
+                .onChange(of: player.selectedSong!.selectedTrack, {
                     if(player.isPlaying) {
                         player.stop()
                     }
                     
-                    player.setSelectedSong(song: song)
+                    player.setSelectedSong(song: player.selectedSong!)
                 })
                 .tint(.primary)
 //                .glassEffect()
@@ -85,11 +91,11 @@ struct PlayerView: View {
                     Text("Sheet Music")
                 }
                 .tint(.primary)
-                .disabled(song.sheetMusic?.file == nil || !isPro)
+                .disabled(player.selectedSong!.sheetMusic?.file == nil || !isPro)
                 .matchedTransitionSource(id: "sheetmusic", in: animation)
                 .fullScreenCover(isPresented: $presentSheetMusic) {
                     SheetMusicView(
-                        sheetMusicFile: song.sheetMusic!.file!,
+                        sheetMusicFile: player.selectedSong!.sheetMusic!.file!,
                         dismissSheetMusicView: { presentSheetMusic = false },
                         player: player
                     )
@@ -198,9 +204,9 @@ struct PlayerView: View {
                 Spacer()
                 
                 SetListMenuView(
-                    setList: setList,
-                    currentSong: song,
-                    setSelectedSong: setSelectedSong
+                    setList: player.selectedSetList,
+                    currentSong: player.selectedSong!,
+                    setSelectedSong: player.setSelectedSong
                 )
                 .frame(width: 40, height: 40)
             }
@@ -210,8 +216,16 @@ struct PlayerView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.keyboard)
         .padding(20)
-        .sheet(isPresented: $isAddToSetListSheetPresented) { AddToSetListView(song: song) }
-        .sheet(isPresented: $isEditSongSheetPresented) { EditSongView(song: $song).interactiveDismissDisabled(true) }
+        .sheet(isPresented: $isAddToSetListSheetPresented) { AddToSetListView(song: player.selectedSong!) }
+        .sheet(isPresented: $isEditSongSheetPresented) {
+            EditSongView(
+                    song: Binding(
+                        get: { player.selectedSong! },
+                        set: { newValue in player.selectedSong = newValue }
+                    )
+                )
+                .interactiveDismissDisabled(true)
+        }
         .onAppear() {
             loopStartLocked = player.loopStart != nil
             loopEndLocked = player.loopEnd != nil
@@ -221,7 +235,7 @@ struct PlayerView: View {
             player.publishProgressChanges = false
         }
         .presentationDragIndicator(.visible)
-        .onChange(of: song) {
+        .onChange(of: player.selectedSong!) {
             showPlaybackProgress = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showPlaybackProgress = true }
         }
@@ -267,12 +281,14 @@ struct PlayerView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .sheet(isPresented: $showSheet) {
-                PlayerView(
-                    song: $song,
-                    isEditingProgress: $isEditingProgress,
-                    player: player
-                )
+                if player.selectedSong != nil {
+                    PlayerView(
+                        isEditingProgress: $isEditingProgress,
+                        player: player
+                    )
+                }
             }
+            .onAppear { player.setSelectedSong(song: song) }
         }
     }
     
