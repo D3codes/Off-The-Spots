@@ -159,13 +159,13 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         
         duration = audioPlayer.duration
         selectedSong = song
-        setupNowPlaying(song: song)
+        setupNowPlaying()
     }
     
-    private func setupNowPlaying(song: Song) {
+    private func setupNowPlaying() {
         var nowPlayingInfo = [String : Any]()
-        nowPlayingInfo[MPMediaItemPropertyTitle] = song.name
-        nowPlayingInfo[MPMediaItemPropertyArtist] = song.selectedTrack.name
+        nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong?.name
+        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name
 
         if let image = UIImage(named: "logo") {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
@@ -175,6 +175,7 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = audioPlayer.duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = audioPlayer.rate
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
