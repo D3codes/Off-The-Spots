@@ -27,8 +27,6 @@ class StoreHelper {
             case .unverified(let t, let error):
                 print("Transaction ID \(t.id) for \(t.productID) is unverified: \(error)")
             }
-            
-            print("State: \(status.state.localizedDescription), Product ID: \(productId)")
         }
         
         return isPro

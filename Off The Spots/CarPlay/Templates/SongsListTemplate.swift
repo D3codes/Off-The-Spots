@@ -19,24 +19,22 @@ func songsListTemplate(modelContext: ModelContext, interfaceController: CPInterf
         let songListItem = CPListItem(text: song.name, detailText: "")
         
         songListItem.handler = { listItem, completion in
-            if !AudioHelper.sharedController.isPlaying || AudioHelper.sharedController.selectedSong?.id != song.id {
-                AudioHelper.sharedController.setSelectedSong(song: song, setList: nil)
-                AudioHelper.sharedController.play()
-            }
+            AudioHelper.sharedController.setSelectedSong(song: song, setList: nil)
+            AudioHelper.sharedController.play()
             
             if let interfaceController = interfaceController {
                 interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true) { success, error in
-//                     optional completion handler once CarPlay UI is displayed
+                     // optional completion handler once CarPlay UI is displayed
                 }
             }
             
             completion()
         }
         
-        listItems.append(songListItem)
 //        if AudioHelper.sharedController.selectedSong?.id == song.id {
 //            songListItem.setImage(UIImage(systemName: "waveform")!)
 //        }
+        listItems.append(songListItem)
     }
     
     let songsListSection = CPListSection(items: listItems)

@@ -6,16 +6,30 @@
 //
 
 import CarPlay
+import SwiftData
 
 @MainActor
-func setListsListTemplate() -> CPListTemplate {
-    let listItems: [CPListItem] = [
-        CPListItem(text: "Set List 1", detailText: "Set List 1 detail"),
-        CPListItem(text: "Set List 2", detailText: "Set List 2 detail"),
-        CPListItem(text: "Set List 3", detailText: "Set List 3 detail"),
-        CPListItem(text: "Set List 4", detailText: "Set List 4 detail"),
-        CPListItem(text: "Set List 5", detailText: "Set List 5 detail"),
-    ]
+func setListsListTemplate(modelContext: ModelContext, interfaceController: CPInterfaceController?) -> CPListTemplate {
+    let descriptor = FetchDescriptor<SetList>(sortBy: [SortDescriptor(\.order, order: .forward)])
+    let setLists = (try? modelContext.fetch(descriptor)) ?? []
+    
+    var listItems: [CPListItem] = []
+    setLists.forEach { setList in
+        let setListsListItem = CPListItem(text: setList.name, detailText: "")
+        
+        setListsListItem.handler = { listItem, completion in
+            if let interfaceController = interfaceController {
+                interfaceController.pushTemplate(CarPlayDataProvider().makeSetListTemplate(setList: setList, interfaceController: interfaceController), animated: true) { success, error in
+                     // optional completion handler once CarPlay UI is displayed
+                }
+            }
+            
+            completion()
+        }
+        
+        setListsListItem.setAccessoryImage(UIImage(systemName: "chevron.right")!)
+        listItems.append(setListsListItem)
+    }
     
     let setListsListSection = CPListSection(items: listItems)
     let setListsTemplate = CPListTemplate(title: "Set Lists", sections: [setListsListSection])

@@ -34,4 +34,14 @@ final class CarPlayDataProvider {
     func makeSongsTemplate(interfaceController: CPInterfaceController?) -> CPListTemplate {
         songsListTemplate(modelContext: context, interfaceController: interfaceController)
     }
+    
+    @MainActor
+    func makeSetListsTemplate(interfaceController: CPInterfaceController?) -> CPListTemplate {
+        setListsListTemplate(modelContext: context, interfaceController: interfaceController)
+    }
+    
+    @MainActor
+    func makeSetListTemplate(setList: SetList, interfaceController: CPInterfaceController?) -> CPListTemplate {
+        setListListTemplate(setList: setList, modelContext: context, interfaceController: interfaceController)
+    }
 }
