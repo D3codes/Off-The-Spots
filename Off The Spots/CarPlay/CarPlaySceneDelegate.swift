@@ -10,27 +10,30 @@ import UIKit
 
 class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     var interfaceController: CPInterfaceController?
+    var templateManager: CarPlayTemplateManager?
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                   didConnect interfaceController: CPInterfaceController) {
         
         self.interfaceController = interfaceController
-        let dataProvider = CarPlayDataProvider()
+        self.templateManager = CarPlayTemplateManager(interfaceController: interfaceController)
+        templateManager!.connect()
         
         var tabTemplates: [CPTemplate] = []
-        tabTemplates.append(dataProvider.makeSongsTemplate(interfaceController: interfaceController))
-        tabTemplates.append(dataProvider.makeSetListsTemplate(interfaceController: interfaceController))
+        tabTemplates.append(templateManager!.songsListTemplate())
+        tabTemplates.append(templateManager!.setListsListTemplate())
 
         let carPlayUI = CPTabBarTemplate(templates: tabTemplates)
 
         interfaceController.setRootTemplate(carPlayUI, animated: true) { success, error in
-//             optional completion handler once CarPlay UI is displayed
+             // optional completion handler once CarPlay UI is displayed
         }
     }
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                   didDisconnect interfaceController: CPInterfaceController,
                                   from window: CPWindow) {
+        self.templateManager!.disconnect()
         self.interfaceController = nil
     }
 }
