@@ -6,25 +6,37 @@
 //
 
 import CarPlay
+import SwiftData
 
 @MainActor
-func songsListTemplate() -> CPListTemplate {
-    let listItems: [CPListItem] = [
-        CPListItem(text: "Song 1", detailText: "Song 1 detail"),
-        CPListItem(text: "Song 2", detailText: "Song 2 detail"),
-        CPListItem(text: "Song 3", detailText: "Song 3 detail"),
-        CPListItem(text: "Song 4", detailText: "Song 4 detail"),
-        CPListItem(text: "Song 5", detailText: "Song 5 detail"),
-    ]
+func songsListTemplate(modelContext: ModelContext, interfaceController: CPInterfaceController?) -> CPListTemplate {
+
+    let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.name, order: .forward)])
+    let songs = (try? modelContext.fetch(descriptor)) ?? []
     
-//    var listItems: [CPListItem] = []
-//    songs.forEach { song in
-//        let songListItem = CPListItem(text: song.name, detailText: song.name)
-//        listItems.append(songListItem)
+    var listItems: [CPListItem] = []
+    songs.forEach { song in
+        let songListItem = CPListItem(text: song.name, detailText: "")
+        
+        songListItem.handler = { listItem, completion in
+            // Start playback asynchronously...
+            AudioHelper.sharedController.setSelectedSong(song: song)
+            AudioHelper.sharedController.play()
+            
+            if let interfaceController = interfaceController {
+                interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true) { success, error in
+//                     optional completion handler once CarPlay UI is displayed
+                }
+            }
+            
+            completion()
+        }
+        
+        listItems.append(songListItem)
 //        if true {
 //            songListItem.setImage(UIImage(systemName: "waveform")!)
 //        }
-//    }
+    }
     
     let songsListSection = CPListSection(items: listItems)
     let songsTemplate = CPListTemplate(title: "Songs", sections: [songsListSection])

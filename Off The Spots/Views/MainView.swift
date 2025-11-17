@@ -20,7 +20,7 @@ struct MainView: View {
     @State var selectedSong: Song?
     @State var selectedSetList: SetList?
     
-    @StateObject private var player: AudioHelper = AudioHelper()
+    @StateObject private var player: AudioHelper = AudioHelper.sharedController
     @State private var isEditingProgress: Bool = false
     
     @State private var presentPlayerSheet: Bool = false
