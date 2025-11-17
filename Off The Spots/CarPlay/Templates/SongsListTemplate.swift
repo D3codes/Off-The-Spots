@@ -11,7 +11,7 @@ import SwiftData
 @MainActor
 func songsListTemplate(modelContext: ModelContext, interfaceController: CPInterfaceController?) -> CPListTemplate {
 
-    let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.name, order: .forward)])
+    let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.order, order: .forward)])
     let songs = (try? modelContext.fetch(descriptor)) ?? []
     
     var listItems: [CPListItem] = []
@@ -19,9 +19,10 @@ func songsListTemplate(modelContext: ModelContext, interfaceController: CPInterf
         let songListItem = CPListItem(text: song.name, detailText: "")
         
         songListItem.handler = { listItem, completion in
-            // Start playback asynchronously...
-            AudioHelper.sharedController.setSelectedSong(song: song)
-            AudioHelper.sharedController.play()
+            if !AudioHelper.sharedController.isPlaying || AudioHelper.sharedController.selectedSong?.id != song.id {
+                AudioHelper.sharedController.setSelectedSong(song: song)
+                AudioHelper.sharedController.play()
+            }
             
             if let interfaceController = interfaceController {
                 interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true) { success, error in
@@ -33,7 +34,7 @@ func songsListTemplate(modelContext: ModelContext, interfaceController: CPInterf
         }
         
         listItems.append(songListItem)
-//        if true {
+//        if AudioHelper.sharedController.selectedSong?.id == song.id {
 //            songListItem.setImage(UIImage(systemName: "waveform")!)
 //        }
     }
