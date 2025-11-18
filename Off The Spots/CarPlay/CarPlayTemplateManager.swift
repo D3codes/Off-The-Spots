@@ -36,6 +36,7 @@ final class CarPlayTemplateManager: NSObject {
     
     func connect() -> Void {
         interfaceController.delegate = self
+        CPNowPlayingTemplate.shared.isAlbumArtistButtonEnabled = true
         CPNowPlayingTemplate.shared.add(self)
         self.setNowPlayingButtons()
     }

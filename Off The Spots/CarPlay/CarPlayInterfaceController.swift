@@ -12,6 +12,7 @@ extension CarPlayTemplateManager: CPInterfaceControllerDelegate {
 //        print("Template \(aTemplate.classForCoder) will appear.")
         
         if aTemplate is CPNowPlayingTemplate {
+            CPNowPlayingTemplate.shared.isAlbumArtistButtonEnabled = true
             CPNowPlayingTemplate.shared.isUpNextButtonEnabled = AudioHelper.sharedController.selectedSetList != nil
             self.setNowPlayingButtons()
         }
@@ -29,6 +30,7 @@ extension CarPlayTemplateManager: CPInterfaceControllerDelegate {
 //        print("Template \(aTemplate.classForCoder) did appear.")
         
         if aTemplate is CPNowPlayingTemplate {
+            CPNowPlayingTemplate.shared.isAlbumArtistButtonEnabled = true
             CPNowPlayingTemplate.shared.isUpNextButtonEnabled = AudioHelper.sharedController.selectedSetList != nil
             self.setNowPlayingButtons()
         }

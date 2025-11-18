@@ -90,6 +90,8 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         audioPlayer.enableRate = true
         audioPlayer.rate = value
         rateValue = value
+        
+        updateNowPlaying()
     }
     
     func setLoopStart(value: Double) -> Bool {
@@ -165,8 +167,9 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func setupNowPlaying() {
         var nowPlayingInfo = [String : Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong?.name
-        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name
-
+//        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = selectedSong?.selectedTrack.name
+        
         if let image = UIImage(named: "logo") {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
                 return image
@@ -182,10 +185,11 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     private func updateNowPlaying() {
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
+//        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
+        guard var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo else { return }
 
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1 : 0
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? audioPlayer.rate : 0
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
