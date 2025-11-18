@@ -167,8 +167,8 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func setupNowPlaying() {
         var nowPlayingInfo = [String : Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong?.name
-//        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name
-        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = selectedSong?.selectedTrack.name
+//        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name // required to show in control center
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = selectedSong?.selectedTrack.name // required to be selectable in CarPlay
         
         if let image = UIImage(named: "logo") {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
@@ -185,7 +185,6 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     private func updateNowPlaying() {
-//        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
         guard var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo else { return }
 
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
