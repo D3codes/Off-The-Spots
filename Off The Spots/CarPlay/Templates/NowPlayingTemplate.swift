@@ -20,6 +20,12 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
         }
     }
     
+    func nowPlayingTemplateAlbumArtistButtonTapped(_ nowPlayingTemplate: CPNowPlayingTemplate) {
+        self.interfaceController.pushTemplate(self.tracksListTemplate(song: AudioHelper.sharedController.selectedSong!), animated: true) { success, error in
+            // optional completion handler once CarPlay UI is displayed
+        }
+    }
+    
     func setNowPlayingButtons() -> Void {
         let leftFillValue = AudioHelper.sharedController.panningValue <= 0 ? 1 : 1-AudioHelper.sharedController.panningValue
         let panLeftButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.left", variableValue: leftFillValue)!, handler: { _ in
@@ -67,6 +73,6 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             AudioHelper.sharedController.setRate(value: newRate)
         })
         
-        CPNowPlayingTemplate.shared.updateNowPlayingButtons([panLeftButton, panRightButton, decreaseRateButton, rate, increaseRateButton])
+        CPNowPlayingTemplate.shared.updateNowPlayingButtons([panLeftButton, panRightButton, decreaseRateButton, increaseRateButton])
     }
 }
