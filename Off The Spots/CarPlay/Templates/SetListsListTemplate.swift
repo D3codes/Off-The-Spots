@@ -24,7 +24,7 @@ extension CarPlayTemplateManager {
         
         var listItems: [CPListItem] = []
         setLists.forEach { setList in
-            let setListsListItem = CPListItem(text: setList.name, detailText: "")
+            let setListsListItem = CPListItem(text: setList.name, detailText: "\(setList.songs.count) Song\(setList.songs.count == 1 ? "" : "s")")
             setListsListItem.isPlaying = AudioHelper.sharedController.selectedSetList?.id == setList.id
             
             setListsListItem.handler = { listItem, completion in
@@ -35,7 +35,7 @@ extension CarPlayTemplateManager {
                 completion()
             }
             
-            setListsListItem.setAccessoryImage(UIImage(systemName: "chevron.right")!)
+//            setListsListItem.setAccessoryImage(UIImage(systemName: "chevron.right")!)
             listItems.append(setListsListItem)
         }
         

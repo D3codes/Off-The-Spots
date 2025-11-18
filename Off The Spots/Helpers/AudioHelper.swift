@@ -135,6 +135,8 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func setSelectedSong(song: Song, setList: SetList?) {
+        if song.id == selectedSong?.id && setList?.id == selectedSetList?.id { return }
+        
         selectedSetList = setList
         
         isPlaying = false
