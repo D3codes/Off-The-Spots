@@ -19,6 +19,8 @@ class StoreHelper {
             let isProProductId: Bool = productId == monthlyPro || productId == yearlyPro
             let isActiveStatus: Bool = status.state != .revoked && status.state != .expired
             
+//            print("Product ID: \(productId), isProProductId: \(isProProductId), isActiveStatus: \(isActiveStatus)")
+            
             switch status.transaction {
             case .verified:
                 if isProProductId && isActiveStatus {

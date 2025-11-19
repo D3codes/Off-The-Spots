@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TrackListSectionView: View {
     @State var song: Song
-    @State var isPro: Bool
+    var isPro: Bool
     @Binding var presentSubscription: Bool
     
     @State private var presentTrackFileImporter: Bool = false
