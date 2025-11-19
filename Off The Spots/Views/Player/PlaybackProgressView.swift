@@ -101,7 +101,8 @@ struct PlaybackProgressView: View {
             isEditingProgress = false
         }
         
-        player.setCurrentTime(value: progress)
+        let seekFrame = AVAudioFramePosition(progress * player.audioSampleRate)
+        player.setCurrentTime(value: seekFrame)
     }
 }
 

@@ -7,12 +7,10 @@
 
 import AVFoundation
 import MediaPlayer
-import SwiftUI
+import SwiftData
 
-class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
+class AudioHelper: NSObject, ObservableObject {
     @MainActor static let sharedController = AudioHelper()
-    
-    private var audioPlayer: AVAudioPlayer = AVAudioPlayer()
     
     @Published var selectedSong: Song? = nil
     @Published var selectedSetList: SetList? = nil
@@ -28,14 +26,73 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     var publishProgressChanges: Bool = false
     
-    var handlePlayerDidFinishPlaying: () -> Void = {}
+//    private var displayLink: CADisplayLink?
+
+    private let engine = AVAudioEngine()
+    private let speedAndPitchControl = AVAudioUnitTimePitch()
+    private let audioPlayer = AVAudioPlayerNode()
+    
+    private var needsFileScheduled = true
+
+    private var audioFile: AVAudioFile?
+    var audioSampleRate: Double = 0
+
+    private var seekFrame: AVAudioFramePosition = 0
+    private var currentPosition: AVAudioFramePosition = 0
+    private var audioLengthSamples: AVAudioFramePosition = 0
+
+    private var currentFrame: AVAudioFramePosition {
+      guard
+        let lastRenderTime = audioPlayer.lastRenderTime,
+        let playerTime = audioPlayer.playerTime(forNodeTime: lastRenderTime)
+      else {
+        return 0
+      }
+
+      return playerTime.sampleTime
+    }
+    
+    let container: ModelContainer
+    let modelContext: ModelContext
     
     override init() {
+        container = {
+            let schema = Schema([
+                Song.self,
+                SetList.self
+            ])
+            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+            do {
+                return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            } catch {
+                fatalError("Could not create ModelContainer: \(error)")
+            }
+        }()
+        
+        modelContext = ModelContext(container)
+        
         super.init()
+        
+        engine.attach(audioPlayer)
+        engine.attach(speedAndPitchControl)
+        
+        engine.connect(audioPlayer, to: speedAndPitchControl, format: nil)
+        engine.connect(speedAndPitchControl, to: engine.mainMixerNode, format: nil)
+        
         setupRemoteTransportControls()
     }
     
     func play() {
+        if !engine.isRunning {
+            do { try engine.start() }
+            catch { }
+        }
+        
+        if needsFileScheduled {
+          scheduleAudioFile()
+        }
+        
         audioPlayer.play()
         isPlaying = true
         updateNowPlaying()
@@ -43,41 +100,88 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     func pause() {
         audioPlayer.pause()
+        engine.pause()
         isPlaying = false
         updateNowPlaying()
     }
     
     func stop() {
         audioPlayer.stop()
-        isPlaying = false
+        engine.stop()
+        seekFrame = 0
         progress = 0
+        currentPosition = 0
+        isPlaying = false
         updateNowPlaying()
     }
     
     func skip(seconds: Double) {
-        if progress + seconds >= duration {
-            audioPlayer.currentTime = duration - 0.5
-        } else {
-            audioPlayer.currentTime += seconds
-        }
+        currentPosition = currentFrame + seekFrame
+        currentPosition = max(currentPosition, 0)
+        currentPosition = min(currentPosition, audioLengthSamples)
         
-        updateProgress()
+        let offset = AVAudioFramePosition(seconds * audioSampleRate)
+        seekFrame = currentPosition + offset
+        setCurrentTime(value: seekFrame)
     }
     
-    func setCurrentTime(value: Double) {
-        audioPlayer.currentTime = value
-        progress = value
+    func setCurrentTime(value: AVAudioFramePosition) {
+        guard let audioFile = audioFile else { return }
+
+        seekFrame = value
+        seekFrame = max(seekFrame, 0)
+        seekFrame = min(seekFrame, audioLengthSamples)
+        currentPosition = seekFrame
+
+        let wasPlaying = audioPlayer.isPlaying
+        audioPlayer.stop()
+
+        if currentPosition < audioLengthSamples {
+            updateProgress()
+            needsFileScheduled = false
+
+            let frameCount = AVAudioFrameCount(audioLengthSamples - seekFrame)
+            
+            audioPlayer.scheduleSegment(
+                audioFile,
+                startingFrame: seekFrame,
+                frameCount: frameCount,
+                at: nil
+            ) {
+                self.needsFileScheduled = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { self.updateProgress() })
+            }
+
+            if wasPlaying {
+              audioPlayer.play()
+            }
+        }
     }
     
-    func updateProgress() {
-        if (isLooping && (audioPlayer.currentTime > loopEnd! || audioPlayer.currentTime < loopStart!)) {
-            audioPlayer.currentTime = loopStart!
-        }
+    @objc func updateProgress() {
+        print("currentFrame: \(currentFrame), seekFrame: \(seekFrame), audioLengthSamples: \(audioLengthSamples)")
         
-        if publishProgressChanges {
-            progress = audioPlayer.currentTime
+        currentPosition = currentFrame + seekFrame
+        currentPosition = max(currentPosition, 0)
+        currentPosition = min(currentPosition, audioLengthSamples)
+
+        if currentPosition >= audioLengthSamples {
+            stop()
+            handlePlayerDidFinishPlaying()
         }
+
+        progress = Double(currentPosition) / audioSampleRate
         
+        print("Progress: \(progress)")
+        
+        if (isLooping && (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate))) {
+            setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
+        }
+
+//        if publishProgressChanges {
+//            progress = Double(currentPosition) / audioSampleRate
+//        }
+
         updateNowPlaying()
     }
     
@@ -87,15 +191,14 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func setRate(value: Float) {
-        audioPlayer.enableRate = true
-        audioPlayer.rate = value
+        speedAndPitchControl.rate = value
         rateValue = value
-        
+
         updateNowPlaying()
     }
     
     func setLoopStart(value: Double) -> Bool {
-        guard value < loopEnd ?? 9999999999 else { return false }
+        guard value < loopEnd ?? duration else { return false }
         loopStart = value
         return true
     }
@@ -119,26 +222,42 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func startLoop() {
         guard loopStart != nil, loopEnd != nil else { return }
         isLooping = true
-        setCurrentTime(value: loopStart!)
+        setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
     }
     
     func stopLoop() {
         isLooping = false
     }
     
-    func setSelectedTrack(track: Track) {
-        if track.id == selectedSong?.selectedTrack.id { return }
-        
-        stop()
-        selectedSong!.selectedTrack = track
-        setSelectedSong(song: selectedSong!, setList: selectedSetList)
+    private func scheduleAudioFile() {
+        guard let file = audioFile, needsFileScheduled
+        else { return }
+
+        needsFileScheduled = false
+        seekFrame = 0
+
+        audioPlayer.scheduleFile(file, at: nil) {
+            self.needsFileScheduled = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { self.updateProgress() })
+        }
     }
     
-    func setSelectedSong(song: Song, setList: SetList?) {
-        if song.id == selectedSong?.id && setList?.id == selectedSetList?.id { return }
-        
+    func setSelectedTrack(track: Track) {
+        if track.id == selectedSong?.selectedTrack.id { return }
+
+        stop()
+        selectedSong!.selectedTrack = track
+        setSelectedSong(song: selectedSong!, setList: selectedSetList, skipSameCheck: true)
+    }
+    
+    func setSelectedSong(song: Song, setList: SetList?, skipSameCheck: Bool = false) {
+        if !skipSameCheck && song.id == selectedSong?.id && setList?.id == selectedSetList?.id { return }
+
+        selectedSong = song
         selectedSetList = setList
         
+        seekFrame = 0
+        currentPosition = 0
         isPlaying = false
         progress = 0
         setPan(value: 0.0)
@@ -147,23 +266,61 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         clearLoopEnd()
         
         do {
-            audioPlayer = try AVAudioPlayer(data: song.selectedTrack.file!)
-            audioPlayer.enableRate = true
-            audioPlayer.delegate = self
+            guard let data = song.selectedTrack.file else {
+                print("Selected track has no data")
+                return
+            }
+
+            let tempDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            let tempURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+            do {
+                try data.write(to: tempURL, options: [.atomic])
+            } catch {
+                print("Failed to write audio data to temp file: \(error)")
+                return
+            }
+
+            audioFile = try AVAudioFile(forReading: tempURL)
+            let format = audioFile!.processingFormat
+            audioLengthSamples = audioFile!.length
+            audioSampleRate = format.sampleRate
+            duration = Double(audioLengthSamples) / audioSampleRate
+
+            if audioPlayer.isPlaying {
+                audioPlayer.stop()
+            }
+            scheduleAudioFile()
         } catch {
-            print("Failed to create AVAudioPlayer with error: \(error)")
+            print("Failed to prepare audio engine/player with error: \(error)")
         }
-        
+
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to set AVAudioSession category with error: \(error)")
         }
-        
-        duration = audioPlayer.duration
-        selectedSong = song
+
         setupNowPlaying()
+    }
+    
+    private func handlePlayerDidFinishPlaying() {
+        isPlaying = false
+        progress = 0
+        
+        let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.order, order: .forward)])
+        let songs = (try? modelContext.fetch(descriptor)) ?? []
+        
+        if selectedSetList != nil {
+            let currentSongIndex = selectedSetList!.songs.firstIndex(of: selectedSong!.id)!
+            if currentSongIndex == selectedSetList!.songs.count - 1 { return }
+            
+            let nextSong: Song? = songs.first(where: { $0.id == selectedSetList!.songs[currentSongIndex + 1] })
+            guard let nextSong else { return }
+            
+            setSelectedSong(song: nextSong, setList: selectedSetList)
+            play()
+        }
     }
     
     private func setupNowPlaying() {
@@ -171,27 +328,29 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
         nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong?.name
 //        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name // required to show in control center
         nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = selectedSong?.selectedTrack.name // required to be selectable in CarPlay
-        
+
         if let image = UIImage(named: "logo") {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
                 return image
             }
         }
-        
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
-        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = audioPlayer.duration
-        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = audioPlayer.rate
 
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = 0
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 0
+
+        MPNowPlayingInfoCenter.default().playbackState = .stopped
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
     private func updateNowPlaying() {
         guard var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo else { return }
+        
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = progress
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? speedAndPitchControl.rate : 0
 
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = audioPlayer.currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? audioPlayer.rate : 0
-
+        MPNowPlayingInfoCenter.default().playbackState = isPlaying ? .playing : .paused
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
@@ -213,33 +372,27 @@ class AudioHelper: NSObject, ObservableObject, AVAudioPlayerDelegate {
             }
             return .commandFailed
         }
-        
+
         commandCenter.stopCommand.addTarget { _ in
             self.stop()
             return .success
         }
-        
+
         commandCenter.skipBackwardCommand.addTarget { _ in
             self.skip(seconds: -10)
             return .success
         }
-        
+
         commandCenter.skipForwardCommand.addTarget { _ in
             self.skip(seconds: 10)
             return .success
         }
-        
+
         commandCenter.changePlaybackPositionCommand.addTarget { event in
             guard let e = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-            
-            self.setCurrentTime(value: e.positionTime)
+
+            self.setCurrentTime(value: AVAudioFramePosition(e.positionTime * self.audioSampleRate))
             return .success
-        }
-    }
-    
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        if (flag) {
-            handlePlayerDidFinishPlaying()
         }
     }
 }

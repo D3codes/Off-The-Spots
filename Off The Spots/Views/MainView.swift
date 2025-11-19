@@ -71,25 +71,8 @@ struct MainView: View {
                 player: player
             )
         }
-        .onAppear { player.handlePlayerDidFinishPlaying = handlePlayerDidFinishPlaying }
         .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
             updateProgress()
-        }
-    }
-    
-    private func handlePlayerDidFinishPlaying() {
-        player.isPlaying = false
-        player.progress = 0
-        
-        if player.selectedSetList != nil {
-            let currentSongIndex = player.selectedSetList!.songs.firstIndex(of: player.selectedSong!.id)!
-            if currentSongIndex == player.selectedSetList!.songs.count - 1 { return }
-            
-            let nextSong: Song? = songs.first(where: { $0.id == player.selectedSetList!.songs[currentSongIndex + 1] })
-            guard let nextSong else { return }
-            
-            player.setSelectedSong(song: nextSong, setList: player.selectedSetList)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { player.play() }
         }
     }
     

@@ -58,6 +58,7 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
                 newRate = 0.5
             }
             AudioHelper.sharedController.setRate(value: newRate)
+            self.setNowPlayingButtons()
         })
         
         let rate = CPNowPlayingPlaybackRateButton() { _ in
@@ -73,6 +74,6 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             AudioHelper.sharedController.setRate(value: newRate)
         })
         
-        CPNowPlayingTemplate.shared.updateNowPlayingButtons([panLeftButton, panRightButton, decreaseRateButton, increaseRateButton])
+        CPNowPlayingTemplate.shared.updateNowPlayingButtons([panLeftButton, panRightButton, decreaseRateButton, rate, increaseRateButton])
     }
 }
