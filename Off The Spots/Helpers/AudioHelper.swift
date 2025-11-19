@@ -10,7 +10,7 @@ import MediaPlayer
 import SwiftData
 
 class AudioHelper: NSObject, ObservableObject {
-    @MainActor static let sharedController = AudioHelper()
+    @MainActor static let sharedController: AudioHelper = AudioHelper()
     
     @Published var selectedSong: Song? = nil
     @Published var selectedSetList: SetList? = nil
@@ -25,14 +25,12 @@ class AudioHelper: NSObject, ObservableObject {
     @Published var loopEnd: Double? = nil
     
     var publishProgressChanges: Bool = false
-    
-//    private var displayLink: CADisplayLink?
 
-    private let engine = AVAudioEngine()
-    private let speedAndPitchControl = AVAudioUnitTimePitch()
-    private let audioPlayer = AVAudioPlayerNode()
+    private let engine: AVAudioEngine = AVAudioEngine()
+    private let speedAndPitchControl: AVAudioUnitTimePitch = AVAudioUnitTimePitch()
+    private let audioPlayer: AVAudioPlayerNode = AVAudioPlayerNode()
     
-    private var needsFileScheduled = true
+    private var needsFileScheduled: Bool = true
 
     private var audioFile: AVAudioFile?
     var audioSampleRate: Double = 0
@@ -52,8 +50,8 @@ class AudioHelper: NSObject, ObservableObject {
       return playerTime.sampleTime
     }
     
-    let container: ModelContainer
-    let modelContext: ModelContext
+    private let container: ModelContainer
+    private let modelContext: ModelContext
     
     override init() {
         container = {
@@ -81,6 +79,68 @@ class AudioHelper: NSObject, ObservableObject {
         engine.connect(speedAndPitchControl, to: engine.mainMixerNode, format: nil)
         
         setupRemoteTransportControls()
+    }
+    
+    func setSelectedTrack(track: Track) {
+        if track.id == selectedSong?.selectedTrack.id { return }
+
+        stop()
+        selectedSong!.selectedTrack = track
+        setSelectedSong(song: selectedSong!, setList: selectedSetList, skipSameCheck: true)
+    }
+    
+    func setSelectedSong(song: Song, setList: SetList?, skipSameCheck: Bool = false) {
+        if !skipSameCheck && song.id == selectedSong?.id && setList?.id == selectedSetList?.id { return }
+
+        selectedSong = song
+        selectedSetList = setList
+        
+        seekFrame = 0
+        currentPosition = 0
+        isPlaying = false
+        progress = 0
+        setPan(value: 0.0)
+        setRate(value: 1.0)
+        clearLoopStart()
+        clearLoopEnd()
+        
+        do {
+            guard let data = song.selectedTrack.file else {
+                print("Selected track has no data")
+                return
+            }
+
+            let tempDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            let tempURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+            do {
+                try data.write(to: tempURL, options: [.atomic])
+            } catch {
+                print("Failed to write audio data to temp file: \(error)")
+                return
+            }
+
+            audioFile = try AVAudioFile(forReading: tempURL)
+            let format = audioFile!.processingFormat
+            audioLengthSamples = audioFile!.length
+            audioSampleRate = format.sampleRate
+            duration = Double(audioLengthSamples) / audioSampleRate
+
+            if audioPlayer.isPlaying {
+                audioPlayer.stop()
+            }
+            scheduleAudioFile()
+        } catch {
+            print("Failed to prepare audio engine/player with error: \(error)")
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to set AVAudioSession category with error: \(error)")
+        }
+
+        setupNowPlaying()
     }
     
     func play() {
@@ -240,68 +300,6 @@ class AudioHelper: NSObject, ObservableObject {
             self.needsFileScheduled = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { self.updateProgress() })
         }
-    }
-    
-    func setSelectedTrack(track: Track) {
-        if track.id == selectedSong?.selectedTrack.id { return }
-
-        stop()
-        selectedSong!.selectedTrack = track
-        setSelectedSong(song: selectedSong!, setList: selectedSetList, skipSameCheck: true)
-    }
-    
-    func setSelectedSong(song: Song, setList: SetList?, skipSameCheck: Bool = false) {
-        if !skipSameCheck && song.id == selectedSong?.id && setList?.id == selectedSetList?.id { return }
-
-        selectedSong = song
-        selectedSetList = setList
-        
-        seekFrame = 0
-        currentPosition = 0
-        isPlaying = false
-        progress = 0
-        setPan(value: 0.0)
-        setRate(value: 1.0)
-        clearLoopStart()
-        clearLoopEnd()
-        
-        do {
-            guard let data = song.selectedTrack.file else {
-                print("Selected track has no data")
-                return
-            }
-
-            let tempDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            let tempURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
-            do {
-                try data.write(to: tempURL, options: [.atomic])
-            } catch {
-                print("Failed to write audio data to temp file: \(error)")
-                return
-            }
-
-            audioFile = try AVAudioFile(forReading: tempURL)
-            let format = audioFile!.processingFormat
-            audioLengthSamples = audioFile!.length
-            audioSampleRate = format.sampleRate
-            duration = Double(audioLengthSamples) / audioSampleRate
-
-            if audioPlayer.isPlaying {
-                audioPlayer.stop()
-            }
-            scheduleAudioFile()
-        } catch {
-            print("Failed to prepare audio engine/player with error: \(error)")
-        }
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("Failed to set AVAudioSession category with error: \(error)")
-        }
-
-        setupNowPlaying()
     }
     
     private func handlePlayerDidFinishPlaying() {
