@@ -82,11 +82,12 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func setSelectedTrack(track: Track) {
-        if track.id == selectedSong?.selectedTrack.id { return }
+        guard let selectedSong else { return }
+        if track.id == selectedSong.selectedTrack.id || !selectedSong.tracks.contains(where: { $0.id == track.id }) { return }
 
         stop()
-        selectedSong!.selectedTrack = track
-        setSelectedSong(song: selectedSong!, setList: selectedSetList, skipSameCheck: true)
+        selectedSong.selectedTrack = track
+        setSelectedSong(song: selectedSong, setList: selectedSetList, skipSameCheck: true)
     }
     
     func setSelectedSong(song: Song, setList: SetList?, skipSameCheck: Bool = false) {
@@ -209,7 +210,7 @@ class AudioHelper: NSObject, ObservableObject {
                 at: nil
             ) {
                 self.needsFileScheduled = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { self.updateProgress() })
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.updateProgress() })
             }
 
             if wasPlaying {
@@ -219,28 +220,22 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     @objc func updateProgress() {
-        print("currentFrame: \(currentFrame), seekFrame: \(seekFrame), audioLengthSamples: \(audioLengthSamples)")
-        
         currentPosition = currentFrame + seekFrame
         currentPosition = max(currentPosition, 0)
         currentPosition = min(currentPosition, audioLengthSamples)
-
-        if currentPosition >= audioLengthSamples {
+        
+        if currentPosition > 0 && currentPosition >= audioLengthSamples {
             stop()
             handlePlayerDidFinishPlaying()
         }
-
-        progress = Double(currentPosition) / audioSampleRate
-        
-        print("Progress: \(progress)")
         
         if (isLooping && (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate))) {
             setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
         }
 
-//        if publishProgressChanges {
-//            progress = Double(currentPosition) / audioSampleRate
-//        }
+        if publishProgressChanges {
+            progress = Double(currentPosition) / audioSampleRate
+        }
 
         updateNowPlaying()
     }
@@ -254,7 +249,7 @@ class AudioHelper: NSObject, ObservableObject {
         speedAndPitchControl.rate = value
         rateValue = value
 
-        updateNowPlaying()
+        updateProgress()
     }
     
     func setLoopStart(value: Double) -> Bool {
@@ -298,7 +293,7 @@ class AudioHelper: NSObject, ObservableObject {
 
         audioPlayer.scheduleFile(file, at: nil) {
             self.needsFileScheduled = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { self.updateProgress() })
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.updateProgress() })
         }
     }
     
@@ -345,7 +340,7 @@ class AudioHelper: NSObject, ObservableObject {
     private func updateNowPlaying() {
         guard var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo else { return }
         
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = progress
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Double(currentPosition) / audioSampleRate
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? speedAndPitchControl.rate : 0
 
         MPNowPlayingInfoCenter.default().playbackState = isPlaying ? .playing : .paused
