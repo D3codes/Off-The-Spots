@@ -13,7 +13,6 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     var templateManager: CarPlayTemplateManager?
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene, didConnect interfaceController: CPInterfaceController) {
-        
         self.interfaceController = interfaceController
         self.templateManager = CarPlayTemplateManager(interfaceController: interfaceController)
         templateManager!.connect()
