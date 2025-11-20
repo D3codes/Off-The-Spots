@@ -353,7 +353,6 @@ class AudioHelper: NSObject, ObservableObject {
         commandCenter.changePlaybackRateCommand.isEnabled = true
         commandCenter.changePlaybackRateCommand.addTarget { event in
             guard let rateEvent = event as? MPChangePlaybackRateCommandEvent else { return .commandFailed }
-            print("HERE")
             return .success
         }
 

@@ -71,7 +71,7 @@ struct RateView: View {
         @StateObject var player: AudioHelper = AudioHelper()
         
         var body: some View {
-            RateView(player: AudioHelper.sharedController, rateValue: $player.rateValue)
+            RateView(player: player, rateValue: $player.rateValue)
                 .frame(maxHeight: 50)
         }
     }
