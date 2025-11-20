@@ -34,7 +34,7 @@ struct RateView: View {
                         .frame(width: 30, height: 30)
                 })
                 
-                Text("\(String(format: "%.1f", rateValue))x")
+                Text("\(String(format: "%.1f", rateValue))×")
                     .font(.title2)
                     .contentTransition(.numericText())
                 

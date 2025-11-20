@@ -13,7 +13,7 @@ struct SetListView: View {
     
     @State var setList: SetList
     @Binding var presentPlayerSheet: Bool
-    var setSelectedSong: (Song, SetList?) -> Void = {song, setList in }
+    var setSelectedSong: (Song, SetList?, Bool) -> Void = {song, setList, skip in }
     
     var selectedSong: Song?
     var selectedSetList: SetList?
@@ -28,7 +28,7 @@ struct SetListView: View {
                 ForEach(setList.songs, id: \.self) { songId in
                     if let song = songs.first(where: { $0.id == songId }) {
                         Button(action: {
-                            setSelectedSong(song, setList)
+                            setSelectedSong(song, setList, false)
                             presentPlayerSheet = true
                         }) {
                             SongListItemView(

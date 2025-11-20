@@ -60,7 +60,7 @@ struct ThanksView: View {
                         Text("My name is David and I’m the developer of Off The Spots. I hope you enjoy using the app!")
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        Text("This is a one-person project, so your subscription direclty supports my ability to keep adding new features.")
+                        Text("This is a one-person project, so your subscription directly supports my ability to keep adding new features.")
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         Text("Thank you for your support and keep the whole world singing!")
