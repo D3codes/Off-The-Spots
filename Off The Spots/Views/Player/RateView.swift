@@ -28,15 +28,19 @@ struct RateView: View {
                         player.setRate(value: rateValue)
                     }
                 }, label: {
-                    Image(systemName: "minus")
+                    Image(systemName: "tortoise.fill")
                         .font(.title2)
                         .foregroundColor(rateValue > 0.2 ? .primary : .secondary)
-                        .frame(width: 30, height: 30)
+                        .frame(width: 20, height: 20)
                 })
                 
-                Text("\(String(format: "%.1f", rateValue))×")
-                    .font(.title2)
-                    .contentTransition(.numericText())
+                Button(action: { player.setRate(value: 1) }, label: {
+                    Text("\(String(format: "%.1f", rateValue))×")
+                        .font(.title2)
+                        .contentTransition(.numericText())
+                        .padding(.horizontal, 4)
+                })
+                .buttonStyle(.plain)
                 
                 Button(action: {
                     if(rateValue < 2) {
@@ -46,10 +50,10 @@ struct RateView: View {
                         player.setRate(value: rateValue)
                     }
                 }, label: {
-                    Image(systemName: "plus")
+                    Image(systemName: "hare.fill")
                         .font(.title2)
                         .foregroundColor(rateValue < 2 ? .primary : .secondary)
-                        .frame(width: 30, height: 30)
+                        .frame(width: 20, height: 20)
                 })
             }
         }
@@ -67,7 +71,7 @@ struct RateView: View {
         @StateObject var player: AudioHelper = AudioHelper()
         
         var body: some View {
-            RateView(player: player, rateValue: $player.rateValue)
+            RateView(player: AudioHelper.sharedController, rateValue: $player.rateValue)
                 .frame(maxHeight: 50)
         }
     }
