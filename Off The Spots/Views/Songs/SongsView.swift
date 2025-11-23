@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SongsView: View {
+    let defaults = UserDefaults.standard
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
@@ -111,9 +112,9 @@ struct SongsView: View {
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 if let statuses = taskState.value {
-                    isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+                    isPro = StoreHelper.checkForActiveSubscription(in: statuses)
                 } else {
-                    isPro = false
+                    isPro = defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
                 }
             }
         }

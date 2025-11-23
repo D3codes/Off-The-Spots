@@ -68,7 +68,7 @@ struct EditSongView: View {
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
             if let statuses = taskState.value {
-                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
+                isPro = StoreHelper.checkForActiveSubscription(in: statuses)
             } else {
                 isPro = false
             }

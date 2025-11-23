@@ -8,10 +8,11 @@
 import StoreKit
 
 class StoreHelper {
-    let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
-    let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
+    @MainActor static let defaults = UserDefaults.standard
+    static let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
+    static let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
     
-    func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
+    static func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
         var isPro: Bool = false
         
         statuses.forEach { status in
@@ -19,11 +20,20 @@ class StoreHelper {
             let isProProductId: Bool = productId == monthlyPro || productId == yearlyPro
             let isActiveStatus: Bool = status.state != .revoked && status.state != .expired
             
-//            print("Product ID: \(productId), isProProductId: \(isProProductId), isActiveStatus: \(isActiveStatus)")
-            
-            switch status.transaction {
+            let verification = status.transaction
+            switch verification {
             case .verified:
                 if isProProductId && isActiveStatus {
+                    if let transaction = try? verification.payloadValue {
+                        let expirationDate: Date? = transaction.expirationDate
+                        let revocationDate: Date? = transaction.revocationDate
+                        
+                        let proExpirationDate: Date = min(expirationDate ?? Date.distantFuture, revocationDate ?? Date.distantFuture)
+                        DispatchQueue.main.async {
+                            defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
+                        }
+                    }
+                    
                     isPro = true
                 }
             case .unverified(let t, let error):
