@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EditSongView: View {
+    let defaults = UserDefaults.standard
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -70,7 +71,7 @@ struct EditSongView: View {
             if let statuses = taskState.value {
                 isPro = StoreHelper.checkForActiveSubscription(in: statuses)
             } else {
-                isPro = false
+                isPro = defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
             }
         }
 //        .background(backgroundGradient)

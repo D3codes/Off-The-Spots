@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SetListsView: View {
+    let defaults = UserDefaults.standard
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
@@ -120,7 +121,7 @@ struct SetListsView: View {
                 if let statuses = taskState.value {
                     isPro = StoreHelper.checkForActiveSubscription(in: statuses)
                 } else {
-                    isPro = false
+                    isPro = defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
                 }
             }
         }

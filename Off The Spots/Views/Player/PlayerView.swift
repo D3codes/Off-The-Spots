@@ -9,6 +9,7 @@ import SwiftUI
 import AVFoundation
 
 struct PlayerView: View {
+    let defaults = UserDefaults.standard
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
     
@@ -238,7 +239,7 @@ struct PlayerView: View {
             if let statuses = taskState.value {
                 isPro = StoreHelper.checkForActiveSubscription(in: statuses)
             } else {
-                isPro = false
+                isPro = defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
             }
         }
     }

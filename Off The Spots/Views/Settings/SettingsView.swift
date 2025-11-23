@@ -9,6 +9,7 @@ import SwiftUI
 import StoreKit
 
 struct SettingsView: View {
+    let defaults = UserDefaults.standard
     @Environment(\.otsProGroupId) var otsProGroupId
     @Environment(\.requestReview) var requestReview
     @Environment(\.openURL) var openURL
@@ -190,7 +191,7 @@ struct SettingsView: View {
             if let statuses = taskState.value {
                 isPro = StoreHelper.checkForActiveSubscription(in: statuses)
             } else {
-                isPro = false
+                isPro = defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
             }
         }
     }

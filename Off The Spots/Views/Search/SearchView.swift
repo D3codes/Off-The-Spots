@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SearchView: View {
+    let defaults = UserDefaults.standard
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
@@ -122,7 +123,7 @@ struct SearchView: View {
                 if let statuses = taskState.value {
                     isPro = StoreHelper.checkForActiveSubscription(in: statuses)
                 } else {
-                    isPro = false
+                    isPro = defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
                 }
             }
         }
