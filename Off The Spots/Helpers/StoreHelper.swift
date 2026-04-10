@@ -6,39 +6,46 @@
 //
 
 import StoreKit
+import _StoreKit_SwiftUI
 
 class StoreHelper {
     @MainActor static let defaults = UserDefaults.standard
     static let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
     static let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
     
-    static func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
-        var isPro: Bool = false
+    @MainActor static func checkForActiveSubscription(in taskState: EntitlementTaskState<[Product.SubscriptionInfo.Status]>) -> Bool {
+        if let statuses = taskState.value {
+            return checkForActiveSubscription(in: statuses)
+        } else {
+            print("HI")
+            return defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
+        }
+    }
+    
+    private static func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
+        let activeStatuses = statuses.filter {
+            $0.state != .revoked && $0.state != .expired
+            && ($0.transaction.unsafePayloadValue.productID == monthlyPro || $0.transaction.unsafePayloadValue.productID == yearlyPro)
+        }
         
-        statuses.forEach { status in
-            let productId: String = status.transaction.unsafePayloadValue.productID
-            let isProProductId: Bool = productId == monthlyPro || productId == yearlyPro
-            let isActiveStatus: Bool = status.state != .revoked && status.state != .expired
-            
-            let verification = status.transaction
-            switch verification {
-            case .verified:
-                if isProProductId && isActiveStatus {
-                    if let transaction = try? verification.payloadValue {
-                        let expirationDate: Date? = transaction.expirationDate
-                        let revocationDate: Date? = transaction.revocationDate
-                        
-                        let proExpirationDate: Date = min(expirationDate ?? Date.distantFuture, revocationDate ?? Date.distantFuture)
-                        DispatchQueue.main.async {
-                            defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
-                        }
-                    }
-                    
-                    isPro = true
-                }
-            case .unverified(let t, let error):
-                print("Transaction ID \(t.id) for \(t.productID) is unverified: \(error)")
+        let isPro: Bool = !activeStatuses.isEmpty
+        
+        var proExpirationDate: Date = Date()
+        if isPro {
+            let verification = activeStatuses.first!.transaction
+            if let transaction = try? verification.payloadValue {
+                let expirationDate: Date = transaction.expirationDate ?? Date.distantFuture
+                let revocationDate: Date = transaction.revocationDate ?? Date.distantFuture
+                
+                print("Expiration: \(expirationDate), Revocation: \(revocationDate), Now: \(Date())")
+                
+                proExpirationDate = min(expirationDate, revocationDate)
             }
+        }
+        
+        print("Pro Expiration: \(proExpirationDate)")
+        DispatchQueue.main.async {
+            defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
         }
         
         return isPro
