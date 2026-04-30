@@ -17,7 +17,6 @@ class StoreHelper {
         if let statuses = taskState.value {
             return checkForActiveSubscription(in: statuses)
         } else {
-            print("HI")
             return defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
         }
     }
@@ -30,7 +29,6 @@ class StoreHelper {
         
         let isPro: Bool = !activeStatuses.isEmpty
         
-        var proExpirationDate: Date = Date()
         if isPro {
             let verification = activeStatuses.first!.transaction
             if let transaction = try? verification.payloadValue {
@@ -39,13 +37,13 @@ class StoreHelper {
                 
                 print("Expiration: \(expirationDate), Revocation: \(revocationDate), Now: \(Date())")
                 
-                proExpirationDate = min(expirationDate, revocationDate)
+                let proExpirationDate: Date = min(expirationDate, revocationDate)
+                
+                print("Pro Expiration: \(proExpirationDate)")
+                DispatchQueue.main.async {
+                    defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
+                }
             }
-        }
-        
-        print("Pro Expiration: \(proExpirationDate)")
-        DispatchQueue.main.async {
-            defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
         }
         
         return isPro

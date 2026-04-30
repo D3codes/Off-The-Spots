@@ -9,6 +9,14 @@ import AVFoundation
 import MediaPlayer
 import SwiftData
 
+private final class AudioHelperRelay: @unchecked Sendable {
+    weak var helper: AudioHelper?
+
+    init(helper: AudioHelper) {
+        self.helper = helper
+    }
+}
+
 class AudioHelper: NSObject, ObservableObject {
     @MainActor static let sharedController: AudioHelper = AudioHelper()
     
@@ -202,6 +210,7 @@ class AudioHelper: NSObject, ObservableObject {
             needsFileScheduled = false
 
             let frameCount = AVAudioFrameCount(audioLengthSamples - seekFrame)
+            let relay = AudioHelperRelay(helper: self)
             
             audioPlayer.scheduleSegment(
                 audioFile,
@@ -209,8 +218,13 @@ class AudioHelper: NSObject, ObservableObject {
                 frameCount: frameCount,
                 at: nil
             ) {
-                self.needsFileScheduled = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.updateProgress() })
+                Task { @MainActor in
+                    guard let helper = relay.helper else { return }
+                    helper.needsFileScheduled = true
+
+                    try? await Task.sleep(for: .seconds(2))
+                    helper.updateProgress()
+                }
             }
 
             if wasPlaying {
@@ -290,10 +304,16 @@ class AudioHelper: NSObject, ObservableObject {
 
         needsFileScheduled = false
         seekFrame = 0
+        let relay = AudioHelperRelay(helper: self)
 
         audioPlayer.scheduleFile(file, at: nil) {
-            self.needsFileScheduled = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.updateProgress() })
+            Task { @MainActor in
+                guard let helper = relay.helper else { return }
+                helper.needsFileScheduled = true
+
+                try? await Task.sleep(for: .seconds(2))
+                helper.updateProgress()
+            }
         }
     }
     
@@ -395,4 +415,3 @@ class AudioHelper: NSObject, ObservableObject {
         }
     }
 }
-

@@ -61,8 +61,10 @@ struct SongsView: View {
                             })
                             .listRowBackground(listItemBackground)
                         }
-                        .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)
+                        .if(isPro) { view in
+                            view.onMove(perform: moveSongs)
+                        }
                     }
                     .scrollContentBackground(.hidden)
                     .listSectionSpacing(.compact)
@@ -75,7 +77,7 @@ struct SongsView: View {
                     NavigationLink(destination: SettingsView(hideMiniPlayer: $hideMiniPlayer), label: {Image(systemName: "gearshape") })
                 }
                 
-                if(!songs.isEmpty) {
+                if(!songs.isEmpty && isPro) {
                     ToolbarItem(placement: .topBarTrailing) {
                         EditButton()
                     }
