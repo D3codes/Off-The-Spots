@@ -2,7 +2,7 @@
 //  SubscriptionRequiredTemplate.swift
 //  Off The Spots
 //
-//  Created by Codex on 11/24/25.
+//  Created by David Freeman on 04/29/26.
 //
 
 import CarPlay
