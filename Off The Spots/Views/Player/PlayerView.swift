@@ -67,8 +67,11 @@ struct PlayerView: View {
                         }
                     }
                 )) {
-                    ForEach(player.selectedSong!.tracks, id: \.id) { track in
-                        Text(track.name).tag(track.id)
+                    ForEach(player.selectedSong!.tracks.enumerated(), id: \.offset) { index, track in
+                        let unlockTrack: Bool = isPro || index < 2
+                        if unlockTrack {
+                            Text(track.name).tag(track.id)
+                        }
                     }
                 }
                 .pickerStyle(.menu)
@@ -235,11 +238,7 @@ struct PlayerView: View {
         .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
-            if let statuses = taskState.value {
-                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
-            } else {
-                isPro = false
-            }
+            isPro = StoreHelper.checkForActiveSubscription(in: taskState)
         }
     }
 }

@@ -9,5 +9,5 @@ import SwiftUI
 
 extension EnvironmentValues {
     // Subscription IDs
-    @Entry var otsProGroupId: String = "21825638"
+    @Entry var otsProGroupId: String = StoreHelper.proGroupID
 }

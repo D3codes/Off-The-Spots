@@ -36,9 +36,9 @@ struct SubscriptionBenefitsView: View {
             )
             
             SubscriptionBenefitItemView(
-                image: Image(systemName: "square"),
-                title: "Custom Icons",
-                description: "Personalize your look"
+                image: Image(systemName: "car.side.fill"),
+                title: "CarPlay",
+                description: "Control your music in the car"
             )
         }
     }

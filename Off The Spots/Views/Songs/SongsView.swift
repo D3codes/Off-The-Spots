@@ -61,8 +61,10 @@ struct SongsView: View {
                             })
                             .listRowBackground(listItemBackground)
                         }
-                        .onMove(perform: moveSongs)
                         .onDelete(perform: deleteSongs)
+                        .if(isPro) { view in
+                            view.onMove(perform: moveSongs)
+                        }
                     }
                     .scrollContentBackground(.hidden)
                     .listSectionSpacing(.compact)
@@ -75,7 +77,7 @@ struct SongsView: View {
                     NavigationLink(destination: SettingsView(hideMiniPlayer: $hideMiniPlayer), label: {Image(systemName: "gearshape") })
                 }
                 
-                if(!songs.isEmpty) {
+                if(!songs.isEmpty && isPro) {
                     ToolbarItem(placement: .topBarTrailing) {
                         EditButton()
                     }
@@ -110,11 +112,7 @@ struct SongsView: View {
             .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
-                if let statuses = taskState.value {
-                    isPro = StoreHelper().checkForActiveSubscription(in: statuses)
-                } else {
-                    isPro = false
-                }
+                isPro = StoreHelper.checkForActiveSubscription(in: taskState)
             }
         }
     }

@@ -6,28 +6,57 @@
 //
 
 import StoreKit
+import _StoreKit_SwiftUI
 
 class StoreHelper {
-    let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
-    let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
+    @MainActor static let defaults = UserDefaults.standard
+    static let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
+    static let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
+    static let proGroupID: String = "21825638"
     
-    func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
-        var isPro: Bool = false
+    @MainActor static func checkForActiveSubscription(in taskState: EntitlementTaskState<[Product.SubscriptionInfo.Status]>) -> Bool {
+        if let statuses = taskState.value {
+            return checkForActiveSubscription(in: statuses)
+        } else {
+            return hasCachedActiveSubscription()
+        }
+    }
+
+    @MainActor static func hasCachedActiveSubscription() -> Bool {
+        defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
+    }
+
+    @MainActor static func hasActiveSubscription(groupID: String = proGroupID) async -> Bool {
+        do {
+            let statuses = try await Product.SubscriptionInfo.status(for: groupID)
+            return checkForActiveSubscription(in: statuses)
+        } catch {
+            return hasCachedActiveSubscription()
+        }
+    }
+    
+    private static func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
+        let activeStatuses = statuses.filter {
+            $0.state != .revoked && $0.state != .expired
+            && ($0.transaction.unsafePayloadValue.productID == monthlyPro || $0.transaction.unsafePayloadValue.productID == yearlyPro)
+        }
         
-        statuses.forEach { status in
-            let productId: String = status.transaction.unsafePayloadValue.productID
-            let isProProductId: Bool = productId == monthlyPro || productId == yearlyPro
-            let isActiveStatus: Bool = status.state != .revoked && status.state != .expired
-            
-//            print("Product ID: \(productId), isProProductId: \(isProProductId), isActiveStatus: \(isActiveStatus)")
-            
-            switch status.transaction {
-            case .verified:
-                if isProProductId && isActiveStatus {
-                    isPro = true
+        let isPro: Bool = !activeStatuses.isEmpty
+        
+        if isPro {
+            let verification = activeStatuses.first!.transaction
+            if let transaction = try? verification.payloadValue {
+                let expirationDate: Date = transaction.expirationDate ?? Date.distantFuture
+                let revocationDate: Date = transaction.revocationDate ?? Date.distantFuture
+                
+                print("Expiration: \(expirationDate), Revocation: \(revocationDate), Now: \(Date())")
+                
+                let proExpirationDate: Date = min(expirationDate, revocationDate)
+                
+                print("Pro Expiration: \(proExpirationDate)")
+                DispatchQueue.main.async {
+                    defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
                 }
-            case .unverified(let t, let error):
-                print("Transaction ID \(t.id) for \(t.productID) is unverified: \(error)")
             }
         }
         

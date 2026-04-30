@@ -67,11 +67,7 @@ struct EditSongView: View {
         .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
-            if let statuses = taskState.value {
-                isPro = StoreHelper().checkForActiveSubscription(in: statuses)
-            } else {
-                isPro = false
-            }
+            isPro = StoreHelper.checkForActiveSubscription(in: taskState)
         }
 //        .background(backgroundGradient)
     }

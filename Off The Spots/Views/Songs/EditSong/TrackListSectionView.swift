@@ -19,8 +19,10 @@ struct TrackListSectionView: View {
             ForEach(0..<song.tracks.count, id: \.self) { index in
                 TextField("", text: self.$song.tracks[index].name)
             }
-            .onMove(perform: moveTracks)
             .onDelete(perform: deleteTracks)
+            .if(isPro) { view in
+                view.onMove(perform: moveTracks)
+            }
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
 //            .listRowBackground(listItemBackground)
