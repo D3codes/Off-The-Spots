@@ -22,6 +22,7 @@ struct SubscriptionBenefitItemView: View {
                     .foregroundStyle(.accent)
                     .font(.title)
                     .padding(.horizontal)
+                    .frame(width: 75)
                 
                 VStack {
                     Text(title)

@@ -12,12 +12,26 @@ class StoreHelper {
     @MainActor static let defaults = UserDefaults.standard
     static let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
     static let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
+    static let proGroupID: String = "21825638"
     
     @MainActor static func checkForActiveSubscription(in taskState: EntitlementTaskState<[Product.SubscriptionInfo.Status]>) -> Bool {
         if let statuses = taskState.value {
             return checkForActiveSubscription(in: statuses)
         } else {
-            return defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
+            return hasCachedActiveSubscription()
+        }
+    }
+
+    @MainActor static func hasCachedActiveSubscription() -> Bool {
+        defaults.value(forKey: UserDefaultsKeys.proExpirationDate) as? Date ?? Date.distantPast > Date()
+    }
+
+    @MainActor static func hasActiveSubscription(groupID: String = proGroupID) async -> Bool {
+        do {
+            let statuses = try await Product.SubscriptionInfo.status(for: groupID)
+            return checkForActiveSubscription(in: statuses)
+        } catch {
+            return hasCachedActiveSubscription()
         }
     }
     
