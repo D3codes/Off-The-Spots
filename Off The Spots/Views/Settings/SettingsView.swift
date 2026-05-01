@@ -54,20 +54,6 @@ struct SettingsView: View {
             .listRowBackground(listItemBackground)
             
             Section {
-                NavigationLink(destination: WhatsNewView(), label: {
-                    HStack {
-                        Image(systemName: "bell.badge")
-                        VStack {
-                            Text("What's New?")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            Text("Read about the latest updates")
-                                .font(.footnote)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                })
-                
                 NavigationLink(destination: AboutView(), label: {
                     HStack {
                         Image(systemName: "info.circle")
@@ -81,10 +67,7 @@ struct SettingsView: View {
                         }
                     }
                 })
-            }
-            .listRowBackground(listItemBackground)
-            
-            Section {
+                
                 Button(action: { showMail = true }, label: {
                     HStack {
                         Image(systemName: "envelope")
