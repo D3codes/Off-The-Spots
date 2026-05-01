@@ -29,7 +29,6 @@ enum OffTheSpotsPersistence {
                 cloudKitDatabase: .private(Self.cloudKitContainerIdentifier)
             )
             let container = try ModelContainer(for: schema, configurations: [cloudConfiguration])
-            normalizeTrackOrders(in: container)
             return container
         } catch {
             print("CloudKit-backed ModelContainer unavailable, using local store: \(error)")
@@ -37,39 +36,10 @@ enum OffTheSpotsPersistence {
 
             do {
                 let container = try ModelContainer(for: schema, configurations: [localConfiguration])
-                normalizeTrackOrders(in: container)
                 return container
             } catch {
                 fatalError("Could not create ModelContainer: \(error)")
             }
-        }
-    }
-
-    private static func normalizeTrackOrders(in container: ModelContainer) {
-        let context = ModelContext(container)
-        let descriptor = FetchDescriptor<Song>()
-        guard let songs = try? context.fetch(descriptor) else { return }
-
-        var didChange = false
-        for song in songs {
-            guard let tracks = song.tracks, tracks.count > 1 else { continue }
-
-            let orders = tracks.map(\.order)
-            let hasDuplicateOrders = Set(orders).count != orders.count
-            let hasContiguousOrders = Set(orders) == Set(0..<tracks.count)
-
-            if hasDuplicateOrders || !hasContiguousOrders {
-                for (index, track) in tracks.enumerated() {
-                    if track.order != index {
-                        track.order = index
-                        didChange = true
-                    }
-                }
-            }
-        }
-
-        if didChange {
-            try? context.save()
         }
     }
 }
