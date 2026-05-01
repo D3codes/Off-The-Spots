@@ -46,6 +46,7 @@ class AudioHelper: NSObject, ObservableObject {
     private var seekFrame: AVAudioFramePosition = 0
     private var currentPosition: AVAudioFramePosition = 0
     private var audioLengthSamples: AVAudioFramePosition = 0
+    private var scheduleGeneration: Int = 0
 
     private var currentFrame: AVAudioFramePosition {
       guard
@@ -92,12 +93,10 @@ class AudioHelper: NSObject, ObservableObject {
         selectedSong = song
         selectedSetList = setList
         
-        seekFrame = 0
-        currentPosition = 0
-        isPlaying = false
-        progress = 0
+        resetScheduledAudio()
         setPan(value: 0.0)
-        setRate(value: 1.0)
+        speedAndPitchControl.rate = 1.0
+        rateValue = 1.0
         clearLoopStart()
         clearLoopEnd()
         
@@ -126,9 +125,6 @@ class AudioHelper: NSObject, ObservableObject {
             audioSampleRate = format.sampleRate
             duration = Double(audioLengthSamples) / audioSampleRate
 
-            if audioPlayer.isPlaying {
-                audioPlayer.stop()
-            }
             scheduleAudioFile()
         } catch {
             print("Failed to prepare audio engine/player with error: \(error)")
@@ -145,6 +141,12 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func play() {
+        guard audioFile != nil else {
+            isPlaying = false
+            updateNowPlaying()
+            return
+        }
+
         if !engine.isRunning {
             do { try engine.start() }
             catch { }
@@ -169,6 +171,8 @@ class AudioHelper: NSObject, ObservableObject {
     func stop() {
         audioPlayer.stop()
         engine.stop()
+        scheduleGeneration += 1
+        needsFileScheduled = true
         seekFrame = 0
         progress = 0
         currentPosition = 0
@@ -196,6 +200,7 @@ class AudioHelper: NSObject, ObservableObject {
 
         let wasPlaying = audioPlayer.isPlaying
         audioPlayer.stop()
+        scheduleGeneration += 1
 
         if currentPosition < audioLengthSamples {
             updateProgress()
@@ -203,6 +208,7 @@ class AudioHelper: NSObject, ObservableObject {
 
             let frameCount = AVAudioFrameCount(audioLengthSamples - seekFrame)
             let relay = AudioHelperRelay(helper: self)
+            let generation = scheduleGeneration
             
             audioPlayer.scheduleSegment(
                 audioFile,
@@ -212,9 +218,11 @@ class AudioHelper: NSObject, ObservableObject {
             ) {
                 Task { @MainActor in
                     guard let helper = relay.helper else { return }
+                    guard helper.scheduleGeneration == generation else { return }
                     helper.needsFileScheduled = true
 
                     try? await Task.sleep(for: .seconds(2))
+                    guard helper.scheduleGeneration == generation else { return }
                     helper.updateProgress()
                 }
             }
@@ -297,16 +305,33 @@ class AudioHelper: NSObject, ObservableObject {
         needsFileScheduled = false
         seekFrame = 0
         let relay = AudioHelperRelay(helper: self)
+        let generation = scheduleGeneration
 
         audioPlayer.scheduleFile(file, at: nil) {
             Task { @MainActor in
                 guard let helper = relay.helper else { return }
+                guard helper.scheduleGeneration == generation else { return }
                 helper.needsFileScheduled = true
 
                 try? await Task.sleep(for: .seconds(2))
+                guard helper.scheduleGeneration == generation else { return }
                 helper.updateProgress()
             }
         }
+    }
+
+    private func resetScheduledAudio() {
+        audioPlayer.stop()
+        scheduleGeneration += 1
+        audioFile = nil
+        audioSampleRate = 1
+        audioLengthSamples = 0
+        duration = 0
+        needsFileScheduled = true
+        seekFrame = 0
+        currentPosition = 0
+        isPlaying = false
+        progress = 0
     }
     
     private func handlePlayerDidFinishPlaying() {
