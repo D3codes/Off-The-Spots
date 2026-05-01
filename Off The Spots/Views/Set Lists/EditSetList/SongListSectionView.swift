@@ -11,11 +11,11 @@ import SwiftData
 struct SongListSectionView: View {
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
 
-    @State var setList: SetList
+    @Binding var songIdsDraft: [UUID]
     
     var body: some View {
         Section {
-            ForEach(setList.songs, id: \.self) { songId in
+            ForEach(songIdsDraft, id: \.self) { songId in
                 if let song = songs.first(where: { $0.id == songId }) {
                     Text(song.name)
 //                        .listRowBackground(listItemBackground)
@@ -34,7 +34,7 @@ struct SongListSectionView: View {
                 
                 Spacer()
                 
-                NavigationLink(destination: { SelectSongsView(setList: setList) }) {
+                NavigationLink(destination: { SelectSongsView(songIdsDraft: $songIdsDraft) }) {
                     Image(systemName: "plus")
                         .font(.title2)
                         .foregroundStyle(.foreground)
@@ -44,7 +44,7 @@ struct SongListSectionView: View {
                 .buttonStyle(.bordered)
             }
         } footer: {
-            if(setList.songs.isEmpty) {
+            if songIdsDraft.isEmpty {
                 Text("No Songs")
                     .foregroundStyle(.secondary)
                     .font(.title3)
@@ -56,21 +56,19 @@ struct SongListSectionView: View {
     
     private func deleteSongs(offsets: IndexSet) {
         withAnimation {
-            for index in offsets {
-                setList.songs.remove(at: index)
-            }
+            songIdsDraft.remove(atOffsets: offsets)
         }
     }
 
     private func moveSongs(offsets: IndexSet, destination: Int) {
         withAnimation {
-            setList.songs.move(fromOffsets: offsets, toOffset: destination)
+            songIdsDraft.move(fromOffsets: offsets, toOffset: destination)
         }
     }
 }
 
 #Preview {
-    let setList = SetList(name: "Test", songs: [])
+    @Previewable @State var songIdsDraft: [UUID] = []
     
     let container: ModelContainer = {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
@@ -79,14 +77,14 @@ struct SongListSectionView: View {
             let track = Track(name: "Track 1", file: nil)
             let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
             container.mainContext.insert(song)
-            setList.songs.append(song.id)
+            songIdsDraft.append(song.id)
         }
         return container
     }()
     
     NavigationStack {
         List {
-            SongListSectionView(setList: setList)
+            SongListSectionView(songIdsDraft: $songIdsDraft)
                 .modelContainer(container)
         }
     }

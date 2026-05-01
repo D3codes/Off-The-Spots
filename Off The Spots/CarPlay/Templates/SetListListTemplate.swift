@@ -18,7 +18,7 @@ extension CarPlayTemplateManager {
         setList.songs.forEach { songId in
             let song = songs.first(where: { $0.id == songId })!
             
-            let songListItem = CPListItem(text: song.name, detailText: "\(song.tracks.count) Track\(song.tracks.count > 1 ? "s" : "")")
+            let songListItem = CPListItem(text: song.name, detailText: "\(song.trackCount) Track\(song.trackCount > 1 ? "s" : "")")
             songListItem.isPlaying = AudioHelper.sharedController.selectedSong?.id == song.id && AudioHelper.sharedController.selectedSetList?.id == setList.id
             
             songListItem.handler = { listItem, completion in

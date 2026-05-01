@@ -10,16 +10,15 @@ import SwiftData
 
 @Model
 final class SetList {
-    var id: UUID
-    var order: Int
-    var name: String
-    var songs: [UUID]
+    var id: UUID = UUID()
+    var order: Int = 0
+    var name: String = ""
+    var songs: [UUID] = []
     
-    init(id: UUID = UUID(), order: Int = 0, name: String, songs: [UUID]) {
+    init(id: UUID = UUID(), order: Int = 0, name: String = "", songs: [UUID] = []) {
         self.id = id
         self.order = order
         self.name = name
         self.songs = songs
     }
 }
-

@@ -30,7 +30,7 @@ struct PlayerAccessoryView: View {
                         )
                         
                         MarqueeText(
-                            text: player.selectedSong?.selectedTrack.name ?? "",
+                            text: player.selectedSong?.activeTrackName ?? "",
                             font: UIFont.preferredFont(forTextStyle: .subheadline),
                             leftFade: 16,
                             rightFade: 16,
@@ -79,7 +79,7 @@ struct PlayerAccessoryView: View {
                         )
                         
                         MarqueeText(
-                            text: player.selectedSong?.selectedTrack.name ?? "",
+                            text: player.selectedSong?.activeTrackName ?? "",
                             font: UIFont.preferredFont(forTextStyle: .subheadline),
                             leftFade: 16,
                             rightFade: 16,

@@ -15,15 +15,19 @@ struct EditSetListView: View {
     @State private var sheetTitle: String = "Add Set List"
     
     @Binding var setList: SetList
+    var isNewSetList: Bool = false
     var dismissSubView: () -> Void = { }
     
     @FocusState var isNameFieldFocused: Bool
+    @State private var setListNameDraft: String = ""
+    @State private var songIdsDraft: [UUID] = []
+    @State private var didLoadDrafts: Bool = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    TextField("New Set List", text: $setList.name)
+                    TextField("New Set List", text: $setListNameDraft)
                         .focused($isNameFieldFocused)
                 } header: {
                     Text("Name")
@@ -31,7 +35,7 @@ struct EditSetListView: View {
                 }
 //                .listRowBackground(listItemBackground)
                 
-                SongListSectionView(setList: setList)
+                SongListSectionView(songIdsDraft: $songIdsDraft)
             }
             .scrollContentBackground(.hidden)
             .navigationTitle(Text(sheetTitle))
@@ -43,23 +47,41 @@ struct EditSetListView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .confirm, action: {
-                        modelContext.delete(setList)
-                        modelContext.insert(setList)
+                        applyDrafts()
+                        if isNewSetList {
+                            modelContext.insert(setList)
+                        }
+                        try? modelContext.save()
                         dismiss()
                         dismissSubView()
                     })
-                    .disabled(setList.name.isEmpty)
+                    .disabled(setListNameDraft.isEmpty)
                 }
             }
 //            .background(backgroundGradient)
         }
         .onAppear {
-            if(!setList.name.isEmpty) {
+            if !didLoadDrafts {
+                loadDrafts()
+            }
+
+            if(!setListNameDraft.isEmpty) {
                 sheetTitle = "Edit Set List"
             } else {
                 isNameFieldFocused = true
             }
         }
+    }
+
+    private func loadDrafts() {
+        setListNameDraft = setList.name
+        songIdsDraft = setList.songs
+        didLoadDrafts = true
+    }
+
+    private func applyDrafts() {
+        setList.name = setListNameDraft
+        setList.songs = songIdsDraft
     }
 }
 
@@ -89,7 +111,7 @@ struct EditSetListView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .sheet(isPresented : $presentAddSetListPopover) {
-                EditSetListView(setList: $setList)
+                EditSetListView(setList: $setList, isNewSetList: true)
                     .interactiveDismissDisabled(true)
                     .modelContainer(container)
             }

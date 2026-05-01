@@ -107,7 +107,7 @@ struct SetListsView: View {
                     })
                     .accessibilityLabel("Add Set List")
                     .sheet(isPresented: $presentAddSetListSheet) {
-                        EditSetListView(setList: $newSetList)
+                        EditSetListView(setList: $newSetList, isNewSetList: true)
                             .interactiveDismissDisabled(true)
                     }
                 }

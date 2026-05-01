@@ -62,19 +62,7 @@ class AudioHelper: NSObject, ObservableObject {
     private let modelContext: ModelContext
     
     override init() {
-        container = {
-            let schema = Schema([
-                Song.self,
-                SetList.self
-            ])
-            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-            do {
-                return try ModelContainer(for: schema, configurations: [modelConfiguration])
-            } catch {
-                fatalError("Could not create ModelContainer: \(error)")
-            }
-        }()
+        container = OffTheSpotsPersistence.makeModelContainer()
         
         modelContext = ModelContext(container)
         
@@ -91,7 +79,7 @@ class AudioHelper: NSObject, ObservableObject {
     
     func setSelectedTrack(track: Track) {
         guard let selectedSong else { return }
-        if track.id == selectedSong.selectedTrack.id || !selectedSong.tracks.contains(where: { $0.id == track.id }) { return }
+        if track.id == selectedSong.selectedTrack?.id || !(selectedSong.tracks ?? []).contains(where: { $0.id == track.id }) { return }
 
         stop()
         selectedSong.selectedTrack = track
@@ -114,7 +102,11 @@ class AudioHelper: NSObject, ObservableObject {
         clearLoopEnd()
         
         do {
-            guard let data = song.selectedTrack.file else {
+            if song.selectedTrack == nil {
+                song.selectedTrack = song.sortedTracks.first
+            }
+
+            guard let data = song.activeTrack?.file else {
                 print("Selected track has no data")
                 return
             }
@@ -339,8 +331,8 @@ class AudioHelper: NSObject, ObservableObject {
     private func setupNowPlaying() {
         var nowPlayingInfo = [String : Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = selectedSong?.name
-//        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.selectedTrack.name // required to show in control center
-        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = selectedSong?.selectedTrack.name // required to be selectable in CarPlay
+//        nowPlayingInfo[MPMediaItemPropertyArtist] = selectedSong?.activeTrackName // required to show in control center
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = selectedSong?.activeTrackName // required to be selectable in CarPlay
 
         if let image = UIImage(named: "logo") {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in

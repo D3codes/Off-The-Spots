@@ -102,7 +102,7 @@ struct SongsView: View {
                     })
                     .accessibilityLabel("Add Song")
                     .sheet(isPresented: $presentAddSongSheet) {
-                        EditSongView(song: $newSong)
+                        EditSongView(song: $newSong, isNewSong: true)
                             .interactiveDismissDisabled(true)
                     }
                 }

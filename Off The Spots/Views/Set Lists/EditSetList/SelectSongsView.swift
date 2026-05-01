@@ -12,9 +12,9 @@ struct SelectSongsView: View {
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
     @Environment(\.dismiss) private var dismiss
     
-    @State var setList: SetList
+    @Binding var songIdsDraft: [UUID]
     
-    @State private var songSelection = Set<Song.ID>()
+    @State private var songSelection = Set<UUID>()
     
     @State private var searchText: String = ""
     var filteredSongs: [Song] {
@@ -42,7 +42,7 @@ struct SelectSongsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    setList.songs = Array(songSelection)
+                    songIdsDraft = orderedSelectedSongIds()
                     dismiss()
                 }) {
                     Image(systemName: "chevron.backward")
@@ -51,15 +51,24 @@ struct SelectSongsView: View {
         }
         .onAppear {
             DispatchQueue.main.async {
-                songSelection = Set<Song.ID>(setList.songs)
+                songSelection = Set<UUID>(songIdsDraft)
             }
         }
 //        .background(backgroundGradient)
     }
+
+    private func orderedSelectedSongIds() -> [UUID] {
+        var selectedIds = songIdsDraft.filter { songSelection.contains($0) }
+        let existingIds = Set(selectedIds)
+        selectedIds.append(contentsOf: songs.map(\.id).filter {
+            songSelection.contains($0) && !existingIds.contains($0)
+        })
+        return selectedIds
+    }
 }
 
 #Preview {
-    let setList = SetList(name: "Test", songs: [])
+    @Previewable @State var songIdsDraft: [UUID] = []
     
     let container: ModelContainer = {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
@@ -68,13 +77,13 @@ struct SelectSongsView: View {
             let track = Track(name: "Track 1", file: nil)
             let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
             container.mainContext.insert(song)
-            setList.songs.append(song.id)
+            songIdsDraft.append(song.id)
         }
         return container
     }()
     
     NavigationStack {
-        SelectSongsView(setList: setList)
+        SelectSongsView(songIdsDraft: $songIdsDraft)
             .modelContainer(container)
     }
 }

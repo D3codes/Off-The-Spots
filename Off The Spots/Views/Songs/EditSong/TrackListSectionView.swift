@@ -8,16 +8,17 @@
 import SwiftUI
 
 struct TrackListSectionView: View {
-    @State var song: Song
+    @Binding var trackDrafts: [TrackDraft]
     var isPro: Bool
     @Binding var presentSubscription: Bool
     
     @State private var presentTrackFileImporter: Bool = false
+    @State private var importErrorMessage: String?
     
     var body: some View {
         Section {
-            ForEach(0..<song.tracks.count, id: \.self) { index in
-                TextField("", text: self.$song.tracks[index].name)
+            ForEach($trackDrafts) { $trackDraft in
+                TextField("", text: $trackDraft.name)
             }
             .onDelete(perform: deleteTracks)
             .if(isPro) { view in
@@ -37,7 +38,7 @@ struct TrackListSectionView: View {
                 Spacer()
                 
                 Button(action: {
-                    if isPro || song.tracks.count < 2 {
+                    if isPro || trackDrafts.count < 2 {
                         presentTrackFileImporter = true
                     } else {
                         presentSubscription = true
@@ -52,7 +53,7 @@ struct TrackListSectionView: View {
                 .buttonStyle(.bordered)
             }
         } footer: {
-            if(song.tracks.isEmpty) {
+            if trackDrafts.isEmpty {
                 Text("No Tracks")
                     .foregroundStyle(.secondary)
                     .font(.title3)
@@ -74,7 +75,7 @@ struct TrackListSectionView: View {
                 case .success(let fileUrls):
                     
                     fileUrls.forEach { file in
-                        if isPro || song.tracks.count < 2 {
+                        if isPro || trackDrafts.count < 2 {
                             
                             // gain access to the directory
                             let gotAccess = file.startAccessingSecurityScopedResource()
@@ -93,39 +94,52 @@ struct TrackListSectionView: View {
                 }
             }
         )
+        .alert("Track Not Imported", isPresented: Binding(
+            get: { importErrorMessage != nil },
+            set: { if !$0 { importErrorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(importErrorMessage ?? "")
+        }
     }
     
     func addTrack(fileUrl: URL) {
         do {
+            let fileSize = try fileUrl.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+            guard fileSize <= OffTheSpotsPersistence.maximumCloudKitAssetSize else {
+                importErrorMessage = "This file is too large to sync with iCloud. Choose a file smaller than 249 MB."
+                return
+            }
+
             let file: Data = try Data(contentsOf: fileUrl)
-            song.tracks.append(Track(name: fileUrl.deletingPathExtension().lastPathComponent, file: file))
+            let track = TrackDraft(name: fileUrl.deletingPathExtension().lastPathComponent, file: file)
+            trackDrafts.append(track)
         } catch {
-            
+            importErrorMessage = "The selected track could not be imported."
         }
     }
     
     private func deleteTracks(offsets: IndexSet) {
         withAnimation {
-            for index in offsets {
-                song.tracks.remove(at: index)
-            }
+            trackDrafts.remove(atOffsets: offsets)
         }
     }
 
     private func moveTracks(offsets: IndexSet, destination: Int) {
         withAnimation {
-            song.tracks.move(fromOffsets: offsets, toOffset: destination)
+            trackDrafts.move(fromOffsets: offsets, toOffset: destination)
         }
     }
 }
 
 #Preview {
     struct TrackListView_Preview: View {
-        @State private var song: Song = Song(name: "Test Song", tracks: [], selectedTrack: Track(name: "Track 1"))
+        @State private var trackDrafts: [TrackDraft] = []
         
         var body: some View {
             List {
-                TrackListSectionView(song: song, isPro: false, presentSubscription: .constant(false))
+                TrackListSectionView(trackDrafts: $trackDrafts, isPro: false, presentSubscription: .constant(false))
             }
         }
     }

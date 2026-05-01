@@ -8,22 +8,48 @@
 import SwiftUI
 import SwiftData
 
-@main
-struct Off_The_SpotsApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
+enum OffTheSpotsPersistence {
+    static let cloudKitContainerIdentifier = "iCloud.codes.d3.Off-The-Spots"
+    static let maximumCloudKitAssetSize = 249 * 1024 * 1024
+
+    static var schema: Schema {
+        Schema([
             Song.self,
             SetList.self
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    }
+
+    static func makeModelContainer() -> ModelContainer {
+        let schema = Self.schema
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let cloudConfiguration = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .private(Self.cloudKitContainerIdentifier)
+            )
+            let container = try ModelContainer(for: schema, configurations: [cloudConfiguration])
+            return container
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            print("CloudKit-backed ModelContainer unavailable, using local store: \(error)")
+            let localConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+            do {
+                let container = try ModelContainer(for: schema, configurations: [localConfiguration])
+                return container
+            } catch {
+                fatalError("Could not create ModelContainer: \(error)")
+            }
         }
+    }
+}
+
+@main
+struct Off_The_SpotsApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    var sharedModelContainer: ModelContainer = {
+        OffTheSpotsPersistence.makeModelContainer()
     }()
 
     var body: some Scene {
