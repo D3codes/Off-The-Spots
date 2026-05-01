@@ -62,7 +62,7 @@ class AudioHelper: NSObject, ObservableObject {
     private let modelContext: ModelContext
     
     override init() {
-        container = OffTheSpotsPersistence.makeModelContainer()
+        container = OffTheSpotsPersistence.sharedModelContainer
         
         modelContext = ModelContext(container)
         

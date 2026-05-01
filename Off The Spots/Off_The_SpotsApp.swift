@@ -11,6 +11,7 @@ import SwiftData
 enum OffTheSpotsPersistence {
     static let cloudKitContainerIdentifier = "iCloud.codes.d3.Off-The-Spots"
     static let maximumCloudKitAssetSize = 249 * 1024 * 1024
+    static let sharedModelContainer: ModelContainer = makeModelContainer()
 
     static var schema: Schema {
         Schema([
@@ -19,7 +20,7 @@ enum OffTheSpotsPersistence {
         ])
     }
 
-    static func makeModelContainer() -> ModelContainer {
+    private static func makeModelContainer() -> ModelContainer {
         let schema = Self.schema
 
         do {
@@ -49,7 +50,7 @@ struct Off_The_SpotsApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var sharedModelContainer: ModelContainer = {
-        OffTheSpotsPersistence.makeModelContainer()
+        OffTheSpotsPersistence.sharedModelContainer
     }()
 
     var body: some Scene {

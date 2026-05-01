@@ -17,7 +17,7 @@ final class CarPlayTemplateManager: NSObject {
     init(interfaceController: CPInterfaceController) {
         self.interfaceController = interfaceController
         
-        container = OffTheSpotsPersistence.makeModelContainer()
+        container = OffTheSpotsPersistence.sharedModelContainer
         
         modelContext = ModelContext(container)
     }
