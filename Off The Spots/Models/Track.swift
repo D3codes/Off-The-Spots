@@ -10,12 +10,16 @@ import SwiftData
 
 @Model
 final class Track {
-    var id: UUID
-    var name: String
+    var id: UUID = UUID()
+    var order: Int = 0
+    var name: String = ""
     @Attribute(.externalStorage) var file: Data?
+    var song: Song?
+    var selectedBySong: Song?
     
-    init(name: String, file: Data? = nil) {
-        self.id = UUID()
+    init(id: UUID = UUID(), name: String = "", order: Int = 0, file: Data? = nil) {
+        self.id = id
+        self.order = order
         self.name = name
         self.file = file
     }

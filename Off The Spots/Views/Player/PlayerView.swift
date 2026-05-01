@@ -60,14 +60,14 @@ struct PlayerView: View {
             
             HStack {
                 Picker("Select a Track", selection: Binding(
-                    get: { player.selectedSong!.selectedTrack.id },
+                    get: { player.selectedSong!.activeTrack?.id ?? UUID() },
                     set: { newId in
-                        if let newTrack = player.selectedSong!.tracks.first(where: { $0.id == newId }) {
+                        if let newTrack = player.selectedSong!.sortedTracks.first(where: { $0.id == newId }) {
                             player.setSelectedTrack(track: newTrack)
                         }
                     }
                 )) {
-                    ForEach(player.selectedSong!.tracks.enumerated(), id: \.offset) { index, track in
+                    ForEach(player.selectedSong!.sortedTracks.enumerated(), id: \.offset) { index, track in
                         let unlockTrack: Bool = isPro || index < 2
                         if unlockTrack {
                             Text(track.name).tag(track.id)

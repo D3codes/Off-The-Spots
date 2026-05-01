@@ -11,7 +11,7 @@ extension CarPlayTemplateManager {
     @MainActor
     func tracksListTemplate(song: Song) -> CPListTemplate {
         var listItems: [CPListItem] = []
-        song.tracks.forEach { track in
+        song.sortedTracks.forEach { track in
             let trackListItem = CPListItem(text: track.name, detailText: "")
             
             trackListItem.handler = { listItem, completion in

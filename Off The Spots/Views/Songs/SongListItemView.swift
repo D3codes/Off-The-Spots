@@ -21,7 +21,7 @@ struct SongListItemView: View {
                     .multilineTextAlignment(.leading)
                 
                 HStack {
-                    Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.tracks.count)")
+                    Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.trackCount)")
                         .font(.footnote)
                         .tint(.primary)
                     

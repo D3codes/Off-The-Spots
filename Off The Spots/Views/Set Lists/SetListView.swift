@@ -41,8 +41,6 @@ struct SetListView: View {
                         .listRowBackground(listItemBackground)
                     }
                 }
-                .onMove(perform: moveSongs)
-                .onDelete(perform: deleteSongs)
             }
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
@@ -59,20 +57,6 @@ struct SetListView: View {
                 .interactiveDismissDisabled(true)
         }
         .background(backgroundGradient)
-    }
-    
-    private func deleteSongs(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                setList.songs.remove(at: index)
-            }
-        }
-    }
-
-    private func moveSongs(offsets: IndexSet, destination: Int) {
-        withAnimation {
-            setList.songs.move(fromOffsets: offsets, toOffset: destination)
-        }
     }
 }
 

@@ -53,7 +53,7 @@ struct AddToSetListView: View {
                     })
                     .buttonStyle(.plain)
                     .sheet(isPresented: $presentAddSetListSheet) {
-                        EditSetListView(setList: $newSetList, dismissSubView: { dismiss() })
+                        EditSetListView(setList: $newSetList, isNewSetList: true, dismissSubView: { dismiss() })
                             .interactiveDismissDisabled(true)
                     }
                 }

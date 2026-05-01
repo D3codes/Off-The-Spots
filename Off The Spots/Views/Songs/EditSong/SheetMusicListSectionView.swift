@@ -8,24 +8,25 @@
 import SwiftUI
 
 struct SheetMusicListSectionView: View {
-    @State var song: Song
+    @Binding var sheetMusicDraft: SheetMusicDraft?
     var isPro: Bool
     @Binding var presentSubscription: Bool
     
     @State private var presentSheetMusicFileImporter: Bool = false
     @State private var presentSheetMusicViewer: Bool = false
+    @State private var importErrorMessage: String?
     
     var body: some View {
         Section {
             ForEach(0...0, id: \.self) { _ in
-                if song.sheetMusic != nil {
+                if let sheetMusicDraft {
                     Button(action: { presentSheetMusicViewer = true }) {
-                        Text(song.sheetMusic!.name)
+                        Text(sheetMusicDraft.name)
                     }
                     .buttonStyle(.plain)
                     .fullScreenCover(isPresented: $presentSheetMusicViewer) {
                         SheetMusicView(
-                            sheetMusicFile: song.sheetMusic!.file!,
+                            sheetMusicFile: sheetMusicDraft.file!,
                             dismissSheetMusicView: { presentSheetMusicViewer = false }
                         )
                         .interactiveDismissDisabled(true)
@@ -46,7 +47,7 @@ struct SheetMusicListSectionView: View {
                 
                 Spacer()
                 
-                if song.sheetMusic == nil {
+                if sheetMusicDraft == nil {
                     Button(action: {
                         if isPro {
                             presentSheetMusicFileImporter = true
@@ -88,31 +89,45 @@ struct SheetMusicListSectionView: View {
                 }
             }
         )
+        .alert("Sheet Music Not Imported", isPresented: Binding(
+            get: { importErrorMessage != nil },
+            set: { if !$0 { importErrorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(importErrorMessage ?? "")
+        }
     }
     
     func addSheetMusic(fileUrl: URL) {
         do {
+            let fileSize = try fileUrl.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+            guard fileSize <= OffTheSpotsPersistence.maximumCloudKitAssetSize else {
+                importErrorMessage = "This PDF is too large to sync with iCloud. Choose a file smaller than 249 MB."
+                return
+            }
+
             let file: Data = try Data(contentsOf: fileUrl)
-            song.sheetMusic = SheetMusic(name: fileUrl.deletingPathExtension().lastPathComponent, file: file)
+            sheetMusicDraft = SheetMusicDraft(name: fileUrl.deletingPathExtension().lastPathComponent, file: file)
         } catch {
-            
+            importErrorMessage = "The selected sheet music could not be imported."
         }
     }
     
     private func deleteSheetMusic(offsets: IndexSet) {
         withAnimation {
-            song.sheetMusic = nil
+            sheetMusicDraft = nil
         }
     }
 }
 
 #Preview {
     struct SheetMusicListView_Preview: View {
-        @State private var song: Song = Song(name: "Test Song", tracks: [], selectedTrack: Track(name: "Track 1"))
+        @State private var sheetMusicDraft: SheetMusicDraft?
         
         var body: some View {
             List {
-                SheetMusicListSectionView(song: song, isPro: false, presentSubscription: .constant(false))
+                SheetMusicListSectionView(sheetMusicDraft: $sheetMusicDraft, isPro: false, presentSubscription: .constant(false))
             }
         }
     }

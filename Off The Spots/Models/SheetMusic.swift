@@ -10,12 +10,13 @@ import SwiftData
 
 @Model
 final class SheetMusic {
-    var id: UUID
-    var name: String
+    var id: UUID = UUID()
+    var name: String = ""
     @Attribute(.externalStorage) var file: Data?
+    var song: Song?
     
-    init(name: String, file: Data? = nil) {
-        self.id = UUID()
+    init(id: UUID = UUID(), name: String = "", file: Data? = nil) {
+        self.id = id
         self.name = name
         self.file = file
     }
