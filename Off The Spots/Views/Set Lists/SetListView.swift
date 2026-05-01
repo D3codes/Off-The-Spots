@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SetListView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
     
     @State var setList: SetList
@@ -41,6 +42,8 @@ struct SetListView: View {
                         .listRowBackground(listItemBackground)
                     }
                 }
+                .onMove(perform: moveSongs)
+                .onDelete(perform: deleteSongs)
             }
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
@@ -57,6 +60,20 @@ struct SetListView: View {
                 .interactiveDismissDisabled(true)
         }
         .background(backgroundGradient)
+    }
+    
+    private func deleteSongs(offsets: IndexSet) {
+        withAnimation {
+            setList.songs.remove(atOffsets: offsets)
+            try? modelContext.save()
+        }
+    }
+
+    private func moveSongs(offsets: IndexSet, destination: Int) {
+        withAnimation {
+            setList.songs.move(fromOffsets: offsets, toOffset: destination)
+            try? modelContext.save()
+        }
     }
 }
 
