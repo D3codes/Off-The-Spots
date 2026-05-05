@@ -17,6 +17,10 @@ private final class AudioHelperRelay: @unchecked Sendable {
     }
 }
 
+extension Notification.Name {
+    static let audioHelperSelectedSongDidChange = Notification.Name("audioHelperSelectedSongDidChange")
+}
+
 class AudioHelper: NSObject, ObservableObject {
     @MainActor static let sharedController: AudioHelper = AudioHelper()
     
@@ -138,6 +142,7 @@ class AudioHelper: NSObject, ObservableObject {
         }
 
         setupNowPlaying()
+        NotificationCenter.default.post(name: .audioHelperSelectedSongDidChange, object: self)
     }
     
     func play() {
