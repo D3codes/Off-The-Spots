@@ -29,7 +29,7 @@ struct SettingsView: View {
             Section {
                 NavigationLink(destination: SubscriptionView(presentThanksSheet: $presentThanksSheet), label: {
                     HStack {
-                        Image(systemName: "creditcard")
+                        Image(systemName: "creditcard.fill").foregroundStyle(.accent)
                         VStack {
                             Text("Subscribe to Pro")
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,7 +43,7 @@ struct SettingsView: View {
                 
                 Button(action: { Task { await restore() } }, label: {
                     HStack {
-                        Image(systemName: "arrow.trianglehead.2.counterclockwise")
+                        Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.circle.fill").foregroundStyle(.green)
                         Text("Restore Purchases")
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -56,7 +56,7 @@ struct SettingsView: View {
             Section {
                 NavigationLink(destination: AboutView(), label: {
                     HStack {
-                        Image(systemName: "info.circle")
+                        Image(systemName: "info.circle.fill").foregroundStyle(.gray)
                         VStack {
                             Text("About")
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -70,7 +70,7 @@ struct SettingsView: View {
                 
                 Button(action: { showMail = true }, label: {
                     HStack {
-                        Image(systemName: "envelope")
+                        Image(systemName: "envelope.fill").foregroundStyle(.primary)
                         VStack {
                             Text("Send Feedback")
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -87,7 +87,7 @@ struct SettingsView: View {
                 
                 Button(action: { requestReview() }, label: {
                     HStack {
-                        Image(systemName: "star")
+                        Image(systemName: "star.fill").foregroundStyle(.yellow)
                         VStack {
                             Text("Rate Off The Spots")
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -154,7 +154,7 @@ struct SettingsView: View {
         .onAppear { hideMiniPlayer = true }
         .scrollContentBackground(.hidden)
         .ignoresSafeArea(.keyboard)
-        .background(backgroundGradient)
+//        .background(backgroundGradient)
         .toolbar {
             if isPro {
                 ToolbarItem(placement: .topBarTrailing) {

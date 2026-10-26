@@ -23,7 +23,7 @@ let backgroundGradient = LinearGradient(
     endPoint: .bottom
 )
 
-let listItemBackground = Color(.systemGroupedBackground).opacity(0.4)
+let listItemBackground = Color(.systemGroupedBackground).opacity(0)
 
 
 #Preview {

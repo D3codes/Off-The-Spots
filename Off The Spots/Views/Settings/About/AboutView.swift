@@ -115,7 +115,7 @@ struct AboutView: View {
         }
         .scrollIndicators(.hidden)
         .navigationTitle("About")
-        .background(backgroundGradient)
+//        .background(backgroundGradient)
     }
 }
 

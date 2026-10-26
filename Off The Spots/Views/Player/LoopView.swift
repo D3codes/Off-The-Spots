@@ -21,7 +21,7 @@ struct LoopView: View {
         VStack {
             Text("Loop Section")
                 .font(.subheadline)
-                .padding(.bottom)
+//                .padding(.bottom)
             
             HStack(spacing: 20) {
                 Button(action: handleLoopStartLockTap, label: {

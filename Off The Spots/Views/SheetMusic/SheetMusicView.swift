@@ -29,12 +29,13 @@ struct SheetMusicView: View {
                         ToolbarItem(placement: .topBarLeading) {
                             Button(role: .cancel, action: dismissSheetMusicView)
                         }
+                        .axisBehavior(.horizontalOnly)
                     }
                 
                 if player != nil {
                     Circle().opacity(0)
                         .toolbar {
-                            ToolbarItemGroup(placement: .topBarTrailing) {
+                            ToolbarItemGroup(placement: .bottomBar) {
                                     Button(
                                         action: { player!.skip(seconds: -15) },
                                         label: { Image(systemName: "15.arrow.trianglehead.counterclockwise") }
@@ -59,9 +60,11 @@ struct SheetMusicView: View {
                                         label: { Image(systemName: "15.arrow.trianglehead.clockwise") }
                                     )
                             }
+                            .axisBehavior(.horizontalOnly)
                         }
                 }
             }
+            .toolbarVisibility(.visible, for: .navigationBar)
         }
         .interactiveDismissDisabled(true)
         .statusBar(hidden: true)

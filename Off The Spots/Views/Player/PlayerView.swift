@@ -28,95 +28,96 @@ struct PlayerView: View {
     @State private var presentThanksSheet: Bool = false
     
     var body: some View {
-        VStack {
-            HStack {
-                Text(player.selectedSong!.name)
-                    .font(.largeTitle)
-                Spacer()
-                Menu(content: {
-                    Button(
-                        action: {
-                            if isPro {
-                                isAddToSetListSheetPresented = true
-                            } else {
-                                presentSubscription = true
+        NavigationStack {
+            VStack {
+//                HStack {
+//                    Text(player.selectedSong!.name)
+//                        .font(.largeTitle)
+//                    Spacer()
+//                    Menu(content: {
+//                        Button(
+//                            action: {
+//                                if isPro {
+//                                    isAddToSetListSheetPresented = true
+//                                } else {
+//                                    presentSubscription = true
+//                                }
+//                            },
+//                            label: { Label("Add to Set List", systemImage: "music.note.list") }
+//                        )
+//                        Button(
+//                            action: { isEditSongSheetPresented = true },
+//                            label: { Label("Edit Song", systemImage: "pencil") }
+//                        )
+//                    }, label: {
+//                        Image(systemName: "ellipsis")
+//                            .font(.title3)
+//                            .frame(width: 40, height: 40)
+//                            .foregroundStyle(.foreground)
+//                    })
+//                    .glassEffect()
+//                }
+//                .padding(.top)
+                
+                HStack {
+                    Picker("Select a Track", selection: Binding(
+                        get: { player.selectedSong!.activeTrack?.id ?? UUID() },
+                        set: { newId in
+                            if let newTrack = player.selectedSong!.sortedTracks.first(where: { $0.id == newId }) {
+                                player.setSelectedTrack(track: newTrack)
                             }
-                        },
-                        label: { Label("Add to Set List", systemImage: "music.note.list") }
-                    )
-                    Button(
-                        action: { isEditSongSheetPresented = true },
-                        label: { Label("Edit Song", systemImage: "pencil") }
-                    )
-                }, label: {
-                    Image(systemName: "ellipsis")
-                        .font(.title3)
-                        .frame(width: 40, height: 40)
-                        .foregroundStyle(.foreground)
-                })
-                .glassEffect()
-            }
-            .padding(.top)
-            
-            HStack {
-                Picker("Select a Track", selection: Binding(
-                    get: { player.selectedSong!.activeTrack?.id ?? UUID() },
-                    set: { newId in
-                        if let newTrack = player.selectedSong!.sortedTracks.first(where: { $0.id == newId }) {
-                            player.setSelectedTrack(track: newTrack)
+                        }
+                    )) {
+                        ForEach(player.selectedSong!.sortedTracks.enumerated(), id: \.offset) { index, track in
+                            let unlockTrack: Bool = isPro || index < 2
+                            if unlockTrack {
+                                Text(track.name).tag(track.id)
+                            }
                         }
                     }
-                )) {
-                    ForEach(player.selectedSong!.sortedTracks.enumerated(), id: \.offset) { index, track in
-                        let unlockTrack: Bool = isPro || index < 2
-                        if unlockTrack {
-                            Text(track.name).tag(track.id)
+                    .pickerStyle(.menu)
+                    .tint(.primary)
+                    .glassEffect()
+                    
+                    Spacer()
+                    
+                    Button(action: { presentSheetMusic = true }) {
+                        Image(systemName: "music.pages.fill").matchedTransitionSource(id: "sheetmusic", in: animation)
+                        Text("Sheet Music")
+                    }
+                    .tint(.primary)
+                    .disabled(player.selectedSong!.sheetMusic?.file == nil || !isPro)
+//                    .matchedTransitionSource(id: "sheetmusic", in: animation)
+                    .fullScreenCover(isPresented: $presentSheetMusic) {
+                        SheetMusicView(
+                            sheetMusicFile: player.selectedSong!.sheetMusic!.file!,
+                            dismissSheetMusicView: { presentSheetMusic = false },
+                            player: player
+                        )
+                        .navigationTransition(.zoom(sourceID: "sheetmusic", in: animation))
+                    }
+                    .onTapGesture {
+                        if !isPro {
+                            presentSubscription = true
                         }
                     }
                 }
-                .pickerStyle(.menu)
-                .tint(.primary)
-//                .glassEffect()
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Spacer()
+                Spacer()
                 
-                Button(action: { presentSheetMusic = true }) {
-                    Image(systemName: "music.pages.fill")
-                    Text("Sheet Music")
-                }
-                .tint(.primary)
-                .disabled(player.selectedSong!.sheetMusic?.file == nil || !isPro)
-                .matchedTransitionSource(id: "sheetmusic", in: animation)
-                .fullScreenCover(isPresented: $presentSheetMusic) {
-                    SheetMusicView(
-                        sheetMusicFile: player.selectedSong!.sheetMusic!.file!,
-                        dismissSheetMusicView: { presentSheetMusic = false },
-                        player: player
-                    )
-                    .navigationTransition(.zoom(sourceID: "sheetmusic", in: animation))
-                }
-                .onTapGesture {
-                    if !isPro {
-                        presentSubscription = true
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Spacer()
-            Spacer()
-            
-            GlassEffectContainer(spacing: 10.0) {
+                //            GlassEffectContainer(spacing: 10.0) {
                 VStack(spacing: 10.0) {
                     PanningView(player: player, panningValue: $player.panningValue)
-                        .frame(maxWidth: .infinity, maxHeight: 80)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding()
-                        .glassEffect()
-
+                    //                        .glassEffect()
+                    
                     RateView(player: player, rateValue: $player.rateValue)
-                        .frame(maxWidth: .infinity, maxHeight: 80)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding()
-                        .glassEffect()
+                    //                        .glassEffect()
                     
                     LoopView(
                         player: player,
@@ -125,91 +126,117 @@ struct PlayerView: View {
                         loopEnd: $player.loopEnd,
                         loopEndLocked: $loopEndLocked,
                         isLooping: $player.isLooping)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .frame(maxWidth: .infinity, maxHeight: 50)
                     .padding()
-                    .glassEffect()
+                    //                    .glassEffect()
+                }
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
+                //            }
+                
+                Spacer()
+                
+                // Necessary to force rerender when song changes
+                if showPlaybackProgress {
+                    PlaybackProgressView(
+                        player: player,
+                        duration: $player.duration,
+                        progress: $player.progress,
+                        isEditingProgress: $isEditingProgress,
+                        loopStart: $player.loopStart,
+                        loopStartLocked: $loopStartLocked,
+                        loopEnd: $player.loopEnd,
+                        loopEndLocked: $loopEndLocked)
+                } else {
+                    PlaybackProgressView(
+                        player: player,
+                        duration: $player.duration,
+                        progress: $player.progress,
+                        isEditingProgress: $isEditingProgress,
+                        loopStart: $player.loopStart,
+                        loopStartLocked: $loopStartLocked,
+                        loopEnd: $player.loopEnd,
+                        loopEndLocked: $loopEndLocked)
+                }
+                
+                HStack {
+                    AirPlayButton()
+                        .frame(width: 40, height: 40)
+                    
+                    Spacer()
+                    
+                    Button(action: { player.skip(seconds: -15) }, label: {
+                        Image(systemName: "15.arrow.trianglehead.counterclockwise")
+                            .font(.largeTitle)
+                            .tint(.primary)
+                    })
+                    .padding(.horizontal)
+                    
+                    Button(action: {
+                        if(player.isPlaying) {
+                            player.pause()
+                        } else {
+                            player.play()
+                        }
+                    }, label: {
+                        if(player.isPlaying) {
+                            Image(systemName: "pause.fill")
+                                .font(.largeTitle)
+                                .tint(.primary)
+                        } else {
+                            Image(systemName: "play.fill")
+                                .font(.largeTitle)
+                                .tint(.primary)
+                        }
+                    })
+                    .padding(.horizontal)
+                    
+                    Button(action: { player.skip(seconds: 15) }, label: {
+                        Image(systemName: "15.arrow.trianglehead.clockwise")
+                            .font(.largeTitle)
+                            .tint(.primary)
+                    })
+                    .padding(.horizontal)
+                    
+                    Spacer()
+                    
+                    SetListMenuView(
+                        setList: player.selectedSetList,
+                        currentSong: player.selectedSong!,
+                        setSelectedSong: player.setSelectedSong
+                    )
+                    .frame(width: 40, height: 40)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom)
+            }
+            .padding(20)
+            .navigationTitle(player.selectedSong!.name)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu(content: {
+                        Button(
+                            action: {
+                                if isPro {
+                                    isAddToSetListSheetPresented = true
+                                } else {
+                                    presentSubscription = true
+                                }
+                            },
+                            label: { Label("Add to Set List", systemImage: "music.note.list") }
+                        )
+                        Button(
+                            action: { isEditSongSheetPresented = true },
+                            label: { Label("Edit Song", systemImage: "pencil") }
+                        )
+                    }, label: {
+                        Image(systemName: "ellipsis")
+                    })
                 }
             }
-            
-            Spacer()
-            
-            // Necessary to force rerender when song changes
-            if showPlaybackProgress {
-                PlaybackProgressView(
-                    player: player,
-                    duration: $player.duration,
-                    progress: $player.progress,
-                    isEditingProgress: $isEditingProgress,
-                    loopStart: $player.loopStart,
-                    loopStartLocked: $loopStartLocked,
-                    loopEnd: $player.loopEnd,
-                    loopEndLocked: $loopEndLocked)
-            } else {
-                PlaybackProgressView(
-                    player: player,
-                    duration: $player.duration,
-                    progress: $player.progress,
-                    isEditingProgress: $isEditingProgress,
-                    loopStart: $player.loopStart,
-                    loopStartLocked: $loopStartLocked,
-                    loopEnd: $player.loopEnd,
-                    loopEndLocked: $loopEndLocked)
-            }
-            
-            HStack {
-                AirPlayButton()
-                    .frame(width: 40, height: 40)
-                
-                Spacer()
-                
-                Button(action: { player.skip(seconds: -15) }, label: {
-                    Image(systemName: "15.arrow.trianglehead.counterclockwise")
-                        .font(.largeTitle)
-                        .tint(.primary)
-                })
-                .padding(.horizontal)
-                
-                Button(action: {
-                    if(player.isPlaying) {
-                        player.pause()
-                    } else {
-                        player.play()
-                    }
-                }, label: {
-                    if(player.isPlaying) {
-                        Image(systemName: "pause.fill")
-                            .font(.largeTitle)
-                            .tint(.primary)
-                    } else {
-                        Image(systemName: "play.fill")
-                            .font(.largeTitle)
-                            .tint(.primary)
-                    }
-                })
-                .padding(.horizontal)
-                
-                Button(action: { player.skip(seconds: 15) }, label: {
-                    Image(systemName: "15.arrow.trianglehead.clockwise")
-                        .font(.largeTitle)
-                        .tint(.primary)
-                })
-                .padding(.horizontal)
-                
-                Spacer()
-                
-                SetListMenuView(
-                    setList: player.selectedSetList,
-                    currentSong: player.selectedSong!,
-                    setSelectedSong: player.setSelectedSong
-                )
-                .frame(width: 40, height: 40)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.bottom)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.keyboard)
-        .padding(20)
         .sheet(isPresented: $isAddToSetListSheetPresented) { AddToSetListView(song: player.selectedSong!) }
         .sheet(isPresented: $isEditSongSheetPresented) {
             EditSongView(
@@ -234,7 +261,7 @@ struct PlayerView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showPlaybackProgress = true }
         }
         .ignoresSafeArea(.keyboard)
-        .background(backgroundGradient)
+//        .background(backgroundGradient)
         .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in

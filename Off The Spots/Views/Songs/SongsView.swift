@@ -55,7 +55,8 @@ struct SongsView: View {
                                 SongListItemView(
                                     song: song,
                                     selectedSong: player.selectedSetList == nil ? player.selectedSong : nil,
-                                    isSongPlaying: player.isPlaying
+                                    isSongPlaying: player.isPlaying,
+                                    deleteSong: { withAnimation { modelContext.delete(song) } }
                                 )
                                 .foregroundStyle(unlockSong ? .primary : .secondary)
                             })
@@ -108,8 +109,10 @@ struct SongsView: View {
                 }
             }
             .onAppear { hideMiniPlayer = false }
-            .background(backgroundGradient)
-            .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+//            .background(backgroundGradient)
+            .sheet(isPresented: $presentSubscription) {
+                SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+            }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 isPro = StoreHelper.checkForActiveSubscription(in: taskState)

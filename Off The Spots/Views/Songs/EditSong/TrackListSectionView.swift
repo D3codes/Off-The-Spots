@@ -18,7 +18,11 @@ struct TrackListSectionView: View {
     var body: some View {
         Section {
             ForEach($trackDrafts) { $trackDraft in
-                TextField("", text: $trackDraft.name)
+                HStack {
+                    TextField("", text: $trackDraft.name)
+                    Spacer()
+                    Image(systemName: "line.3.horizontal")
+                }
             }
             .onDelete(perform: deleteTracks)
             .if(isPro) { view in

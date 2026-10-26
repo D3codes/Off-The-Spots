@@ -17,7 +17,7 @@ struct RateView: View {
         VStack {
             Text("Playback Speed")
                 .font(.subheadline)
-                .padding(.bottom)
+//                .padding(.bottom)
             
             HStack(spacing: 20) {
                 Button(action: {
@@ -41,6 +41,7 @@ struct RateView: View {
                         .padding(.horizontal, 4)
                 })
                 .buttonStyle(.plain)
+                .frame(width: 80)
                 
                 Button(action: {
                     if(rateValue < 2) {

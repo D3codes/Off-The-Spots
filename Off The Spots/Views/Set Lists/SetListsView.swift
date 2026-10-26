@@ -53,7 +53,8 @@ struct SetListsView: View {
                                 SetListItemView(
                                     setList: setList,
                                     selectedSetList: selectedSetList,
-                                    isSongPlaying: isSongPlaying
+                                    isSongPlaying: isSongPlaying,
+                                    deleteSetList: { withAnimation { modelContext.delete(setList) } }
                                 )
                                 .foregroundStyle(isPro ? .primary : .secondary)
                             }
@@ -113,7 +114,7 @@ struct SetListsView: View {
                 }
             }
             .onAppear { hideMiniPlayer = false }
-            .background(backgroundGradient)
+//            .background(backgroundGradient)
             .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in

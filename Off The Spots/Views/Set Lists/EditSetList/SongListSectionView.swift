@@ -17,7 +17,11 @@ struct SongListSectionView: View {
         Section {
             ForEach(songIdsDraft, id: \.self) { songId in
                 if let song = songs.first(where: { $0.id == songId }) {
-                    Text(song.name)
+                    HStack {
+                        Text(song.name)
+                        Spacer()
+                        Image(systemName: "line.3.horizontal")
+                    }
 //                        .listRowBackground(listItemBackground)
                 }
             }

@@ -27,16 +27,23 @@ struct SearchView: View {
     var filteredSongs: [Song] {
         if searchText.isEmpty {
             return songs
-        } else {
-            return songs.filter { $0.name.contains(searchText) }
         }
+        
+        return songs.filter { $0.name.localizedStandardContains(searchText) }
     }
     
     var filteredSetLists: [SetList] {
         if searchText.isEmpty {
             return setLists
-        } else {
-            return setLists.filter { $0.name.contains(searchText) }
+        }
+
+        let matchingSongIDs = Set(filteredSongs.map(\.id))
+        
+        return setLists.filter { setList in
+            setList.name.localizedStandardContains(searchText) ||
+            setList.songs.contains { songID in
+                matchingSongIDs.contains(songID)
+            }
         }
     }
     
@@ -56,7 +63,7 @@ struct SearchView: View {
                                 presentSubscription = true
                             }
                         }, label: {
-                            SongListItemView(song: song)
+                            SongListItemView(song: song, isSearchResult: true)
                                 .foregroundStyle(unlockSong ? .primary : .secondary)
                         })
                     }
@@ -89,7 +96,7 @@ struct SearchView: View {
                                 presentSubscription = true
                             }
                         }, label: {
-                            SetListItemView(setList: setList)
+                            SetListItemView(setList: setList, isSearchResult: true)
                                 .foregroundStyle(isPro ? .primary : .secondary)
                         })
                     }
@@ -115,7 +122,7 @@ struct SearchView: View {
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
             .navigationTitle("Search")
-            .background(backgroundGradient)
+//            .background(backgroundGradient)
             .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in

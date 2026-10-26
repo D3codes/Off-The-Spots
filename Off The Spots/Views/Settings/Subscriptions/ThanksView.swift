@@ -58,12 +58,15 @@ struct ThanksView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         Text("My name is David and I’m the developer of Off The Spots. I hope you enjoy using the app!")
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         Text("This is a one-person project, so your subscription directly supports my ability to keep adding new features.")
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         Text("Thank you for your support and keep the whole world singing!")
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding()

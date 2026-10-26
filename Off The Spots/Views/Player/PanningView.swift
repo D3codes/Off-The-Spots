@@ -18,7 +18,7 @@ struct PanningView: View {
         VStack {
             Text("Panning")
                 .font(.subheadline)
-                .padding(.bottom)
+//                .padding(.bottom)
             
             HStack {
                 Image(systemName: "wave.3.left", variableValue: panningValue <= 0 ? 1 : 1-panningValue)

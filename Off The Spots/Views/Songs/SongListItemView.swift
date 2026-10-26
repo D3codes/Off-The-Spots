@@ -12,6 +12,9 @@ struct SongListItemView: View {
     var selectedSong: Song? = nil
     var isSongPlaying: Bool = false
     
+    var isSearchResult: Bool = false
+    var deleteSong: () -> Void = {}
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -20,26 +23,58 @@ struct SongListItemView: View {
                     .tint(.primary)
                     .multilineTextAlignment(.leading)
                 
-                HStack {
-                    Text("\(Image(systemName: "music.note.square.stack.fill")) \(song.trackCount)")
-                        .font(.footnote)
+                HStack(spacing: 4) {
+                    if selectedSong != nil && selectedSong!.id == song.id {
+                        AnimatedWaveformView(color: .accentColor, animate: isSongPlaying)
+                            .scaleEffect(0.2)
+                            .frame(maxWidth: 10, maxHeight: 10)
+                            .padding(.trailing, 4)
+                    }
+                    
+                    Text("\(Image(systemName: "music.note.square.stack.fill"))")
+                        .tint(.accentColor)
+                        .font(.subheadline)
+                    Text("\(song.trackCount)")
                         .tint(.primary)
+                        .font(.subheadline)
                     
                     if song.sheetMusic != nil {
-                        Divider()
+                        Divider().padding(.horizontal, 4)
                         
                         Image(systemName: "music.pages.fill")
-                            .font(.footnote)
-                            .tint(.primary)
+                            .font(.subheadline)
+                            .tint(.accentColor)
                     }
                 }
             }
             
-            if selectedSong != nil && selectedSong!.id == song.id {
+            if !isSearchResult {
                 Spacer()
-                AnimatedWaveformView(color: .accentColor, animate: isSongPlaying)
-                    .scaleEffect(0.3)
+                
+                Menu(content: {
+                    Button(
+                        action: { },
+                        label: { Label("Edit Song", systemImage: "pencil") }
+                    )
+                    Button(
+                        action: { },
+                        label: { Label("Add to Set List", systemImage: "music.note.list") }
+                    )
+                    
+                    Divider()
+                    
+                    Button(role: .destructive) {
+                        deleteSong()
+                    } label: {
+                        Label("Delete Song", systemImage: "trash")
+                    }
+                }, label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundStyle(.foreground)
+                        .frame(width: 20, height: 20)
+                })
             }
+
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -47,10 +82,10 @@ struct SongListItemView: View {
 
 #Preview {
     List {
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
     }
 }

@@ -52,14 +52,15 @@ struct SetListView: View {
         .navigationTitle(setList.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { presentEditSetListSheet = true }, label: { Image(systemName: "pencil") })
+                Button(action: { presentEditSetListSheet = true }, label: { Text("Edit") })
             }
+            .axisBehavior(.horizontalOnly)
         }
         .sheet(isPresented: $presentEditSetListSheet) {
             EditSetListView(setList: $setList)
                 .interactiveDismissDisabled(true)
         }
-        .background(backgroundGradient)
+//        .background(backgroundGradient)
     }
     
     private func deleteSongs(offsets: IndexSet) {
