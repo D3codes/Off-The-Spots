@@ -43,13 +43,13 @@ struct PlayerAccessoryView: View {
                     Spacer()
                     
                     Button(action: {
-                        if(player.isPlaying) {
+                        if(player.isPlaybackRequested) {
                             player.pause()
                         } else {
                             player.play()
                         }
                     }, label: {
-                        if(player.isPlaying) {
+                        if(player.isPlaybackRequested) {
                             Image(systemName: "pause.fill")
                                 .font(.title2)
                                 .tint(.primary)
@@ -92,13 +92,13 @@ struct PlayerAccessoryView: View {
                     Spacer()
                     
                     Button(action: {
-                        if(player.isPlaying) {
+                        if(player.isPlaybackRequested) {
                             player.pause()
                         } else {
                             player.play()
                         }
                     }, label: {
-                        if(player.isPlaying) {
+                        if(player.isPlaybackRequested) {
                             Image(systemName: "pause.fill")
                                 .font(.title2)
                                 .tint(.primary)

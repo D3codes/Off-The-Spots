@@ -6,22 +6,26 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TrackDraft: Identifiable {
     let id: UUID
     var name: String
     var file: Data?
+    var fileExtension: String?
 
     init(track: Track) {
         id = track.id
         name = track.name
         file = track.file
+        fileExtension = track.fileExtension
     }
 
-    init(id: UUID = UUID(), name: String, file: Data?) {
+    init(id: UUID = UUID(), name: String, file: Data?, fileExtension: String? = nil) {
         self.id = id
         self.name = name
         self.file = file
+        self.fileExtension = fileExtension
     }
 }
 
@@ -150,6 +154,7 @@ struct EditSongView: View {
             let track = tracksById[draft.id] ?? Track(id: draft.id)
             track.name = draft.name
             track.file = draft.file
+            track.fileExtension = draft.fileExtension
             track.order = index
             committedTracks.append(track)
         }

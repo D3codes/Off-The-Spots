@@ -119,7 +119,11 @@ struct TrackListSectionView: View {
             }
 
             let file: Data = try Data(contentsOf: fileUrl)
-            let track = TrackDraft(name: fileUrl.deletingPathExtension().lastPathComponent, file: file)
+            let track = TrackDraft(
+                name: fileUrl.deletingPathExtension().lastPathComponent,
+                file: file,
+                fileExtension: fileUrl.pathExtension
+            )
             trackDrafts.append(track)
         } catch {
             importErrorMessage = "The selected track could not be imported."

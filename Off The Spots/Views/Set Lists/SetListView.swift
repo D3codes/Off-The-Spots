@@ -67,7 +67,8 @@ struct SetListView: View {
                                 selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil,
                                 isSongPlaying: isSongPlaying,
                                 presentAddToSetListSheet: { songToAddToSetList = song },
-                                presentEditSongSheet: { songToEdit = song }
+                                presentEditSongSheet: { songToEdit = song },
+                                unlocked: true
                             )
                         }
 //                        .listRowBackground(Color.clear)

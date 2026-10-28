@@ -34,6 +34,8 @@ class AudioHelper: NSObject, ObservableObject {
     @Published var selectedSetList: SetList? = nil
     
     @Published var isPlaying: Bool = false
+    @Published private(set) var isPreparingToPlay: Bool = false
+    var isPlaybackRequested: Bool { isPlaying || isPreparingToPlay }
     // Progress updates notify only views that read this model, not every player observer.
     let playbackProgress = PlaybackProgress()
     @Published var duration: Double = 0
@@ -52,6 +54,8 @@ class AudioHelper: NSObject, ObservableObject {
     private var needsFileScheduled: Bool = true
 
     private var audioFile: AVAudioFile?
+    private var temporaryAudioURL: URL?
+    private var playbackRequestGeneration: Int = 0
     var audioSampleRate: Double = 0
 
     private var seekFrame: AVAudioFramePosition = 0
@@ -116,21 +120,15 @@ class AudioHelper: NSObject, ObservableObject {
                 song.selectedTrack = song.sortedTracks.first
             }
 
-            guard let data = song.activeTrack?.file else {
+            guard let track = song.activeTrack, let data = track.file else {
                 print("Selected track has no data")
                 return
             }
 
-            let tempDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            let tempURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
-            do {
-                try data.write(to: tempURL, options: [.atomic])
-            } catch {
-                print("Failed to write audio data to temp file: \(error)")
-                return
-            }
+            let tempURL = try AudioTrackFile.writeTemporaryFile(data: data, fileExtension: track.fileExtension)
+            temporaryAudioURL = tempURL
 
-            audioFile = try AVAudioFile(forReading: tempURL)
+            audioFile = try AVAudioFile(forReading: tempURL, commonFormat: .pcmFormatFloat32, interleaved: false)
             let format = audioFile!.processingFormat
             audioLengthSamples = audioFile!.length
             audioSampleRate = format.sampleRate
@@ -138,14 +136,8 @@ class AudioHelper: NSObject, ObservableObject {
 
             scheduleAudioFile()
         } catch {
+            removeTemporaryAudioFile()
             print("Failed to prepare audio engine/player with error: \(error)")
-        }
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowAirPlay])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("Failed to set AVAudioSession category with error: \(error)")
         }
 
         setupNowPlaying()
@@ -159,9 +151,41 @@ class AudioHelper: NSObject, ObservableObject {
             return
         }
 
+        guard !isPlaying, !isPreparingToPlay else { return }
+        playbackRequestGeneration += 1
+        let request = playbackRequestGeneration
+        isPreparingToPlay = true
+        let relay = AudioHelperRelay(helper: self)
+
+        PlaybackAudioSession.activate { result in
+            Task { @MainActor in
+                guard let helper = relay.helper,
+                      helper.playbackRequestGeneration == request else { return }
+                helper.isPreparingToPlay = false
+                switch result {
+                case .success:
+                    helper.startPlayback()
+                case .failure(let error):
+                    helper.isPlaying = false
+                    helper.updateNowPlaying()
+                    print("Failed to activate playback audio session: \(error)")
+                }
+            }
+        }
+    }
+
+    private func startPlayback() {
+        guard audioFile != nil else { return }
+
         if !engine.isRunning {
-            do { try engine.start() }
-            catch { }
+            do {
+                try engine.start()
+            } catch {
+                isPlaying = false
+                updateNowPlaying()
+                print("Failed to start audio engine: \(error)")
+                return
+            }
         }
         
         if needsFileScheduled {
@@ -174,6 +198,7 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func pause() {
+        cancelPendingPlayback()
         audioPlayer.pause()
         engine.pause()
         isPlaying = false
@@ -181,6 +206,7 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func stop() {
+        cancelPendingPlayback()
         audioPlayer.stop()
         engine.stop()
         scheduleGeneration += 1
@@ -333,9 +359,11 @@ class AudioHelper: NSObject, ObservableObject {
     }
 
     private func resetScheduledAudio() {
+        cancelPendingPlayback()
         audioPlayer.stop()
         scheduleGeneration += 1
         audioFile = nil
+        removeTemporaryAudioFile()
         audioSampleRate = 1
         audioLengthSamples = 0
         duration = 0
@@ -344,6 +372,18 @@ class AudioHelper: NSObject, ObservableObject {
         currentPosition = 0
         isPlaying = false
         playbackProgress.value = 0
+    }
+
+    private func cancelPendingPlayback() {
+        playbackRequestGeneration += 1
+        isPreparingToPlay = false
+    }
+
+    private func removeTemporaryAudioFile() {
+        if let temporaryAudioURL {
+            try? FileManager.default.removeItem(at: temporaryAudioURL)
+            self.temporaryAudioURL = nil
+        }
     }
     
     private func handlePlayerDidFinishPlaying() {
@@ -382,7 +422,6 @@ class AudioHelper: NSObject, ObservableObject {
         nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 0
 
-        MPNowPlayingInfoCenter.default().playbackState = .stopped
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
@@ -392,7 +431,6 @@ class AudioHelper: NSObject, ObservableObject {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Double(currentPosition) / audioSampleRate
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? speedAndPitchControl.rate : 0
 
-        MPNowPlayingInfoCenter.default().playbackState = isPlaying ? .playing : .paused
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
@@ -406,7 +444,7 @@ class AudioHelper: NSObject, ObservableObject {
         }
 
         commandCenter.playCommand.addTarget { _ in
-            if !self.audioPlayer.isPlaying {
+            if !self.audioPlayer.isPlaying && !self.isPreparingToPlay {
                 self.play()
                 return .success
             }
@@ -414,7 +452,7 @@ class AudioHelper: NSObject, ObservableObject {
         }
 
         commandCenter.pauseCommand.addTarget { _ in
-            if self.audioPlayer.isPlaying {
+            if self.audioPlayer.isPlaying || self.isPreparingToPlay {
                 self.pause()
                 return .success
             }

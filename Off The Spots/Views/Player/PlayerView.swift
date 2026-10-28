@@ -172,13 +172,13 @@ struct PlayerView: View {
                     .padding(.horizontal)
                     
                     Button(action: {
-                        if(player.isPlaying) {
+                        if(player.isPlaybackRequested) {
                             player.pause()
                         } else {
                             player.play()
                         }
                     }, label: {
-                        if(player.isPlaying) {
+                        if(player.isPlaybackRequested) {
                             Image(systemName: "pause.fill")
                                 .font(.largeTitle)
                                 .tint(.primary)
@@ -216,6 +216,10 @@ struct PlayerView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu(content: {
                         Button(
+                            action: { isEditSongSheetPresented = true },
+                            label: { Label("Edit Song", systemImage: "pencil") }
+                        )
+                        Button(
                             action: {
                                 if isPro {
                                     isAddToSetListSheetPresented = true
@@ -224,10 +228,6 @@ struct PlayerView: View {
                                 }
                             },
                             label: { Label("Add to Set List", systemImage: "music.note.list") }
-                        )
-                        Button(
-                            action: { isEditSongSheetPresented = true },
-                            label: { Label("Edit Song", systemImage: "pencil") }
                         )
                     }, label: {
                         Image(systemName: "ellipsis")
