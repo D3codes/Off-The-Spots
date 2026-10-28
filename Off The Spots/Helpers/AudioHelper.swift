@@ -7,6 +7,7 @@
 
 import AVFoundation
 import MediaPlayer
+import Observation
 import SwiftData
 
 private final class AudioHelperRelay: @unchecked Sendable {
@@ -21,6 +22,11 @@ extension Notification.Name {
     static let audioHelperSelectedSongDidChange = Notification.Name("audioHelperSelectedSongDidChange")
 }
 
+@Observable
+final class PlaybackProgress {
+    var value: Double = 0
+}
+
 class AudioHelper: NSObject, ObservableObject {
     @MainActor static let sharedController: AudioHelper = AudioHelper()
     
@@ -28,7 +34,8 @@ class AudioHelper: NSObject, ObservableObject {
     @Published var selectedSetList: SetList? = nil
     
     @Published var isPlaying: Bool = false
-    @Published var progress: Double = 0
+    // Progress updates notify only views that read this model, not every player observer.
+    let playbackProgress = PlaybackProgress()
     @Published var duration: Double = 0
     @Published var panningValue: Double = 0
     @Published var rateValue: Float = 1.0
@@ -179,7 +186,7 @@ class AudioHelper: NSObject, ObservableObject {
         scheduleGeneration += 1
         needsFileScheduled = true
         seekFrame = 0
-        progress = 0
+        playbackProgress.value = 0
         currentPosition = 0
         isPlaying = false
         updateNowPlaying()
@@ -253,7 +260,7 @@ class AudioHelper: NSObject, ObservableObject {
         }
 
         if publishProgressChanges {
-            progress = Double(currentPosition) / audioSampleRate
+            playbackProgress.value = Double(currentPosition) / audioSampleRate
         }
 
         updateNowPlaying()
@@ -336,12 +343,12 @@ class AudioHelper: NSObject, ObservableObject {
         seekFrame = 0
         currentPosition = 0
         isPlaying = false
-        progress = 0
+        playbackProgress.value = 0
     }
     
     private func handlePlayerDidFinishPlaying() {
         isPlaying = false
-        progress = 0
+        playbackProgress.value = 0
         
         let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.order, order: .forward)])
         let songs = (try? modelContext.fetch(descriptor)) ?? []

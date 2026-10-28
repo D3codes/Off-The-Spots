@@ -12,7 +12,7 @@ struct PlaybackProgressView: View {
     @ObservedObject var player: AudioHelper
     
     @Binding var duration: Double
-    @Binding var progress: Double
+    @Bindable var playbackProgress: PlaybackProgress
     @Binding var isEditingProgress: Bool
 
     @Binding var loopStart: Double?
@@ -26,7 +26,7 @@ struct PlaybackProgressView: View {
     var body: some View {
         VStack {
             UISliderView(
-                value: $progress,
+                value: $playbackProgress.value,
                 handleTouchDown: handleTouchDown,
                 handleTouchUp: handleTouchUp,
                 minValue: 0.0,
@@ -81,11 +81,11 @@ struct PlaybackProgressView: View {
             )
             
             HStack {
-                Text("\(Int(progress + 0.5) / 60):\(String(format: "%02d", Int(progress + 0.5) % 60))")
+                Text("\(Int(playbackProgress.value + 0.5) / 60):\(String(format: "%02d", Int(playbackProgress.value + 0.5) % 60))")
                 
                 Spacer()
                 
-                Text("-\(Int(duration-progress + 0.5) / 60):\(String(format: "%02d", Int(duration-progress + 0.5) % 60))")
+                Text("-\(Int(duration-playbackProgress.value + 0.5) / 60):\(String(format: "%02d", Int(duration-playbackProgress.value + 0.5) % 60))")
             }
         }
     }
@@ -101,7 +101,7 @@ struct PlaybackProgressView: View {
             isEditingProgress = false
         }
         
-        let seekFrame = AVAudioFramePosition(progress * player.audioSampleRate)
+        let seekFrame = AVAudioFramePosition(playbackProgress.value * player.audioSampleRate)
         player.setCurrentTime(value: seekFrame)
     }
 }
@@ -110,7 +110,6 @@ struct PlaybackProgressView: View {
 #Preview {
     struct PlaybackProgressView_Preview: View {
         @StateObject var player: AudioHelper = AudioHelper()
-        @State var progress: Double = 0.0
         @State var isEditingProgress: Bool = false
         @State var loopStart: Double? = 0.0
         @State var loopStartLocked: Bool = true
@@ -121,7 +120,7 @@ struct PlaybackProgressView: View {
             PlaybackProgressView(
                 player: player,
                 duration: $player.duration,
-                progress: $player.progress,
+                playbackProgress: player.playbackProgress,
                 isEditingProgress: $isEditingProgress,
                 loopStart: $loopStart,
                 loopStartLocked: $loopStartLocked,

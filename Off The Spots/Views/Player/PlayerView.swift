@@ -140,7 +140,7 @@ struct PlayerView: View {
                     PlaybackProgressView(
                         player: player,
                         duration: $player.duration,
-                        progress: $player.progress,
+                        playbackProgress: player.playbackProgress,
                         isEditingProgress: $isEditingProgress,
                         loopStart: $player.loopStart,
                         loopStartLocked: $loopStartLocked,
@@ -150,7 +150,7 @@ struct PlayerView: View {
                     PlaybackProgressView(
                         player: player,
                         duration: $player.duration,
-                        progress: $player.progress,
+                        playbackProgress: player.playbackProgress,
                         isEditingProgress: $isEditingProgress,
                         loopStart: $player.loopStart,
                         loopStartLocked: $loopStartLocked,

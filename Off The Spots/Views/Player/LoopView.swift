@@ -104,7 +104,7 @@ struct LoopView: View {
     
     private func handleLoopStartTap() {
         if(loopStart == nil) {
-            guard player.setLoopStart(value: player.progress) else { return }
+            guard player.setLoopStart(value: player.playbackProgress.value) else { return }
             
             if(loopEnd != nil) {
                 loopEndLocked = true
@@ -130,7 +130,7 @@ struct LoopView: View {
 
     private func handleLoopEndTap() {
         if(loopEnd == nil) {
-            guard player.setLoopEnd(value: player.progress) else { return }
+            guard player.setLoopEnd(value: player.playbackProgress.value) else { return }
             
             if(loopStart != nil) {
                 loopStartLocked = true
