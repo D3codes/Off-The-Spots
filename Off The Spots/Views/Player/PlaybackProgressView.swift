@@ -49,7 +49,8 @@ struct PlaybackProgressView: View {
                             value: Binding<Double>(get: {
                                 return loopStart ?? 0.0
                             }, set: {
-                                loopStart = $0
+                                let end = loopEnd ?? duration
+                                loopStart = min($0, end)
                             }),
                             minValue: 0.0,
                             maxValue: duration,
@@ -66,7 +67,8 @@ struct PlaybackProgressView: View {
                             value: Binding<Double>(get: {
                                 return loopEnd ?? 0.0
                             }, set: {
-                                loopEnd = $0
+                                let start = loopStart ?? 0.0
+                                loopEnd = max($0, start)
                             }),
                             minValue: 0.0,
                             maxValue: duration,
