@@ -21,11 +21,41 @@ struct SetListView: View {
     var isSongPlaying: Bool
     
     @State private var selection = Set<Song.ID>()
+    @State private var songToAddToSetList: Song?
+    @State private var songToEdit: Song?
     @State private var presentEditSetListSheet: Bool = false
     
     var body: some View {
         Group {
             List(selection: $selection) {
+                HStack {
+                    Spacer()
+                    
+                    Button(
+                        action: {
+                            if let song = songs.first(where: { $0.id == setList.songs.first }) {
+                                setSelectedSong(song, setList, false)
+                                AudioHelper.sharedController.play()
+                                presentPlayerSheet = true
+                            }
+                        },
+                        label: {
+                            HStack {
+                                Image(systemName: "play.fill")
+                                Text("Play")
+                            }
+                            .foregroundStyle(.foreground)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 6)
+                        }
+                    )
+                    .buttonStyle(.bordered)
+                    
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                
                 ForEach(setList.songs, id: \.self) { songId in
                     if let song = songs.first(where: { $0.id == songId }) {
                         Button(action: {
@@ -35,7 +65,9 @@ struct SetListView: View {
                             SongListItemView(
                                 song: song,
                                 selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil,
-                                isSongPlaying: isSongPlaying
+                                isSongPlaying: isSongPlaying,
+                                presentAddToSetListSheet: { songToAddToSetList = song },
+                                presentEditSongSheet: { songToEdit = song }
                             )
                         }
 //                        .listRowBackground(Color.clear)
@@ -55,6 +87,13 @@ struct SetListView: View {
                 Button(action: { presentEditSetListSheet = true }, label: { Text("Edit") })
             }
             .axisBehavior(.horizontalOnly)
+        }
+        .sheet(item: $songToAddToSetList) { song in
+            AddToSetListView(song: song)
+        }
+        .sheet(item: $songToEdit) { song in
+            EditSongView(song: .constant(song))
+                .interactiveDismissDisabled(true)
         }
         .sheet(isPresented: $presentEditSetListSheet) {
             EditSetListView(setList: $setList)

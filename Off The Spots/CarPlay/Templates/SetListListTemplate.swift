@@ -16,24 +16,25 @@ extension CarPlayTemplateManager {
         
         var listItems: [CPListItem] = []
         setList.songs.forEach { songId in
-            let song = songs.first(where: { $0.id == songId })!
-            
-            let songListItem = CPListItem(text: song.name, detailText: "\(song.trackCount) Track\(song.trackCount > 1 ? "s" : "")")
-            songListItem.isPlaying = AudioHelper.sharedController.selectedSong?.id == song.id && AudioHelper.sharedController.selectedSetList?.id == setList.id
-            
-            songListItem.handler = { listItem, completion in
-                AudioHelper.sharedController.setSelectedSong(song: song, setList: setList)
-                AudioHelper.sharedController.play()
+            if let song = songs.first(where: { $0.id == songId }) {
                 
-                CPNowPlayingTemplate.shared.isUpNextButtonEnabled = true
-                self.interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true) { success, error in
-                    // optional completion handler once CarPlay UI is displayed
+                let songListItem = CPListItem(text: song.name, detailText: "\(song.trackCount) Track\(song.trackCount > 1 ? "s" : "")")
+                songListItem.isPlaying = AudioHelper.sharedController.selectedSong?.id == song.id && AudioHelper.sharedController.selectedSetList?.id == setList.id
+                
+                songListItem.handler = { listItem, completion in
+                    AudioHelper.sharedController.setSelectedSong(song: song, setList: setList)
+                    AudioHelper.sharedController.play()
+                    
+                    CPNowPlayingTemplate.shared.isUpNextButtonEnabled = true
+                    self.interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true) { success, error in
+                        // optional completion handler once CarPlay UI is displayed
+                    }
+                    
+                    completion()
                 }
                 
-                completion()
+                listItems.append(songListItem)
             }
-            
-            listItems.append(songListItem)
         }
         
         let headerButton: CPButton = CPButton(image: UIImage(systemName: "play.fill")!, handler: { _ in

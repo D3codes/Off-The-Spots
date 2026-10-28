@@ -262,7 +262,16 @@ struct PlayerView: View {
         }
         .ignoresSafeArea(.keyboard)
 //        .background(backgroundGradient)
-        .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+        .sheet(isPresented: $presentSubscription) {
+            NavigationStack {
+                SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button(role: .close) { presentSubscription  = false }
+                        }
+                    }
+            }
+        }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
             isPro = StoreHelper.checkForActiveSubscription(in: taskState)

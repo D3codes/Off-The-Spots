@@ -118,12 +118,24 @@ struct SearchView: View {
                 }
                 .listRowBackground(listItemBackground)
             }
-            .searchable(text: $searchText)
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always)
+            )
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
             .navigationTitle("Search")
 //            .background(backgroundGradient)
-            .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+            .sheet(isPresented: $presentSubscription) {
+                NavigationStack {
+                    SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button(role: .close) { presentSubscription  = false }
+                            }
+                        }
+                }
+            }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 isPro = StoreHelper.checkForActiveSubscription(in: taskState)

@@ -18,6 +18,8 @@ struct SongsView: View {
     @Binding var hideMiniPlayer: Bool
     
     @State private var selection = Set<Song.ID>()
+    @State private var songToAddToSetList: Song?
+    @State private var songToEdit: Song?
     
     @State private var presentAddSongSheet = false
     @State private var addSongInitialTrackUrl: URL?
@@ -56,7 +58,22 @@ struct SongsView: View {
                                     song: song,
                                     selectedSong: player.selectedSetList == nil ? player.selectedSong : nil,
                                     isSongPlaying: player.isPlaying,
-                                    deleteSong: { withAnimation { modelContext.delete(song) } }
+                                    deleteSong: {
+                                        guard let index = songs.firstIndex(where: { $0.id == song.id }) else {
+                                            return
+                                        }
+
+                                        deleteSongs(offsets: IndexSet(integer: index))
+                                    },
+                                    presentAddToSetListSheet: {
+                                        if isPro {
+                                            songToAddToSetList = song
+                                        } else {
+                                            presentSubscription = true
+                                        }
+                                    },
+                                    presentEditSongSheet: { songToEdit = song },
+                                    unlocked: unlockSong
                                 )
                                 .foregroundStyle(unlockSong ? .primary : .secondary)
                             })
@@ -110,8 +127,22 @@ struct SongsView: View {
             }
             .onAppear { hideMiniPlayer = false }
 //            .background(backgroundGradient)
+            .sheet(item: $songToAddToSetList) { song in
+                AddToSetListView(song: song)
+            }
+            .sheet(item: $songToEdit) { song in
+                EditSongView(song: .constant(song))
+                    .interactiveDismissDisabled(true)
+            }
             .sheet(isPresented: $presentSubscription) {
-                SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                NavigationStack {
+                    SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button(role: .close) { presentSubscription  = false }
+                            }
+                        }
+                }
             }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in

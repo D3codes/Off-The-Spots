@@ -15,6 +15,11 @@ struct SongListItemView: View {
     var isSearchResult: Bool = false
     var deleteSong: () -> Void = {}
     
+    var presentAddToSetListSheet: () -> Void = {}
+    var presentEditSongSheet: () -> Void = {}
+    
+    var unlocked: Bool = false
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -53,11 +58,11 @@ struct SongListItemView: View {
                 
                 Menu(content: {
                     Button(
-                        action: { },
+                        action: { presentEditSongSheet() },
                         label: { Label("Edit Song", systemImage: "pencil") }
                     )
                     Button(
-                        action: { },
+                        action: { presentAddToSetListSheet() },
                         label: { Label("Add to Set List", systemImage: "music.note.list") }
                     )
                     
@@ -70,9 +75,10 @@ struct SongListItemView: View {
                     }
                 }, label: {
                     Image(systemName: "ellipsis")
-                        .foregroundStyle(.foreground)
+                        .foregroundStyle(unlocked ? Color.primary : Color.secondary)
                         .frame(width: 20, height: 20)
                 })
+                .disabled(!unlocked)
             }
 
         }
@@ -82,10 +88,10 @@ struct SongListItemView: View {
 
 #Preview {
     List {
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {})
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: true)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: true)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: true)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: false)
     }
 }

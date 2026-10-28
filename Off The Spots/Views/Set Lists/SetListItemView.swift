@@ -15,6 +15,10 @@ struct SetListItemView: View {
     var isSearchResult: Bool = false
     var deleteSetList: () -> Void = {}
     
+    var presentEditSetListSheet: () -> Void = {}
+    
+    var isPro: Bool = false
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -45,7 +49,7 @@ struct SetListItemView: View {
                 
                 Menu(content: {
                     Button(
-                        action: { },
+                        action: { presentEditSetListSheet() },
                         label: { Label("Edit Set List", systemImage: "pencil") }
                     )
                     
@@ -58,9 +62,10 @@ struct SetListItemView: View {
                     }
                 }, label: {
                     Image(systemName: "ellipsis")
-                        .foregroundStyle(.foreground)
+                        .foregroundStyle(isPro ? Color.primary : Color.secondary)
                         .frame(width: 20, height: 20)
                 })
+                .disabled(!isPro)
             }
             
         }
@@ -70,10 +75,10 @@ struct SetListItemView: View {
 
 #Preview {
     List {
-        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {})
-        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {})
-        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {})
-        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {})
-        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {})
+        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {}, isPro: true)
+        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {}, isPro: true)
+        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {}, isPro: true)
+        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {}, isPro: false)
+        SetListItemView(setList: SetList(name: "Set List", songs: []), deleteSetList: {}, isPro: false)
     }
 }

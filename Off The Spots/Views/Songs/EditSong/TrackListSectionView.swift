@@ -20,8 +20,10 @@ struct TrackListSectionView: View {
             ForEach($trackDrafts) { $trackDraft in
                 HStack {
                     TextField("", text: $trackDraft.name)
-                    Spacer()
-                    Image(systemName: "line.3.horizontal")
+                    if isPro {
+                        Spacer()
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
             .onDelete(perform: deleteTracks)

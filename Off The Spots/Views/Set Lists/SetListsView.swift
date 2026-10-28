@@ -24,6 +24,7 @@ struct SetListsView: View {
     @State private var selection = Set<SetList.ID>()
     
     @State private var presentAddSetListSheet: Bool = false
+    @State private var setListToEdit: SetList?
     @State var newSetList: SetList = SetList(
         id: UUID(),
         name: "",
@@ -54,7 +55,9 @@ struct SetListsView: View {
                                     setList: setList,
                                     selectedSetList: selectedSetList,
                                     isSongPlaying: isSongPlaying,
-                                    deleteSetList: { withAnimation { modelContext.delete(setList) } }
+                                    deleteSetList: { withAnimation { modelContext.delete(setList) } },
+                                    presentEditSetListSheet: { setListToEdit = setList },
+                                    isPro: isPro
                                 )
                                 .foregroundStyle(isPro ? .primary : .secondary)
                             }
@@ -115,7 +118,20 @@ struct SetListsView: View {
             }
             .onAppear { hideMiniPlayer = false }
 //            .background(backgroundGradient)
-            .sheet(isPresented: $presentSubscription) { SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true) }
+            .sheet(item: $setListToEdit) { setList in
+                EditSetListView(setList: .constant(setList))
+                    .interactiveDismissDisabled(true)
+            }
+            .sheet(isPresented: $presentSubscription) {
+                NavigationStack {
+                    SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button(role: .close) { presentSubscription  = false }
+                            }
+                        }
+                }
+            }
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 isPro = StoreHelper.checkForActiveSubscription(in: taskState)

@@ -24,6 +24,8 @@ struct SettingsView: View {
         return ((try? await AppStore.sync()) != nil)
     }
     
+    @State var show = false
+    
     var body: some View {
         List {
             Section {
@@ -51,7 +53,6 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
-            .listRowBackground(listItemBackground)
             
             Section {
                 NavigationLink(destination: AboutView(), label: {
@@ -102,7 +103,6 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
-            .listRowBackground(listItemBackground)
             
             Section {
                 Button(action: { openURL(URL(string: "https://d3.codes")!) }, label: {
@@ -125,7 +125,6 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
-            .listRowBackground(listItemBackground)
             
             Section("More by D3codes") {
                 Button(action: { openURL(URL(string: "itms-apps://itunes.apple.com/app/id1492605892")!) }, label: {
@@ -145,16 +144,13 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
             }
-            .listRowBackground(listItemBackground)
         }
         .sheet(isPresented: $showMail) { MailView() }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .navigationTitle(Text("Settings"))
         .toolbar(.hidden, for: .tabBar)
         .onAppear { hideMiniPlayer = true }
-        .scrollContentBackground(.hidden)
         .ignoresSafeArea(.keyboard)
-//        .background(backgroundGradient)
         .toolbar {
             if isPro {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -167,6 +163,7 @@ struct SettingsView: View {
                     .buttonStyle(.glassProminent)
                     .tint(.primary)
                 }
+                .axisBehavior(.horizontalOnly)
             }
         }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in

@@ -1,6 +1,9 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:0.34510,0.48235,0.92941,1.00000"
+    "linear-gradient" : [
+      "display-p3:0.37255,0.52157,1.00000,1.00000",
+      "display-p3:0.34510,0.48235,0.92941,1.00000"
+    ]
   },
   "groups" : [
     {
@@ -32,10 +35,12 @@
             },
             {
               "appearance" : "dark",
-              "value" : "none"
+              "value" : {
+                "solid" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+              }
             }
           ],
-          "glass" : true,
+          "glass" : false,
           "hidden" : false,
           "image-name" : "notes.png",
           "name" : "notes",
@@ -80,10 +85,12 @@
           }
         },
         {
+          "glass" : true,
           "image-name" : "body1.png",
           "name" : "body1"
         },
         {
+          "glass" : true,
           "image-name" : "taillegs.png",
           "name" : "taillegs"
         }
