@@ -1,3 +1,10 @@
+//
+//  PlaybackAudioSession.swift
+//  Off The Spots
+//
+//  Created by David Freeman on 10/27/26.
+//
+
 import AVFoundation
 
 enum PlaybackAudioSession {

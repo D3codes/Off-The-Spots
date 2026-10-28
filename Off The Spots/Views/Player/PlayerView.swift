@@ -107,17 +107,14 @@ struct PlayerView: View {
                 Spacer()
                 Spacer()
                 
-                //            GlassEffectContainer(spacing: 10.0) {
                 VStack(spacing: 10.0) {
                     PanningView(player: player, panningValue: $player.panningValue)
                         .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding()
-                    //                        .glassEffect()
                     
                     RateView(player: player, rateValue: $player.rateValue)
                         .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding()
-                    //                        .glassEffect()
                     
                     LoopView(
                         player: player,
@@ -128,10 +125,9 @@ struct PlayerView: View {
                         isLooping: $player.isLooping)
                     .frame(maxWidth: .infinity, maxHeight: 50)
                     .padding()
-                    //                    .glassEffect()
                 }
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
-                //            }
+                .frame(maxWidth: 500)
                 
                 Spacer()
                 

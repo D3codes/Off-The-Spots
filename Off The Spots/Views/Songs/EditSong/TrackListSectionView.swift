@@ -73,7 +73,8 @@ struct TrackListSectionView: View {
                 .mp3,
                 .aiff,
                 .wav,
-                .midi
+                .midi,
+                .mpeg4Audio
             ],
             allowsMultipleSelection: true,
             onCompletion: { results in

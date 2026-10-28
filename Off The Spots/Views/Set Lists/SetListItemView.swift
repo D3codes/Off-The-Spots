@@ -26,6 +26,8 @@ struct SetListItemView: View {
                     .font(.title2)
                     .tint(.primary)
                     .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
                 HStack(spacing: 4) {
                     if selectedSetList != nil && selectedSetList!.id == setList.id {

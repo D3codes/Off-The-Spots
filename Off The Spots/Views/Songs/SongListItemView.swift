@@ -28,6 +28,8 @@ struct SongListItemView: View {
                     .font(.title2)
                     .tint(.primary)
                     .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
                 HStack(spacing: 4) {
                     if selectedSong != nil && selectedSong!.id == song.id {
