@@ -13,7 +13,8 @@ struct SongListItemView: View {
     var isSongPlaying: Bool = false
     
     var isSearchResult: Bool = false
-    var deleteSong: () -> Void = {}
+    var removeSong: (() -> Void)? = nil
+    var deleteSong: (() -> Void)? = nil
     
     var presentAddToSetListSheet: () -> Void = {}
     var presentEditSongSheet: () -> Void = {}
@@ -68,10 +69,20 @@ struct SongListItemView: View {
                     
                     Divider()
                     
-                    Button(role: .destructive) {
-                        deleteSong()
-                    } label: {
-                        Label("Delete Song", systemImage: "trash")
+                    if let removeSong {
+                        Button(role: .destructive) {
+                            removeSong()
+                        } label: {
+                            Label("Remove from Set List", systemImage: "minus.circle")
+                        }
+                    }
+                    
+                    if let deleteSong {
+                        Button(role: .destructive) {
+                            deleteSong()
+                        } label: {
+                            Label("Delete Song", systemImage: "trash")
+                        }
                     }
                 }, label: {
                     Image(systemName: "ellipsis")
@@ -89,9 +100,9 @@ struct SongListItemView: View {
 #Preview {
     List {
         SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: true)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: true)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: true)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, removeSong: {}, deleteSong: {}, unlocked: true)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, removeSong: {}, unlocked: true)
         SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: false)
-        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, deleteSong: {}, unlocked: false)
+        SongListItemView(song: Song(name: "Song 1", tracks: [], selectedTrack: Track(name: "Track 1")), isSongPlaying: false, removeSong: {}, unlocked: false)
     }
 }

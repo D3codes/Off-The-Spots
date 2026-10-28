@@ -66,6 +66,13 @@ struct SetListView: View {
                                 song: song,
                                 selectedSong: selectedSetList?.id == setList.id ? selectedSong : nil,
                                 isSongPlaying: isSongPlaying,
+                                removeSong: {
+                                    guard let index = setList.songs.firstIndex(of: songId) else {
+                                        return
+                                    }
+
+                                    deleteSongs(offsets: IndexSet(integer: index))
+                                },
                                 presentAddToSetListSheet: { songToAddToSetList = song },
                                 presentEditSongSheet: { songToEdit = song },
                                 unlocked: true

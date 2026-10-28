@@ -20,6 +20,7 @@ struct SongsView: View {
     @State private var selection = Set<Song.ID>()
     @State private var songToAddToSetList: Song?
     @State private var songToEdit: Song?
+    @State private var songToDelete: Song?
     
     @State private var presentAddSongSheet = false
     @State private var addSongInitialTrackUrl: URL?
@@ -58,13 +59,7 @@ struct SongsView: View {
                                     song: song,
                                     selectedSong: player.selectedSetList == nil ? player.selectedSong : nil,
                                     isSongPlaying: player.isPlaying,
-                                    deleteSong: {
-                                        guard let index = songs.firstIndex(where: { $0.id == song.id }) else {
-                                            return
-                                        }
-
-                                        deleteSongs(offsets: IndexSet(integer: index))
-                                    },
+                                    deleteSong: { songToDelete = song },
                                     presentAddToSetListSheet: {
                                         if isPro {
                                             songToAddToSetList = song
@@ -147,6 +142,20 @@ struct SongsView: View {
             .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 isPro = StoreHelper.checkForActiveSubscription(in: taskState)
+            }
+            .alert(item: $songToDelete) { song in
+                Alert(
+                    title: Text("Delete \(song.name)?"),
+                    message: Text("All tracks and sheet music will be deleted. It will also be removed from all Set Lists."),
+                    primaryButton: .destructive(Text("Delete"), action: {
+                        guard let index = songs.firstIndex(where: { $0.id == song.id }) else {
+                            return
+                        }
+
+                        deleteSongs(offsets: IndexSet(integer: index))
+                    }),
+                    secondaryButton: .cancel(Text("Cancel"), action: {  })
+                )
             }
         }
     }
