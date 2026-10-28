@@ -17,6 +17,7 @@ struct SongsView: View {
     @Binding var presentPlayerSheet: Bool
     @Binding var hideMiniPlayer: Bool
     
+    @State private var addButtonFrame: CGRect?
     @State private var selection = Set<Song.ID>()
     @State private var songToAddToSetList: Song?
     @State private var songToEdit: Song?
@@ -41,7 +42,7 @@ struct SongsView: View {
         NavigationStack {
             Group {
                 if songs.isEmpty {
-                    SplashScreenView()
+                    SplashScreenView(targetFrame: addButtonFrame, placeholderText: "Add a Song to Get Started")
                 } else {
                     List(selection: $selection) {
                         ForEach(songs.enumerated(), id: \.offset) { index, song in
@@ -114,6 +115,14 @@ struct SongsView: View {
                         Image(systemName: "plus")
                     })
                     .accessibilityLabel("Add Song")
+                    .onGeometryChange(for: CGRect.self) { proxy in
+                        proxy.frame(in: .global)
+                    } action: { frame in
+                        addButtonFrame = frame.isEmpty ? nil : frame
+                    }
+                    .onDisappear {
+                        addButtonFrame = nil
+                    }
                     .sheet(isPresented: $presentAddSongSheet) {
                         EditSongView(song: $newSong, isNewSong: true)
                             .interactiveDismissDisabled(true)

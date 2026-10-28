@@ -21,6 +21,7 @@ struct SetListsView: View {
     var selectedSetList: SetList?
     var isSongPlaying: Bool
     
+    @State private var addButtonFrame: CGRect?
     @State private var selection = Set<SetList.ID>()
     
     @State private var presentAddSetListSheet: Bool = false
@@ -42,7 +43,7 @@ struct SetListsView: View {
         NavigationStack(path: $setListNavPath) {
             Group {
                 if setLists.isEmpty {
-                    SplashScreenView()
+                    SplashScreenView(targetFrame: addButtonFrame, placeholderText: "Add a Set List to Get Started")
                 } else {
                     List(selection: $selection) {
                         ForEach(setLists) { setList in
@@ -112,6 +113,14 @@ struct SetListsView: View {
                         Image(systemName: "plus")
                     })
                     .accessibilityLabel("Add Set List")
+                    .onGeometryChange(for: CGRect.self) { proxy in
+                        proxy.frame(in: .global)
+                    } action: { frame in
+                        addButtonFrame = frame.isEmpty ? nil : frame
+                    }
+                    .onDisappear {
+                        addButtonFrame = nil
+                    }
                     .sheet(isPresented: $presentAddSetListSheet) {
                         EditSetListView(setList: $newSetList, isNewSetList: true)
                             .interactiveDismissDisabled(true)

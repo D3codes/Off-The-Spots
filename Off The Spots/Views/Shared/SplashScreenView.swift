@@ -8,86 +8,82 @@
 import SwiftUI
 
 struct SplashScreenView: View {
-    @State private var noteOffsets = [
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300),
-        Double.random(in: 200...300)
-    ]
-
-    //used to start floating notes animation
-    @State private var appeared = false
-    func flipOffsets() {
-        if appeared {
-            return
-        }
-        
-        for i in 0...9 {
-            noteOffsets[i] = -noteOffsets[i]
-        }
-        
-        appeared = true
-    }
-    
-    func getRandomColor() -> Color {
-        return Color(
-            red: .random(in: 0...1),
-            green: .random(in: 0...1),
-            blue: .random(in: 0...1),
-            opacity: 1
-        )
-    }
+    let targetFrame: CGRect?
+    var placeholderText: String = ""
     
     var body: some View {
-        VStack {
-            VStack(alignment: .trailing) {
-                 Image(systemName: "arrowshape.up.fill")
-                     .font(.title)
-                     .symbolEffect(.wiggle.byLayer, options: .speed(0.5).repeat(.continuous))
-                 Text("Add a song to get started")
-             }
-             .frame(maxWidth: .infinity, maxHeight: 100, alignment: .topTrailing)
-             .padding(.trailing, 21)
+        ZStack {
+            FlyingNotesView()
             
-            Spacer()
-            
-            ZStack {
+            VStack {
                 VStack {
-                    ForEach(0..<10) { i in
-                        Image(systemName: "music.note")
-                            .font(.title)
-                            .foregroundStyle(getRandomColor())
-                            .scaleEffect(Double.random(in: 0.4...1.5))
-                            .offset(x: noteOffsets[i])
-                            .animation(
-                                .linear(duration: Double.random(in: 5...10))
-                                .repeatForever(autoreverses: false),
-                                value: noteOffsets[i]
+                    GeometryReader { proxy in
+                        if let targetFrame {
+                            // Both measurements use global coordinates because the
+                            // toolbar and splash content have different containers.
+                            let containerFrame = proxy.frame(in: .global)
+                            let arrowCenter = CGPoint(
+                                x: targetFrame.midX - containerFrame.minX,
+                                y: targetFrame.maxY - containerFrame.minY + 8 + 22
                             )
+                            
+                            Image(systemName: "arrowshape.up.fill")
+                                .font(.title)
+                                .symbolEffect(
+                                    .wiggle.byLayer,
+                                    options: .speed(0.5).repeat(.continuous)
+                                )
+                                .frame(width: 44, height: 44)
+                                .position(arrowCenter)
+                        }
                     }
+                    .frame(height: 44)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                    
+                    Text(placeholderText)
                 }
+                .frame(maxWidth: .infinity, maxHeight: 100, alignment: .top)
+                .padding(.horizontal, 16)
+                
+                Spacer()
                 
                 Image("spot")
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .frame(width: 300)
             }
-            .frame(width: 350, height: 350)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .glassEffect(in: .rect(cornerRadius: 16.0))
-            .padding(.bottom, 50)
         }
         .ignoresSafeArea(.keyboard)
-        .task { DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { flipOffsets() } }
     }
 }
 
 #Preview {
-    SplashScreenView()
+    @Previewable @State var addButtonFrame: CGRect?
+
+    NavigationStack {
+        SplashScreenView(targetFrame: addButtonFrame, placeholderText: "Add a Song to Get Started")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink(destination: SplashScreenView(targetFrame: addButtonFrame), label: {Image(systemName: "gearshape") })
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        
+                    }, label: {
+                        Image(systemName: "plus")
+                    })
+                    .accessibilityLabel("Add Song")
+                    .onGeometryChange(for: CGRect.self) { proxy in
+                        proxy.frame(in: .global)
+                    } action: { frame in
+                        addButtonFrame = frame.isEmpty ? nil : frame
+                    }
+                    .onDisappear {
+                        addButtonFrame = nil
+                    }
+                }
+            }
+    }
 }
