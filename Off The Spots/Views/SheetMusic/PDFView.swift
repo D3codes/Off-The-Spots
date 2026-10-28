@@ -8,42 +8,34 @@
 import SwiftUI
 import PDFKit
 
-struct PDFKitView: UIViewRepresentable {
+struct PDFUIView: UIViewRepresentable {
+    let pdfData: Data
 
-    let pdfDocument: PDFDocument
+    @MainActor
+    final class Coordinator {
+        private var loadedData: Data?
 
-    init(showing pdfDoc: PDFDocument) {
-        self.pdfDocument = pdfDoc
+        func loadIfNeeded(_ data: Data, into pdfView: PDFView) {
+            // Preserve scroll position and zoom during unrelated SwiftUI updates.
+            guard loadedData != data else { return }
+
+            pdfView.document = PDFDocument(data: data)
+            loadedData = data
+        }
     }
 
-    //could also have inits that take a URL or Data
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
 
     func makeUIView(context: Context) -> PDFView {
         let pdfView = PDFView()
-        pdfView.document = pdfDocument
+        context.coordinator.loadIfNeeded(pdfData, into: pdfView)
         pdfView.autoScales = true
-//        pdfView.displayMode = .singlePageContinuous
-//        pdfView.displayDirection = .vertical
-//        pdfView.usePageViewController(false)
         return pdfView
     }
 
     func updateUIView(_ pdfView: PDFView, context: Context) {
-        pdfView.document = pdfDocument
-    }
-}
-
-struct PDFUIView: View {
-
-    let pdfDoc: PDFDocument
-
-    init(pdfData: Data) {
-        self.pdfDoc = PDFDocument(data: pdfData)!
-//        let url = Bundle.main.url(forResource: "Lipsum", withExtension: "pdf")!
-//        pdfDoc = PDFDocument(url: url)!
-    }
-
-    var body: some View {
-        PDFKitView(showing: pdfDoc)
+        context.coordinator.loadIfNeeded(pdfData, into: pdfView)
     }
 }
