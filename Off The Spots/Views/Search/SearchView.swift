@@ -125,7 +125,7 @@ struct SearchView: View {
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
             .navigationTitle("Search")
-//            .background(backgroundGradient)
+            .background(secondaryBackground)
             .sheet(isPresented: $presentSubscription) {
                 NavigationStack {
                     SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)

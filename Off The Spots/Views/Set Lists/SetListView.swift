@@ -26,7 +26,9 @@ struct SetListView: View {
     @State private var presentEditSetListSheet: Bool = false
     
     var body: some View {
-        Group {
+        ZStack {
+            ScreenBackground()
+
             List(selection: $selection) {
                 HStack {
                     Spacer()
@@ -89,6 +91,7 @@ struct SetListView: View {
             .listSectionSpacing(.compact)
             .ignoresSafeArea(.keyboard)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle(setList.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -107,7 +110,6 @@ struct SetListView: View {
             EditSetListView(setList: $setList)
                 .interactiveDismissDisabled(true)
         }
-//        .background(backgroundGradient)
     }
     
     private func deleteSongs(offsets: IndexSet) {

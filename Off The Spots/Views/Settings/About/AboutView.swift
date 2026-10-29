@@ -112,10 +112,12 @@ struct AboutView: View {
             
             Text("Thank you for trying Off The Spots! 💈")
                 .padding(.top)
+            
+            RandomSpotView()
         }
         .scrollIndicators(.hidden)
         .navigationTitle("About")
-//        .background(backgroundGradient)
+        .background(secondaryBackground)
     }
 }
 

@@ -40,7 +40,9 @@ struct SongsView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
+            ZStack {
+                ScreenBackground()
+
                 if songs.isEmpty {
                     SplashScreenView(targetFrame: addButtonFrame, placeholderText: "Add a Song to Get Started")
                 } else {
@@ -85,6 +87,7 @@ struct SongsView: View {
                     .ignoresSafeArea(.keyboard)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Songs")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -130,7 +133,6 @@ struct SongsView: View {
                 }
             }
             .onAppear { hideMiniPlayer = false }
-//            .background(backgroundGradient)
             .sheet(item: $songToAddToSetList) { song in
                 AddToSetListView(song: song)
             }

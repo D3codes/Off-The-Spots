@@ -151,6 +151,8 @@ struct SettingsView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear { hideMiniPlayer = true }
         .ignoresSafeArea(.keyboard)
+        .scrollContentBackground(.hidden)
+        .background(secondaryBackground)
         .toolbar {
             if isPro {
                 ToolbarItem(placement: .topBarTrailing) {

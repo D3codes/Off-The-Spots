@@ -41,7 +41,9 @@ struct SetListsView: View {
     
     var body: some View {
         NavigationStack(path: $setListNavPath) {
-            Group {
+            ZStack {
+                ScreenBackground()
+
                 if setLists.isEmpty {
                     SplashScreenView(targetFrame: addButtonFrame, placeholderText: "Add a Set List to Get Started")
                 } else {
@@ -84,6 +86,7 @@ struct SetListsView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Set Lists")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -128,7 +131,6 @@ struct SetListsView: View {
                 }
             }
             .onAppear { hideMiniPlayer = false }
-//            .background(backgroundGradient)
             .sheet(item: $setListToEdit) { setList in
                 EditSetListView(setList: .constant(setList))
                     .interactiveDismissDisabled(true)

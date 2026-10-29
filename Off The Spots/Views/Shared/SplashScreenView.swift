@@ -40,18 +40,21 @@ struct SplashScreenView: View {
                     .frame(height: 44)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
-                    
-                    Text(placeholderText)
                 }
                 .frame(maxWidth: .infinity, maxHeight: 100, alignment: .top)
                 .padding(.horizontal, 16)
                 
+                Text("Welcome to Off the Spots!")
+                    .font(.title)
+                    .padding(.bottom, 4)
+                
+                Text(placeholderText)
+                    .font(.headline)
+                
                 Spacer()
                 
-                Image("spot")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300)
+                RandomSpotView()
+                    .padding(.bottom)
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -63,6 +66,7 @@ struct SplashScreenView: View {
 
     NavigationStack {
         SplashScreenView(targetFrame: addButtonFrame, placeholderText: "Add a Song to Get Started")
+            .background { ScreenBackground() }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink(destination: SplashScreenView(targetFrame: addButtonFrame), label: {Image(systemName: "gearshape") })
