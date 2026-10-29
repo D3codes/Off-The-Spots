@@ -44,7 +44,7 @@ struct SplashScreenView: View {
                 .frame(maxWidth: .infinity, maxHeight: 100, alignment: .top)
                 .padding(.horizontal, 16)
                 
-                Text("Welcome to Off the Spots!")
+                Text("Welcome to Off The Spots!")
                     .font(.title)
                     .padding(.bottom, 4)
                 
