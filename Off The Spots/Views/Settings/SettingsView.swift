@@ -105,7 +105,7 @@ struct SettingsView: View {
             }
             
             Section {
-                Button(action: { openURL(URL(string: "https://d3.codes")!) }, label: {
+                Button(action: { openURL(URL(string: "https://d3.codes/apps/offthespots/support")!) }, label: {
                     HStack {
                         Text("Support")
                         Spacer()
@@ -115,7 +115,7 @@ struct SettingsView: View {
                 })
                 .buttonStyle(.plain)
                 
-                Button(action: { openURL(URL(string: "https://d3.codes")!) }, label: {
+                Button(action: { openURL(URL(string: "https://d3.codes/apps/offthespots/privacypolicy")!) }, label: {
                     HStack {
                         Text("Privacy Policy")
                         Spacer()

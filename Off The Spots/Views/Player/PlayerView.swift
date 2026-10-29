@@ -65,6 +65,8 @@ struct PlayerView: View {
                         set: { newId in
                             if let newTrack = player.selectedSong!.sortedTracks.first(where: { $0.id == newId }) {
                                 player.setSelectedTrack(track: newTrack)
+                                loopEndLocked = false
+                                loopStartLocked = false
                             }
                         }
                     )) {
