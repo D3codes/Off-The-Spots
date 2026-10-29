@@ -170,6 +170,21 @@ struct SetListsView: View {
     private func deleteSetLists(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
+                let setListId = setLists[index].id
+                
+                // Stop playing deleted set list, if it is playing
+                if(selectedSetList?.id == setListId) {
+                    presentPlayerSheet = false
+                    
+                    if(AudioHelper.sharedController.isPlaying) {
+                        AudioHelper.sharedController.stop()
+                    }
+                    
+                    AudioHelper.sharedController.selectedSong = nil
+                    AudioHelper.sharedController.selectedSetList = nil
+                }
+                
+                // Remove deleted set list
                 modelContext.delete(setLists[index])
             }
         }
