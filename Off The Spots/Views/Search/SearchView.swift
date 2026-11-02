@@ -13,7 +13,7 @@ struct SearchView: View {
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
     @Binding var presentPlayerSheet: Bool
-    var setSelectedSong: (Song, SetList?, Bool) -> Void = {song, setList, skip in }
+    var setSelectedSong: (Song, SetList?, Bool, Bool) -> Void = {song, setList, skip, skipRepeatReset in }
     @Binding var selectedTab: Tabs
     @Binding var setListNavPath: NavigationPath
     
@@ -57,7 +57,7 @@ struct SearchView: View {
                         Button(action: {
                             if unlockSong {
                                 selectedTab = .songs
-                                setSelectedSong(song, nil, false)
+                                setSelectedSong(song, nil, false, false)
                                 presentPlayerSheet = true
                             } else {
                                 presentSubscription = true

@@ -12,7 +12,7 @@ struct SetListsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\SetList.order)]) private var setLists: [SetList]
     
-    var setSelectedSong: (Song, SetList?, Bool) -> Void = {song, setList, skip in }
+    var setSelectedSong: (Song, SetList?, Bool, Bool) -> Void = {song, setList, skip, skipRepeatReset in }
     @Binding var presentPlayerSheet: Bool
     @Binding var hideMiniPlayer: Bool
     @Binding var setListNavPath: NavigationPath

@@ -13,7 +13,7 @@ struct SetListMenuView: View {
     
     @State var setList: SetList?
     var currentSong: Song
-    var setSelectedSong: (Song, SetList?, Bool) -> Void = {song, setList, skip in }
+    var setSelectedSong: (Song, SetList?, Bool, Bool) -> Void = {song, setList, skip, skipRepeatReset in }
     
     var body: some View {
         Menu("", systemImage: "music.note.list") {
@@ -25,7 +25,7 @@ struct SetListMenuView: View {
                 
                 ForEach(setList!.songs, id: \.self) { songId in
                     if let song = songs.first(where: { $0.id == songId }) {
-                        Button(action: { setSelectedSong(song, setList, false) }) {
+                        Button(action: { setSelectedSong(song, setList, false, false) }) {
                             Text(song.name)
                             
                             if songId == currentSong.id {

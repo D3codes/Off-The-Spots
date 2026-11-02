@@ -167,14 +167,15 @@ struct PlayerView: View {
                     
                     Spacer()
                     
-                    SetListMenuView(
-                        setList: player.selectedSetList,
-                        currentSong: player.selectedSong!,
-                        setSelectedSong: player.setSelectedSong
-                    )
-                    .frame(width: 40, height: 40)
+//                    SetListMenuView(
+//                        setList: player.selectedSetList,
+//                        currentSong: player.selectedSong!,
+//                        setSelectedSong: player.setSelectedSong
+//                    )
+//                    .frame(width: 40, height: 40)
                     
-                    
+                    RepeatButtonView(player: player)
+                        .frame(width: 40, height: 40)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom)

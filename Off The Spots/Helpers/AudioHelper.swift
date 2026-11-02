@@ -44,6 +44,8 @@ class AudioHelper: NSObject, ObservableObject {
     @Published var isLooping: Bool = false
     @Published var loopStart: Double? = nil
     @Published var loopEnd: Double? = nil
+    @Published var repeatOne: Bool = false
+    @Published var repeatAll: Bool = false
     
     var publishProgressChanges: Bool = false
 
@@ -102,7 +104,7 @@ class AudioHelper: NSObject, ObservableObject {
         setSelectedSong(song: selectedSong, setList: selectedSetList, skipSameCheck: true)
     }
     
-    func setSelectedSong(song: Song, setList: SetList?, skipSameCheck: Bool = false) {
+    func setSelectedSong(song: Song, setList: SetList?, skipSameCheck: Bool = false, skipRepeatReset: Bool = false) {
         if !skipSameCheck && song.id == selectedSong?.id && setList?.id == selectedSetList?.id { return }
 
         selectedSong = song
@@ -114,6 +116,9 @@ class AudioHelper: NSObject, ObservableObject {
         rateValue = 1.0
         clearLoopStart()
         clearLoopEnd()
+        if !skipRepeatReset {
+            clearRepeats()
+        }
         
         do {
             if song.selectedTrack == nil {
@@ -339,6 +344,34 @@ class AudioHelper: NSObject, ObservableObject {
         isLooping = false
     }
     
+    func incrementRepeat() {
+        if selectedSetList != nil {
+            if repeatAll {
+                repeatAll = false
+                repeatOne = true
+            } else if repeatOne {
+                repeatOne = false
+                repeatAll = false
+            } else {
+                repeatAll = true
+                repeatOne = false
+            }
+        } else {
+            if repeatOne {
+                repeatOne = false
+                repeatAll = false
+            } else {
+                repeatOne = true
+                repeatAll = false
+            }
+        }
+    }
+    
+    func clearRepeats() {
+        repeatOne = false
+        repeatAll = false
+    }
+    
     private func scheduleAudioFile() {
         guard let file = audioFile, needsFileScheduled
         else { return }
@@ -396,14 +429,25 @@ class AudioHelper: NSObject, ObservableObject {
         let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.order, order: .forward)])
         let songs = (try? modelContext.fetch(descriptor)) ?? []
         
+        if repeatOne {
+            play()
+            return
+        }
+        
         if selectedSetList != nil {
-            let currentSongIndex = selectedSetList!.songs.firstIndex(of: selectedSong!.id)!
-            if currentSongIndex == selectedSetList!.songs.count - 1 { return }
+            var currentSongIndex = selectedSetList!.songs.firstIndex(of: selectedSong!.id)!
+            if currentSongIndex == selectedSetList!.songs.count - 1 {
+                if repeatAll {
+                    currentSongIndex = -1
+                } else {
+                    return
+                }
+            }
             
             let nextSong: Song? = songs.first(where: { $0.id == selectedSetList!.songs[currentSongIndex + 1] })
             guard let nextSong else { return }
             
-            setSelectedSong(song: nextSong, setList: selectedSetList)
+            setSelectedSong(song: nextSong, setList: selectedSetList, skipRepeatReset: true)
             play()
         }
     }

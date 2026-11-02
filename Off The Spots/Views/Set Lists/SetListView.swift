@@ -14,7 +14,7 @@ struct SetListView: View {
     
     @State var setList: SetList
     @Binding var presentPlayerSheet: Bool
-    var setSelectedSong: (Song, SetList?, Bool) -> Void = {song, setList, skip in }
+    var setSelectedSong: (Song, SetList?, Bool, Bool) -> Void = {song, setList, skip, skipRepeatReset in }
     
     var selectedSong: Song?
     var selectedSetList: SetList?
@@ -36,7 +36,7 @@ struct SetListView: View {
                     Button(
                         action: {
                             if let song = songs.first(where: { $0.id == setList.songs.first }) {
-                                setSelectedSong(song, setList, false)
+                                setSelectedSong(song, setList, false, false)
                                 AudioHelper.sharedController.play()
                                 presentPlayerSheet = true
                             }
@@ -61,7 +61,7 @@ struct SetListView: View {
                 ForEach(setList.songs, id: \.self) { songId in
                     if let song = songs.first(where: { $0.id == songId }) {
                         Button(action: {
-                            setSelectedSong(song, setList, false)
+                            setSelectedSong(song, setList, false, false)
                             presentPlayerSheet = true
                         }) {
                             SongListItemView(

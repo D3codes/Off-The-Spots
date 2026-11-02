@@ -27,6 +27,10 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
     }
     
     func setNowPlayingButtons() -> Void {
+//        let repeatButton = CPNowPlayingImageButton(image: UIImage(systemName: "repeat")!, handler: { _ in
+//            AudioHelper.sharedController.incrementRepeat()
+//        })
+        
         let leftFillValue = AudioHelper.sharedController.panningValue <= 0 ? 1 : 1-AudioHelper.sharedController.panningValue
         let panLeftButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.left", variableValue: leftFillValue)!, handler: { _ in
             let currentPan = AudioHelper.sharedController.panningValue
@@ -48,8 +52,6 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             AudioHelper.sharedController.setPan(value: newPan)
             self.setNowPlayingButtons()
         })
-        
-//        let tracksButton = CPNowPlayingImageButton(image: UIImage(systemName: "music.note.square.stack.fill")!, handler: { _ in print("Tacks") })
         
         let decreaseRateButton = CPNowPlayingImageButton(image: UIImage(systemName: "tortoise.fill")!, handler: { _ in
             let currentRate = AudioHelper.sharedController.rateValue
