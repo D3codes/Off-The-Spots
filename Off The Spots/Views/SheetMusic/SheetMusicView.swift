@@ -26,21 +26,28 @@ struct SheetMusicView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea(edges: .all)
                     .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button(role: .cancel, action: dismissSheetMusicView)
+                        if #available(iOS 27.1, *) {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button(role: .cancel, action: dismissSheetMusicView)
+                            }
+                            .axisBehavior(.horizontalOnly)
+                        } else {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button(role: .cancel, action: dismissSheetMusicView)
+                            }
                         }
-                        .axisBehavior(.horizontalOnly)
                     }
                 
                 if player != nil {
                     Circle().opacity(0)
                         .toolbar {
-                            ToolbarItemGroup(placement: .bottomBar) {
+                            if #available(iOS 27.1, *) {
+                                ToolbarItemGroup(placement: .bottomBar) {
                                     Button(
                                         action: { player!.skip(seconds: -15) },
                                         label: { Image(systemName: "15.arrow.trianglehead.counterclockwise") }
                                     )
-                                
+                                    
                                     Button(action: {
                                         if(player!.isPlaying) {
                                             player!.pause()
@@ -54,13 +61,41 @@ struct SheetMusicView: View {
                                             Image(systemName: "play.fill")
                                         }
                                     })
-                                
+                                    
                                     Button(
                                         action: { player!.skip(seconds: 15) },
                                         label: { Image(systemName: "15.arrow.trianglehead.clockwise") }
                                     )
+                                }
+                                .axisBehavior(.horizontalOnly)
+                            } else {
+                                ToolbarItemGroup(placement: .bottomBar) {
+                                    Button(
+                                        action: { player!.skip(seconds: -15) },
+                                        label: { Image(systemName: "15.arrow.trianglehead.counterclockwise") }
+                                    )
+                                    
+                                    Button(action: {
+                                        if(player!.isPlaying) {
+                                            player!.pause()
+                                        } else {
+                                            player!.play()
+                                        }
+                                    }, label: {
+                                        if(player!.isPlaying) {
+                                            Image(systemName: "pause.fill")
+                                        } else {
+                                            Image(systemName: "play.fill")
+                                        }
+                                    })
+                                    
+                                    Button(
+                                        action: { player!.skip(seconds: 15) },
+                                        label: { Image(systemName: "15.arrow.trianglehead.clockwise") }
+                                    )
+                                }
+                                
                             }
-                            .axisBehavior(.horizontalOnly)
                         }
                 }
             }

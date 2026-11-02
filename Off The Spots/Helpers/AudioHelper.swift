@@ -276,13 +276,13 @@ class AudioHelper: NSObject, ObservableObject {
         currentPosition = max(currentPosition, 0)
         currentPosition = min(currentPosition, audioLengthSamples)
         
+        if (isLooping && (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate))) {
+            setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
+        }
+        
         if currentPosition > 0 && currentPosition >= audioLengthSamples {
             stop()
             handlePlayerDidFinishPlaying()
-        }
-        
-        if (isLooping && (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate))) {
-            setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
         }
 
         if publishProgressChanges {
@@ -329,7 +329,10 @@ class AudioHelper: NSObject, ObservableObject {
     func startLoop() {
         guard loopStart != nil, loopEnd != nil else { return }
         isLooping = true
-        setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
+        
+        if (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate)) {
+            setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
+        }
     }
     
     func stopLoop() {

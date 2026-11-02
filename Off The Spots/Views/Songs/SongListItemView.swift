@@ -66,7 +66,7 @@ struct SongListItemView: View {
                     )
                     Button(
                         action: { presentAddToSetListSheet() },
-                        label: { Label("Add to Set List", systemImage: "music.note.list") }
+                        label: { Label("Add to Set List", image: "music.note.list.plus") }
                     )
                     
                     Divider()

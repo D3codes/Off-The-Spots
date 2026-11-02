@@ -27,10 +27,11 @@ struct PackagesView: View {
     
     var body: some View {
         VStack() {
-            Text("Packages")
+            Text("Packages and Fonts")
                 .font(.headline)
                 .padding(.bottom, 2)
             
+            PackageItemView(name: "Anak Orang", creator: "Khurasan")
             PackageItemView(name: "MarqueeText", creator: "Joe Kennedy")
             PackageItemView(name: "Vortex", creator: "Paul Hudson")
             

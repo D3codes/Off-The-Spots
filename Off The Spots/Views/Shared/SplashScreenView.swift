@@ -54,7 +54,7 @@ struct SplashScreenView: View {
                 Spacer()
                 
                 RandomSpotView()
-                    .padding(.bottom)
+                    .padding()
             }
         }
         .ignoresSafeArea(.keyboard)

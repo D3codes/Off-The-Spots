@@ -4,6 +4,13 @@
 <dict>
 	<key>CFBundleGetInfoString</key>
 	<string></string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Chewy.ttf</string>
+		<string>Anak Orang.ttf</string>
+		<string>BadComic-Regular.ttf</string>
+		<string>FriendlySans-Regular.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

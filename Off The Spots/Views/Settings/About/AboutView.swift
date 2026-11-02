@@ -96,16 +96,16 @@ struct AboutView: View {
                 .padding(.horizontal)
             
             Group {
-                HStack {
+                VStack {
                     TestersView()
-                    .containerRelativeFrame(.horizontal) { length, axis in
-                        length * 0.45
-                    }
+//                    .containerRelativeFrame(.horizontal) { length, axis in
+//                        length * 0.45
+//                    }
                     
                     PackagesView()
-                    .containerRelativeFrame(.horizontal) { length, axis in
-                        length * 0.45
-                    }
+//                    .containerRelativeFrame(.horizontal) { length, axis in
+//                        length * 0.45
+//                    }
                 }
             }
             .padding(.horizontal)
@@ -114,6 +114,7 @@ struct AboutView: View {
                 .padding(.top)
             
             RandomSpotView()
+                .padding()
         }
         .scrollIndicators(.hidden)
         .navigationTitle("About")

@@ -155,17 +155,30 @@ struct SettingsView: View {
         .background(secondaryBackground)
         .toolbar {
             if isPro {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { presentThanksSheet = true }) {
-                        Text("Pro")
-                            .font(.title)
-                            .bold()
-                            .gradientForeground(colors: [.teal, Color.otsBlue])
+                if #available(iOS 27.1, *) {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { presentThanksSheet = true }) {
+                            Text("Pro")
+                                .font(.title)
+                                .bold()
+                                .gradientForeground(colors: [.teal, Color.otsBlue])
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(.primary)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(.primary)
+                    .axisBehavior(.horizontalOnly)
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { presentThanksSheet = true }) {
+                            Text("Pro")
+                                .font(.title)
+                                .bold()
+                                .gradientForeground(colors: [.teal, Color.otsBlue])
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(.primary)
+                    }
                 }
-                .axisBehavior(.horizontalOnly)
             }
         }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in

@@ -45,39 +45,75 @@ struct PlaybackProgressView: View {
             .overlay(
                 ZStack {
                     if loopStart != nil {
-                        UISliderView(
-                            value: Binding<Double>(get: {
-                                return loopStart ?? 0.0
-                            }, set: {
-                                let end = loopEnd ?? duration
-                                loopStart = min($0, end)
-                            }),
-                            minValue: 0.0,
-                            maxValue: duration,
-                            thumbImage: loopStartImage,
-                            thumbColor: .primary,
-                            minTrackColor: .clear,
-                            maxTrackColor: .clear
-                        )
-                        .allowsHitTesting(!loopStartLocked)
+                        if loopStartLocked {
+                            UISliderView(
+                                value: Binding<Double>(get: {
+                                    return loopStart ?? 0.0
+                                }, set: {
+                                    let end = loopEnd ?? duration
+                                    loopStart = min($0, end)
+                                }),
+                                minValue: 0.0,
+                                maxValue: duration,
+                                thumbImage: loopStartImage,
+                                thumbColor: .primary,
+                                minTrackColor: .clear,
+                                maxTrackColor: .clear
+                            )
+                            .allowsHitTesting(!loopStartLocked)
+                        } else {
+                            UISliderView(
+                                value: Binding<Double>(get: {
+                                    return loopStart ?? 0.0
+                                }, set: {
+                                    let end = loopEnd ?? duration
+                                    loopStart = min($0, end)
+                                }),
+                                minValue: 0.0,
+                                maxValue: duration,
+                                thumbImage: loopStartImage,
+                                thumbColor: .accentColor,
+                                minTrackColor: .clear,
+                                maxTrackColor: .clear
+                            )
+                            .allowsHitTesting(!loopStartLocked)
+                        }
                     }
                     
                     if loopEnd != nil {
-                        UISliderView(
-                            value: Binding<Double>(get: {
-                                return loopEnd ?? 0.0
-                            }, set: {
-                                let start = loopStart ?? 0.0
-                                loopEnd = max($0, start)
-                            }),
-                            minValue: 0.0,
-                            maxValue: duration,
-                            thumbImage: loopEndImage,
-                            thumbColor: .primary,
-                            minTrackColor: .clear,
-                            maxTrackColor: .clear
-                        )
-                        .allowsHitTesting(!loopEndLocked)
+                        if loopEndLocked {
+                            UISliderView(
+                                value: Binding<Double>(get: {
+                                    return loopEnd ?? 0.0
+                                }, set: {
+                                    let start = loopStart ?? 0.0
+                                    loopEnd = max($0, start)
+                                }),
+                                minValue: 0.0,
+                                maxValue: duration,
+                                thumbImage: loopEndImage,
+                                thumbColor: .primary,
+                                minTrackColor: .clear,
+                                maxTrackColor: .clear
+                            )
+                            .allowsHitTesting(!loopEndLocked)
+                        } else {
+                            UISliderView(
+                                value: Binding<Double>(get: {
+                                    return loopEnd ?? 0.0
+                                }, set: {
+                                    let start = loopStart ?? 0.0
+                                    loopEnd = max($0, start)
+                                }),
+                                minValue: 0.0,
+                                maxValue: duration,
+                                thumbImage: loopEndImage,
+                                thumbColor: .accentColor,
+                                minTrackColor: .clear,
+                                maxTrackColor: .clear
+                            )
+                            .allowsHitTesting(!loopEndLocked)
+                        }
                     }
                 }
             )
@@ -116,7 +152,7 @@ struct PlaybackProgressView: View {
         @State var loopStart: Double? = 0.0
         @State var loopStartLocked: Bool = true
         @State var loopEnd: Double? = nil
-        @State var loopEndLocked: Bool = false
+        @State var loopEndLocked: Bool = true
         
         var body: some View {
             PlaybackProgressView(
@@ -128,6 +164,8 @@ struct PlaybackProgressView: View {
                 loopStartLocked: $loopStartLocked,
                 loopEnd: $loopEnd,
                 loopEndLocked: $loopEndLocked)
+            
+            Button("test: \(loopStartLocked)") { loopStartLocked.toggle() }
         }
     }
     

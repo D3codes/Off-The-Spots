@@ -94,10 +94,16 @@ struct SetListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle(setList.name)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { presentEditSetListSheet = true }, label: { Text("Edit") })
+            if #available(iOS 27.1, *) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { presentEditSetListSheet = true }, label: { Text("Edit") })
+                }
+                .axisBehavior(.horizontalOnly)
+            } else {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { presentEditSetListSheet = true }, label: { Text("Edit") })
+                }
             }
-            .axisBehavior(.horizontalOnly)
         }
         .sheet(item: $songToAddToSetList) { song in
             AddToSetListView(song: song)

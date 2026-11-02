@@ -30,35 +30,6 @@ struct PlayerView: View {
     var body: some View {
         NavigationStack {
             VStack {
-//                HStack {
-//                    Text(player.selectedSong!.name)
-//                        .font(.largeTitle)
-//                    Spacer()
-//                    Menu(content: {
-//                        Button(
-//                            action: {
-//                                if isPro {
-//                                    isAddToSetListSheetPresented = true
-//                                } else {
-//                                    presentSubscription = true
-//                                }
-//                            },
-//                            label: { Label("Add to Set List", systemImage: "music.note.list") }
-//                        )
-//                        Button(
-//                            action: { isEditSongSheetPresented = true },
-//                            label: { Label("Edit Song", systemImage: "pencil") }
-//                        )
-//                    }, label: {
-//                        Image(systemName: "ellipsis")
-//                            .font(.title3)
-//                            .frame(width: 40, height: 40)
-//                            .foregroundStyle(.foreground)
-//                    })
-//                    .glassEffect()
-//                }
-//                .padding(.top)
-                
                 HStack {
                     Picker("Select a Track", selection: Binding(
                         get: { player.selectedSong!.activeTrack?.id ?? UUID() },
@@ -89,7 +60,6 @@ struct PlayerView: View {
                     }
                     .tint(.primary)
                     .disabled(player.selectedSong!.sheetMusic?.file == nil || !isPro)
-//                    .matchedTransitionSource(id: "sheetmusic", in: animation)
                     .fullScreenCover(isPresented: $presentSheetMusic) {
                         SheetMusicView(
                             sheetMusicFile: player.selectedSong!.sheetMusic!.file!,
@@ -203,6 +173,8 @@ struct PlayerView: View {
                         setSelectedSong: player.setSelectedSong
                     )
                     .frame(width: 40, height: 40)
+                    
+                    
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom)
@@ -211,6 +183,18 @@ struct PlayerView: View {
             .navigationTitle(player.selectedSong!.name)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                if player.selectedSetList != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        SetListMenuView(
+                            setList: player.selectedSetList,
+                            currentSong: player.selectedSong!,
+                            setSelectedSong: player.setSelectedSong
+                        )
+                    }
+                    
+                    ToolbarSpacer(.fixed)
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu(content: {
                         Button(
@@ -225,7 +209,7 @@ struct PlayerView: View {
                                     presentSubscription = true
                                 }
                             },
-                            label: { Label("Add to Set List", systemImage: "music.note.list") }
+                            label: { Label("Add to Set List", image: "music.note.list.plus")}
                         )
                     }, label: {
                         Image(systemName: "ellipsis")
@@ -259,7 +243,6 @@ struct PlayerView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showPlaybackProgress = true }
         }
         .ignoresSafeArea(.keyboard)
-//        .background(backgroundGradient)
         .sheet(isPresented: $presentSubscription) {
             NavigationStack {
                 SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)

@@ -68,18 +68,42 @@ struct RandomSpotView: View {
             .resizable()
             .scaledToFit()
             .frame(width: 300)
+            .padding(.bottom, 0)
         
         switch index {
         case sleeping:
             Text("\(String(describing: sleepingPhrases.randomElement()!))")
+                .font(Font.custom("Anak Orang", size: 20))
+                .multilineTextAlignment(.center)
+                .padding(.top, 0)
         case barbershop:
             Text("\(String(describing: barbershopPhrases.randomElement()!))")
+                .font(Font.custom("Anak Orang", size: 20))
+                .multilineTextAlignment(.center)
+                .padding(.top, 0)
         default:
             Text("\(String(describing: spotPhrases.randomElement()!))")
+                .font(Font.custom("Anak Orang", size: 20))
+                .multilineTextAlignment(.center)
+                .padding(.top, 0)
         }
     }
 }
 
 #Preview {
-    RandomSpotView()
+    struct RandomSpotView_Preview: View {
+        @State var reload: Bool = true
+        
+        var body: some View {
+            if reload {
+                RandomSpotView()
+            } else {
+                RandomSpotView()
+            }
+            
+            Button("Reload") { reload.toggle() }
+        }
+    }
+    
+    return RandomSpotView_Preview()
 }
