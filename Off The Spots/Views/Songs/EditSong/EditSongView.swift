@@ -70,7 +70,7 @@ struct EditSongView: View {
         NavigationStack {
             List {
                 Section {
-                    TextField("New Song", text: $songNameDraft)
+                    TextField("Song Name", text: $songNameDraft)
                         .focused($isSongFieldFocused)
                 } header: {
                     Text("Name")

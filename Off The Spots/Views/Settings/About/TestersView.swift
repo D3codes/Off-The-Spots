@@ -12,12 +12,14 @@ struct TestersView: View {
     let testers: [String] = [
         "Rich Kihlken",
         "Ryan Fuller",
+        "Jerry Troxel",
         "Brittany Sloan",
         "Steve Fuller",
         "Mike Olson",
         "Debbie Dodge",
+        "Larry Dodge",
         "Zak Stratton",
-        "Larry Dodge"
+        "Scott Wiegand"
     ]
     
     @State private var sortedTesters: [String] = []
