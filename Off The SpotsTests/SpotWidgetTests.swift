@@ -8,7 +8,7 @@ struct SpotWidgetTests {
     @Test(arguments: SpotPose.allCases)
     func artworkAndLetteringAreAvailableInAppAndWidget(pose: SpotPose) throws {
         let app = Bundle.main
-        let extensionURL = try #require(app.builtInPlugInsURL?.appendingPathComponent("SongsWidget.appex"))
+        let extensionURL = try #require(app.builtInPlugInsURL?.appendingPathComponent("OffTheSpotsWidgets.appex"))
         let widget = try #require(Bundle(url: extensionURL))
         #expect(UIImage(named: pose.rawValue, in: app, compatibleWith: nil) != nil)
         let original = try #require(UIImage(named: pose.rawValue, in: widget, compatibleWith: nil)?.cgImage)
