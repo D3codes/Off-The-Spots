@@ -17,11 +17,15 @@ extension CarPlayTemplateManager: CPInterfaceControllerDelegate {
             self.setNowPlayingButtons()
         }
         
-        if let list = aTemplate as? CPListTemplate {
-            if aTemplate.tabTitle == "Songs" {
-                list.updateSections(self.getSongsListSections())
-            } else if aTemplate.tabTitle == "Set Lists" {
-                list.updateSections(self.getSetListsListSections())
+        Task { @MainActor in
+            let isPro: Bool = await StoreHelper.hasActiveSubscription()
+
+            if let list = aTemplate as? CPListTemplate {
+                if aTemplate.tabTitle == "Songs" {
+                    list.updateSections(self.getSongsListSections(isPro: isPro))
+                } else if aTemplate.tabTitle == "Set Lists" {
+                    list.updateSections(self.getSetListsListSections(isPro: isPro))
+                }
             }
         }
     }

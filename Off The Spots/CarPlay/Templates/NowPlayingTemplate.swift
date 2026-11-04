@@ -21,8 +21,12 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
     }
     
     func nowPlayingTemplateAlbumArtistButtonTapped(_ nowPlayingTemplate: CPNowPlayingTemplate) {
-        self.interfaceController.pushTemplate(self.tracksListTemplate(song: AudioHelper.sharedController.selectedSong!), animated: true) { success, error in
-            // optional completion handler once CarPlay UI is displayed
+        Task { @MainActor in
+            let isPro: Bool = await StoreHelper.hasActiveSubscription()
+            
+            self.interfaceController.pushTemplate(self.tracksListTemplate(song: AudioHelper.sharedController.selectedSong!, isPro: isPro), animated: true) { success, error in
+                // optional completion handler once CarPlay UI is displayed
+            }
         }
     }
     

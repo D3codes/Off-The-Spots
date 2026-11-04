@@ -35,11 +35,11 @@ struct SubscriptionBenefitsView: View {
                 description: "Organize songs for practice & performance"
             )
             
-            SubscriptionBenefitItemView(
-                image: Image(systemName: "car.side.fill"),
-                title: "CarPlay",
-                description: "Control your music in the car"
-            )
+//            SubscriptionBenefitItemView(
+//                image: Image(systemName: "car.side.fill"),
+//                title: "CarPlay",
+//                description: "Control your music in the car"
+//            )
         }
     }
 }

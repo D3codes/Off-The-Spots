@@ -19,16 +19,13 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
 
         Task { @MainActor in
             let rootTemplate: CPTemplate
+            let isPro: Bool = await StoreHelper.hasActiveSubscription()
 
-            if await StoreHelper.hasActiveSubscription() {
-                let tabTemplates: [CPTemplate] = [
-                    self.templateManager!.songsListTemplate(),
-                    self.templateManager!.setListsListTemplate()
-                ]
-                rootTemplate = CPTabBarTemplate(templates: tabTemplates)
-            } else {
-                rootTemplate = self.templateManager!.subscriptionRequiredTemplate()
-            }
+            let tabTemplates: [CPTemplate] = [
+                self.templateManager!.songsListTemplate(isPro: isPro),
+                self.templateManager!.setListsListTemplate(isPro: isPro)
+            ]
+            rootTemplate = CPTabBarTemplate(templates: tabTemplates)
 
             interfaceController.setRootTemplate(rootTemplate, animated: true) { success, error in
                 // optional completion handler once CarPlay UI is displayed
