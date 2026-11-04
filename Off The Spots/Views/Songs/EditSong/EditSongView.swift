@@ -66,21 +66,29 @@ struct EditSongView: View {
     @State private var sheetMusicDraft: SheetMusicDraft?
     @State private var didLoadDrafts: Bool = false
 
+    @State private var shakeSongName = false
+    @State private var shakeAddTrack = false
+
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     TextField("Song Name", text: $songNameDraft)
                         .focused($isSongFieldFocused)
+                        .shake(trigger: $shakeSongName)
                 } header: {
                     Text("Name")
                         .font(.subheadline)
                 }
-//                .listRowBackground(listItemBackground)
                 
                 SheetMusicListSectionView(sheetMusicDraft: $sheetMusicDraft, isPro: isPro, presentSubscription: $presentSubscription)
                 
-                TrackListSectionView(trackDrafts: $trackDrafts, isPro: isPro, presentSubscription: $presentSubscription)
+                TrackListSectionView(
+                    trackDrafts: $trackDrafts,
+                    isPro: isPro,
+                    presentSubscription: $presentSubscription,
+                    shakeAddTrack: $shakeAddTrack
+                )
             }
             .scrollContentBackground(.hidden)
             .listSectionSpacing(.compact)
@@ -93,14 +101,21 @@ struct EditSongView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .confirm, action: {
-                        applyDrafts()
-                        if isNewSong {
-                            modelContext.insert(song)
+                        if songNameDraft.isEmpty {
+                            isSongFieldFocused = true
+                            shakeSongName = true
+                        } else if trackDrafts.isEmpty {
+                            shakeAddTrack = true
+                        } else {
+                            applyDrafts()
+                            if isNewSong {
+                                modelContext.insert(song)
+                            }
+                            try? modelContext.save()
+                            dismiss()
                         }
-                        try? modelContext.save()
-                        dismiss()
                     })
-                    .disabled(songNameDraft.isEmpty || trackDrafts.isEmpty)
+                    .tint((songNameDraft.isEmpty || trackDrafts.isEmpty) ? Color.gray.opacity(0.35) : nil)
                 }
             }
         }
@@ -129,7 +144,6 @@ struct EditSongView: View {
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
             isPro = StoreHelper.checkForActiveSubscription(in: taskState)
         }
-//        .background(backgroundGradient)
     }
 
     private func loadDrafts() {

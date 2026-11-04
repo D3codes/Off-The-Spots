@@ -11,6 +11,7 @@ struct TrackListSectionView: View {
     @Binding var trackDrafts: [TrackDraft]
     var isPro: Bool
     @Binding var presentSubscription: Bool
+    @Binding var shakeAddTrack: Bool
     
     @State private var presentTrackFileImporter: Bool = false
     @State private var importErrorMessage: String?
@@ -57,6 +58,7 @@ struct TrackListSectionView: View {
                 }
                 .font(.subheadline)
                 .buttonStyle(.bordered)
+                .shake(trigger: $shakeAddTrack)
             }
         } footer: {
             if trackDrafts.isEmpty {
@@ -150,7 +152,7 @@ struct TrackListSectionView: View {
         
         var body: some View {
             List {
-                TrackListSectionView(trackDrafts: $trackDrafts, isPro: false, presentSubscription: .constant(false))
+                TrackListSectionView(trackDrafts: $trackDrafts, isPro: false, presentSubscription: .constant(false), shakeAddTrack: .constant(false))
             }
         }
     }

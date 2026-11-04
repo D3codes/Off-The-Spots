@@ -23,17 +23,19 @@ struct EditSetListView: View {
     @State private var songIdsDraft: [UUID] = []
     @State private var didLoadDrafts: Bool = false
 
+    @State private var shakeSetListName = false
+
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     TextField("New Set List", text: $setListNameDraft)
                         .focused($isNameFieldFocused)
+                        .shake(trigger: $shakeSetListName)
                 } header: {
                     Text("Name")
                         .font(.subheadline)
                 }
-//                .listRowBackground(listItemBackground)
                 
                 SongListSectionView(songIdsDraft: $songIdsDraft)
             }
@@ -47,18 +49,22 @@ struct EditSetListView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .confirm, action: {
-                        applyDrafts()
-                        if isNewSetList {
-                            modelContext.insert(setList)
+                        if setListNameDraft.isEmpty {
+                            isNameFieldFocused = true
+                            shakeSetListName = true
+                        } else {
+                            applyDrafts()
+                            if isNewSetList {
+                                modelContext.insert(setList)
+                            }
+                            try? modelContext.save()
+                            dismiss()
+                            dismissSubView()
                         }
-                        try? modelContext.save()
-                        dismiss()
-                        dismissSubView()
                     })
-                    .disabled(setListNameDraft.isEmpty)
+                    .tint(setListNameDraft.isEmpty ? Color.gray.opacity(0.35) : nil)
                 }
             }
-//            .background(backgroundGradient)
         }
         .onAppear {
             if !didLoadDrafts {
