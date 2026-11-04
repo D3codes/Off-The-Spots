@@ -20,20 +20,28 @@ enum OffTheSpotsPersistence {
         ])
     }
 
+    static func modelConfiguration(cloudKitDatabase: ModelConfiguration.CloudKitDatabase) -> ModelConfiguration {
+        ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            // Adding the widget's App Group must not relocate the existing library.
+            groupContainer: .none,
+            cloudKitDatabase: cloudKitDatabase
+        )
+    }
+
     private static func makeModelContainer() -> ModelContainer {
         let schema = Self.schema
 
         do {
-            let cloudConfiguration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
+            let cloudConfiguration = modelConfiguration(
                 cloudKitDatabase: .private(Self.cloudKitContainerIdentifier)
             )
             let container = try ModelContainer(for: schema, configurations: [cloudConfiguration])
             return container
         } catch {
             print("CloudKit-backed ModelContainer unavailable, using local store: \(error)")
-            let localConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            let localConfiguration = modelConfiguration(cloudKitDatabase: .none)
 
             do {
                 let container = try ModelContainer(for: schema, configurations: [localConfiguration])

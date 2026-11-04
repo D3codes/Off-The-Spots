@@ -11,7 +11,7 @@ import SwiftData
 struct SetListMenuView: View {
     @Query(sort: [SortDescriptor(\Song.order)]) private var songs: [Song]
     
-    @State var setList: SetList?
+    let setList: SetList?
     var currentSong: Song
     var setSelectedSong: (Song, SetList?, Bool, Bool) -> Void = {song, setList, skip, skipRepeatReset in }
     
@@ -41,32 +41,42 @@ struct SetListMenuView: View {
         .buttonStyle(.plain)
         .font(.title2)
         .disabled(setList == nil)
+        .accessibilityLabel("Set List")
+        .accessibilityValue(setList?.name ?? "None")
+        .accessibilityIdentifier("playerSetListMenu")
     }
 }
 
-#Preview {
-    struct SetListMenuView_Preview: View {
-        @State var currentSong = Song(name: "", tracks: [], selectedTrack: Track(name: ""))
-        
+#Preview("Switch Set Lists") {
+    struct SetListMenuPreview: View {
+        @State private var useSecondSetList = false
+        private let container: ModelContainer
+        private let song: Song
+        private let first: SetList
+        private let second: SetList
+
+        init() {
+            let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+            container = try! ModelContainer(for: OffTheSpotsPersistence.schema, configurations: [config])
+            song = Song(name: "Shared First Song")
+            let nextSong = Song(name: "Second Set List Encore")
+            first = SetList(name: "Contest Set", songs: [song.id])
+            second = SetList(name: "Rehearsal Set", songs: [song.id, nextSong.id])
+            container.mainContext.insert(song)
+            container.mainContext.insert(nextSong)
+            container.mainContext.insert(first)
+            container.mainContext.insert(second)
+        }
+
         var body: some View {
-            let setList: SetList = SetList(name: "Contest Set", songs: [])
-            let container: ModelContainer = {
-                let config = ModelConfiguration(isStoredInMemoryOnly: true)
-                let container = try! ModelContainer(for: Song.self, configurations: config)
-                for i in 1..<10 {
-                    let track = Track(name: "Track 1", file: nil)
-                    let song = Song(name: "Song \(i)", tracks: [track], selectedTrack: track, sheetMusic: nil)
-                    currentSong = song
-                    setList.songs.append(song.id)
-                    container.mainContext.insert(song)
-                }
-                return container
-            }()
-            
-            SetListMenuView(setList: setList, currentSong: currentSong)
-                .modelContainer(container)
+            VStack(spacing: 24) {
+                Toggle("Use Rehearsal Set", isOn: $useSecondSetList)
+                SetListMenuView(setList: useSecondSetList ? second : first, currentSong: song)
+            }
+            .padding()
+            .modelContainer(container)
         }
     }
-    
-    return SetListMenuView_Preview()
+
+    return SetListMenuPreview()
 }

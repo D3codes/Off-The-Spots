@@ -83,6 +83,7 @@ struct SetListsView: View {
                             selectedSetList: selectedSetList,
                             isSongPlaying: isSongPlaying
                         )
+                        .id(setList.id)
                     }
                 }
             }
