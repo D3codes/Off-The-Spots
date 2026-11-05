@@ -12,15 +12,11 @@ struct PlayerView: View {
     @Binding var isEditingProgress: Bool
     @ObservedObject var player: AudioHelper
     
-    @State private var loopStartLocked: Bool = false
-    @State private var loopEndLocked: Bool = false
     @State private var isEditSongSheetPresented: Bool = false
     @State private var isAddToSetListSheetPresented: Bool = false
     
     @Namespace var animation
     @State private var presentSheetMusic: Bool = false
-    
-    @State private var showPlaybackProgress: Bool = true
     
     @Environment(\.otsProGroupId) var otsProGroupId
     @State private var isPro: Bool = false
@@ -36,8 +32,6 @@ struct PlayerView: View {
                         set: { newId in
                             if let newTrack = player.selectedSong!.sortedTracks.first(where: { $0.id == newId }) {
                                 player.setSelectedTrack(track: newTrack)
-                                loopEndLocked = false
-                                loopStartLocked = false
                             }
                         }
                     )) {
@@ -88,43 +82,19 @@ struct PlayerView: View {
                         .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding()
                     
-                    LoopView(
-                        player: player,
-                        loopStart: $player.loopStart,
-                        loopStartLocked: $loopStartLocked,
-                        loopEnd: $player.loopEnd,
-                        loopEndLocked: $loopEndLocked,
-                        isLooping: $player.isLooping)
-                    .frame(maxWidth: .infinity, maxHeight: 50)
-                    .padding()
+                    LoopView(player: player)
+                        .frame(maxWidth: .infinity)
+                        .padding()
                 }
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
                 .frame(maxWidth: 500)
                 
                 Spacer()
                 
-                // Necessary to force rerender when song changes
-                if showPlaybackProgress {
-                    PlaybackProgressView(
-                        player: player,
-                        duration: $player.duration,
-                        playbackProgress: player.playbackProgress,
-                        isEditingProgress: $isEditingProgress,
-                        loopStart: $player.loopStart,
-                        loopStartLocked: $loopStartLocked,
-                        loopEnd: $player.loopEnd,
-                        loopEndLocked: $loopEndLocked)
-                } else {
-                    PlaybackProgressView(
-                        player: player,
-                        duration: $player.duration,
-                        playbackProgress: player.playbackProgress,
-                        isEditingProgress: $isEditingProgress,
-                        loopStart: $player.loopStart,
-                        loopStartLocked: $loopStartLocked,
-                        loopEnd: $player.loopEnd,
-                        loopEndLocked: $loopEndLocked)
-                }
+                PlaybackProgressView(player: player, isEditingProgress: $isEditingProgress)
+                    .id(player.selectedSong?.activeTrack?.id)
+                    .padding(.vertical)
+                    .zIndex(1)
                 
                 HStack {
                     AirPlayButton()
@@ -167,18 +137,12 @@ struct PlayerView: View {
                     
                     Spacer()
                     
-//                    SetListMenuView(
-//                        setList: player.selectedSetList,
-//                        currentSong: player.selectedSong!,
-//                        setSelectedSong: player.setSelectedSong
-//                    )
-//                    .frame(width: 40, height: 40)
-                    
                     RepeatButtonView(player: player)
                         .frame(width: 40, height: 40)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom)
+                .zIndex(2)
             }
             .padding(20)
             .navigationTitle(player.selectedSong!.name)
@@ -231,18 +195,12 @@ struct PlayerView: View {
                 .interactiveDismissDisabled(true)
         }
         .onAppear() {
-            loopStartLocked = player.loopStart != nil
-            loopEndLocked = player.loopEnd != nil
             player.publishProgressChanges = true
         }
         .onDisappear {
             player.publishProgressChanges = false
         }
         .presentationDragIndicator(.visible)
-        .onChange(of: player.selectedSong!) {
-            showPlaybackProgress = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showPlaybackProgress = true }
-        }
         .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $presentSubscription) {
             NavigationStack {

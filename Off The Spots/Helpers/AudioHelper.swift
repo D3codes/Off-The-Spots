@@ -236,9 +236,8 @@ class AudioHelper: NSObject, ObservableObject {
     func setCurrentTime(value: AVAudioFramePosition) {
         guard let audioFile = audioFile else { return }
 
-        seekFrame = value
-        seekFrame = max(seekFrame, 0)
-        seekFrame = min(seekFrame, audioLengthSamples)
+        let requestedFrame = min(max(value, 0), audioLengthSamples)
+        seekFrame = loopRestartFrame(at: requestedFrame) ?? requestedFrame
         currentPosition = seekFrame
 
         let wasPlaying = audioPlayer.isPlaying
@@ -246,7 +245,6 @@ class AudioHelper: NSObject, ObservableObject {
         scheduleGeneration += 1
 
         if currentPosition < audioLengthSamples {
-            updateProgress()
             needsFileScheduled = false
 
             let frameCount = AVAudioFrameCount(audioLengthSamples - seekFrame)
@@ -273,6 +271,7 @@ class AudioHelper: NSObject, ObservableObject {
             if wasPlaying {
               audioPlayer.play()
             }
+            publishCurrentPosition()
         }
     }
     
@@ -281,15 +280,21 @@ class AudioHelper: NSObject, ObservableObject {
         currentPosition = max(currentPosition, 0)
         currentPosition = min(currentPosition, audioLengthSamples)
         
-        if (isLooping && (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate))) {
-            setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
+        if let restartFrame = loopRestartFrame(at: currentPosition) {
+            setCurrentTime(value: restartFrame)
+            return
         }
         
         if currentPosition > 0 && currentPosition >= audioLengthSamples {
             stop()
             handlePlayerDidFinishPlaying()
+            return
         }
 
+        publishCurrentPosition()
+    }
+
+    private func publishCurrentPosition() {
         if publishProgressChanges {
             playbackProgress.value = Double(currentPosition) / audioSampleRate
         }
@@ -334,10 +339,19 @@ class AudioHelper: NSObject, ObservableObject {
     func startLoop() {
         guard loopStart != nil, loopEnd != nil else { return }
         isLooping = true
-        
-        if (currentPosition > AVAudioFramePosition(loopEnd! * audioSampleRate) || currentPosition < AVAudioFramePosition(loopStart! * audioSampleRate)) {
-            setCurrentTime(value: AVAudioFramePosition(loopStart! * audioSampleRate))
+
+        if let restartFrame = loopRestartFrame(at: currentPosition) {
+            setCurrentTime(value: restartFrame)
         }
+    }
+
+    private func loopRestartFrame(at position: AVAudioFramePosition) -> AVAudioFramePosition? {
+        guard isLooping, let loopStart, let loopEnd else { return nil }
+        let startFrame = AVAudioFramePosition(loopStart * audioSampleRate)
+        guard startFrame < audioLengthSamples else { return nil }
+        let endFrame = loopEnd == duration ? audioLengthSamples : AVAudioFramePosition(loopEnd * audioSampleRate)
+        // The end frame is outside the loop, including when it is the end of the file.
+        return position < startFrame || position >= max(startFrame + 1, endFrame) ? startFrame : nil
     }
     
     func stopLoop() {

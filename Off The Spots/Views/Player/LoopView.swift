@@ -6,173 +6,70 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct LoopView: View {
     @ObservedObject var player: AudioHelper
-    
-    @Binding var loopStart: Double?
-    @Binding var loopStartLocked: Bool
-    @Binding var loopEnd: Double?
-    @Binding var loopEndLocked: Bool
-    @Binding var isLooping: Bool
-    
+
     var body: some View {
-        VStack {
+        VStack(spacing: 4) {
             Text("Loop Section")
                 .font(.subheadline)
-//                .padding(.bottom)
-            
-            HStack(spacing: 20) {
-                Button(action: handleLoopStartLockTap, label: {
-                    Text("\(loopStartLocked ? "Unlock" : "Lock")")
-                        .frame(width: 60)
-                })
-                .foregroundStyle(loopStart == nil ? .secondary : .primary)
-                .disabled(loopStart == nil)
-                .padding(.trailing)
-                
-                Button(action: handleLoopStartTap, label: {
-                    ZStack {
-                        Circle()
-                            .tint(.clear)
-                        
-                        Image(systemName: "chevron.right.to.line")
-                            .font(.title2)
-                            .foregroundColor(loopStart != nil ? .accentColor : .primary)
-                        
-                        if(loopStartLocked) {
-                            Image(systemName: "lock.fill")
-                                .font(.caption)
-                                .bold()
-                                .foregroundColor(.primary)
-                        }
+
+            HStack(spacing: 28) {
+                Button {
+                    if player.loopStart == nil {
+                        _ = player.setLoopStart(value: player.playbackProgress.value)
+                    } else {
+                        player.clearLoopStart()
                     }
-                })
-                .disabled(loopStartLocked)
-                
-                Button(action: {
-                    if isLooping {
+                } label: {
+                    controlIcon("chevron.right.to.line", active: player.loopStart != nil)
+                }
+                .accessibilityLabel(player.loopStart == nil ? "Set Loop Start" : "Clear Loop Start")
+                .disabled(player.duration <= 0)
+
+                Button {
+                    if player.isLooping {
                         player.stopLoop()
                     } else {
                         player.startLoop()
                     }
-                }, label: {
-                    Image(systemName: "arrow.rectanglepath")
-                        .font(.title2)
-                        .foregroundColor(
-                            loopStart == nil || loopEnd == nil
-                            ? .secondary
-                            : isLooping
-                                ? .accentColor
-                                : .primary)
-                })
-                .disabled(loopStart == nil || loopEnd == nil)
-                
-                Button(action: handleLoopEndTap, label: {
-                    ZStack {
-                        Circle()
-                            .tint(.clear)
-                        
-                        Image(systemName: "chevron.left.to.line")
-                            .font(.title2)
-                            .foregroundColor(loopEnd != nil ? .accentColor : .primary)
-                        
-                        if(loopEndLocked) {
-                            Image(systemName: "lock.fill")
-                                .font(.caption)
-                                .bold()
-                                .foregroundColor(.primary)
-                        }
+                } label: {
+                    controlIcon("arrow.rectanglepath", active: player.isLooping)
+                }
+                .accessibilityLabel(player.isLooping ? "Stop Loop" : "Start Loop")
+                .disabled(player.loopStart == nil || player.loopEnd == nil)
+
+                Button {
+                    if player.loopEnd == nil {
+                        _ = player.setLoopEnd(value: player.playbackProgress.value)
+                    } else {
+                        player.clearLoopEnd()
                     }
-                })
-                .disabled(loopEndLocked)
-                
-                Button(action: handleLoopEndLockTap, label: {
-                    Text("\(loopEndLocked ? "Unlock" : "Lock")")
-                        .frame(width: 60)
-                })
-                .foregroundStyle(loopEnd == nil ? .secondary : .primary)
-                .disabled(loopEnd == nil)
-                .padding(.leading)
+                } label: {
+                    controlIcon("chevron.left.to.line", active: player.loopEnd != nil)
+                }
+                .accessibilityLabel(player.loopEnd == nil ? "Set Loop End" : "Clear Loop End")
+                .disabled(player.duration <= 0)
             }
+            .buttonStyle(.borderless)
         }
-        .sensoryFeedback(.selection, trigger: loopStart)
-        .sensoryFeedback(.selection, trigger: loopEnd)
-        .sensoryFeedback(.selection, trigger: isLooping)
-    }
-    
-    private func handleLoopStartTap() {
-        if(loopStart == nil) {
-            guard player.setLoopStart(value: player.playbackProgress.value) else { return }
-            
-            if(loopEnd != nil) {
-                loopEndLocked = true
-            }
-        } else if(!loopStartLocked){
-            player.clearLoopStart()
-        }
-    }
-    
-    private func handleLoopStartLockTap() {
-        guard loopStart != nil else { return }
-        
-        if(loopStartLocked) {
-            loopStartLocked = false
-            
-            if(loopEnd != nil) {
-                loopEndLocked = true
-            }
-        } else {
-            loopStartLocked = true
-        }
+        .sensoryFeedback(.selection, trigger: player.loopStart)
+        .sensoryFeedback(.selection, trigger: player.loopEnd)
+        .sensoryFeedback(.selection, trigger: player.isLooping)
     }
 
-    private func handleLoopEndTap() {
-        if(loopEnd == nil) {
-            guard player.setLoopEnd(value: player.playbackProgress.value) else { return }
-            
-            if(loopStart != nil) {
-                loopStartLocked = true
-            }
-        } else if(!loopEndLocked){
-            player.clearLoopEnd()
-        }
-    }
-    
-    private func handleLoopEndLockTap() {
-        guard loopEnd != nil else { return }
-        
-        if(loopEndLocked) {
-            loopEndLocked = false
-            
-            if(loopStart != nil) {
-                loopStartLocked = true
-            }
-        } else {
-            loopEndLocked = true
-        }
+    private func controlIcon(_ symbol: String, active: Bool) -> some View {
+        Image(systemName: symbol)
+            .font(.title2)
+            .foregroundStyle(active ? Color.accentColor : Color.primary)
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
     }
 }
 
 #Preview {
-    struct LoopView_Preview: View {
-        @StateObject var player: AudioHelper = AudioHelper()
-        @State var loopStartLocked: Bool = false
-        @State var loopEndLocked: Bool = false
-        
-        var body: some View {
-            LoopView(
-                player: player,
-                loopStart: $player.loopStart,
-                loopStartLocked: $loopStartLocked,
-                loopEnd: $player.loopEnd,
-                loopEndLocked: $loopEndLocked,
-                isLooping: $player.isLooping)
-            .frame(maxHeight: 50)
-        }
-    }
-    
-    return LoopView_Preview()
+    @Previewable @StateObject var player = AudioHelper()
+    LoopView(player: player)
+        .onAppear { player.duration = 120 }
 }
-

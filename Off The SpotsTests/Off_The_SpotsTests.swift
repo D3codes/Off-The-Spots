@@ -105,6 +105,30 @@ struct Off_The_SpotsTests {
     }
 
     @MainActor
+    @Test func sectionLoopWrapsAtEndOfTrack() throws {
+        let fixture = try #require(Bundle(for: AudioTestBundle.self).url(forResource: "PaddedMP3", withExtension: "mp3"))
+        let track = Track(name: "Practice", file: try Data(contentsOf: fixture), fileExtension: "mp3")
+        let player = AudioHelper()
+        defer { player.stop() }
+        player.publishProgressChanges = true
+        player.setSelectedSong(song: Song(name: "Loop Test", tracks: [track]), setList: nil)
+        try #require(player.duration > 0)
+
+        let lastFrame = AVAudioFramePosition((player.duration * player.audioSampleRate).rounded())
+        let start = Double(lastFrame / 2) / player.audioSampleRate
+        try #require(player.setLoopStart(value: start))
+        try #require(player.setLoopEnd(value: player.duration))
+
+        // Enabling the loop while parked at EOF and seeking to EOF with the loop active both wrap.
+        player.setCurrentTime(value: lastFrame)
+        player.startLoop()
+        #expect(abs(player.playbackProgress.value - start) <= 1 / player.audioSampleRate)
+
+        player.setCurrentTime(value: lastFrame)
+        #expect(abs(player.playbackProgress.value - start) <= 1 / player.audioSampleRate)
+    }
+
+    @MainActor
     @Test func audioSessionActivatesOffMainThread() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             PlaybackAudioSession.activate { result in
