@@ -30,6 +30,7 @@ struct EditSetListView: View {
             List {
                 Section {
                     TextField("New Set List", text: $setListNameDraft)
+                        .textInputAutocapitalization(.words) 
                         .focused($isNameFieldFocused)
                         .shake(trigger: $shakeSetListName)
                 } header: {

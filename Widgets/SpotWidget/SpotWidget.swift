@@ -28,13 +28,16 @@ struct SpotProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SpotEntry>) -> Void) {
         let now = Date()
+        let hour: TimeInterval = 3600
+        // Keep the number of image views WidgetKit archives per timeline small.
+        let entryCount = 4
         var previousPose: SpotPose?
-        let entries = (0..<24).map { hour in
+        let entries = (0..<entryCount).map { offset in
             let appearance = SpotContent.random(excluding: previousPose)
             previousPose = appearance.pose
-            return SpotEntry(date: now.addingTimeInterval(Double(hour) * 3600), appearance: appearance)
+            return SpotEntry(date: now.addingTimeInterval(Double(offset) * hour), appearance: appearance)
         }
-        completion(Timeline(entries: entries, policy: .atEnd))
+        completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(Double(entryCount) * hour))))
     }
 }
 
@@ -43,14 +46,12 @@ struct SpotWidgetView: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            if let artwork = SpotWidgetArtwork.image(for: entry.appearance.pose) {
-                Image(uiImage: artwork)
-                    .resizable()
-                    .widgetAccentedRenderingMode(.fullColor)
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .accessibilityHidden(true)
-            }
+            Image(entry.appearance.pose.rawValue)
+                .resizable()
+                .widgetAccentedRenderingMode(.fullColor)
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityHidden(true)
 
             Text(entry.appearance.quote)
                 .font(.custom(SpotContent.quoteFontName, size: 14, relativeTo: .caption))

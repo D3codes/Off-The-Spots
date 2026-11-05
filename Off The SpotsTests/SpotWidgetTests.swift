@@ -10,13 +10,12 @@ struct SpotWidgetTests {
         let app = Bundle.main
         let extensionURL = try #require(app.builtInPlugInsURL?.appendingPathComponent("OffTheSpotsWidgets.appex"))
         let widget = try #require(Bundle(url: extensionURL))
-        #expect(UIImage(named: pose.rawValue, in: app, compatibleWith: nil) != nil)
-        let original = try #require(UIImage(named: pose.rawValue, in: widget, compatibleWith: nil)?.cgImage)
-        let artwork = try #require(SpotWidgetArtwork.image(for: pose, in: widget)?.cgImage)
+        let original = try #require(UIImage(named: pose.rawValue, in: app, compatibleWith: nil)?.cgImage)
+        let artwork = try #require(UIImage(named: pose.rawValue, in: widget, compatibleWith: nil)?.cgImage)
         // Check actual bitmap dimensions: a small SwiftUI frame alone does not
         // prevent WidgetKit's imageTooLarge archive failure.
-        #expect(artwork.width <= 400)
-        #expect(artwork.height <= 400)
+        #expect(artwork.width <= 360)
+        #expect(artwork.height <= 360)
         #expect(artwork.width > 0 && artwork.height > 0)
         #expect(artwork.width * artwork.height < original.width * original.height)
         let originalAspect = Double(original.width) / Double(original.height)

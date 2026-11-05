@@ -74,6 +74,7 @@ struct EditSongView: View {
             List {
                 Section {
                     TextField("Song Name", text: $songNameDraft)
+                        .textInputAutocapitalization(.words) 
                         .focused($isSongFieldFocused)
                         .shake(trigger: $shakeSongName)
                 } header: {

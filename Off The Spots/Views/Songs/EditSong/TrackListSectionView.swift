@@ -21,6 +21,7 @@ struct TrackListSectionView: View {
             ForEach($trackDrafts) { $trackDraft in
                 HStack {
                     TextField("", text: $trackDraft.name)
+                        .textInputAutocapitalization(.words)
                     if isPro {
                         Spacer()
                         Image(systemName: "line.3.horizontal")
