@@ -30,11 +30,7 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
         }
     }
     
-    func setNowPlayingButtons() -> Void {
-//        let repeatButton = CPNowPlayingImageButton(image: UIImage(systemName: "repeat")!, handler: { _ in
-//            AudioHelper.sharedController.incrementRepeat()
-//        })
-        
+    func setNowPlayingButtons() {
         let leftFillValue = AudioHelper.sharedController.panningValue <= 0 ? 1 : 1-AudioHelper.sharedController.panningValue
         let panLeftButton = CPNowPlayingImageButton(image: UIImage(systemName: "wave.3.left", variableValue: leftFillValue)!, handler: { _ in
             let currentPan = AudioHelper.sharedController.panningValue
@@ -66,10 +62,6 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             AudioHelper.sharedController.setRate(value: newRate)
         })
         
-        let rate = CPNowPlayingPlaybackRateButton() { _ in
-            AudioHelper.sharedController.setRate(value: 1)
-        }
-        
         let increaseRateButton = CPNowPlayingImageButton(image: UIImage(systemName: "hare.fill")!, handler: { _ in
             let currentRate = AudioHelper.sharedController.rateValue
             var newRate = currentRate + 0.1
@@ -79,6 +71,62 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             AudioHelper.sharedController.setRate(value: newRate)
         })
         
-        CPNowPlayingTemplate.shared.updateNowPlayingButtons([panLeftButton, panRightButton, decreaseRateButton, rate, increaseRateButton])
+        let moreButton = CPNowPlayingMoreButton { [weak self] _ in
+            self?.showNowPlayingOptions()
+        }
+
+        CPNowPlayingTemplate.shared.updateNowPlayingButtons([
+            panLeftButton, panRightButton, decreaseRateButton, increaseRateButton, moreButton
+        ])
+    }
+
+    private func showNowPlayingOptions() {
+        guard interfaceController.presentedTemplate == nil else { return }
+
+        func option(_ title: String, detail: String? = nil, symbol: String, action: @escaping () -> Void) -> CPListItem {
+            let item = CPListItem(text: title, detailText: detail, image: UIImage(systemName: symbol))
+            item.handler = { [weak self] _, completion in
+                guard let self else {
+                    completion()
+                    return
+                }
+                action()
+                self.interfaceController.popTemplate(animated: true) { _, error in
+                    if let error {
+                        NSLog("Could not return to CarPlay Now Playing: %@", error.localizedDescription)
+                    }
+                    completion()
+                }
+            }
+            return item
+        }
+
+        let player = AudioHelper.sharedController
+        let resetRate = option("Reset to 1×", symbol: "1.circle") {
+            player.setRate(value: 1)
+        }
+        let centerPan = option("Center Pan", symbol: "waveform") {
+            player.setPan(value: 0)
+        }
+        let repeatMode: String
+        if player.repeatAll {
+            repeatMode = "Set List"
+        } else if player.repeatOne {
+            repeatMode = "Song"
+        } else {
+            repeatMode = "Off"
+        }
+        let cycleRepeat = option("Repeat", detail: repeatMode, symbol: player.repeatOne ? "repeat.1" : "repeat") {
+            player.incrementRepeat()
+        }
+        let options = CPListTemplate(
+            title: "Playback",
+            sections: [CPListSection(items: [resetRate, centerPan, cycleRepeat])]
+        )
+        interfaceController.pushTemplate(options, animated: true) { _, error in
+            if let error {
+                NSLog("Could not present CarPlay playback options: %@", error.localizedDescription)
+            }
+        }
     }
 }
