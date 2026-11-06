@@ -83,8 +83,8 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
     private func showNowPlayingOptions() {
         guard interfaceController.presentedTemplate == nil else { return }
 
-        func option(_ title: String, detail: String? = nil, symbol: String, action: @escaping () -> Void) -> CPListItem {
-            let item = CPListItem(text: title, detailText: detail, image: UIImage(systemName: symbol))
+        func option(_ title: String, image: UIImage?, action: @escaping () -> Void) -> CPListItem {
+            let item = CPListItem(text: title, detailText: nil, image: image)
             item.handler = { [weak self] _, completion in
                 guard let self else {
                     completion()
@@ -101,28 +101,75 @@ extension CarPlayTemplateManager: @MainActor CPNowPlayingTemplateObserver {
             return item
         }
 
+        let carTraits = interfaceController.carTraitCollection
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = max(carTraits.displayScale, 1)
+
+        let rateGlyph: NSString = "1×"
+        let rateAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .semibold),
+            .foregroundColor: UIColor.label.resolvedColor(with: carTraits)
+        ]
+        let rateIconSize = CGSize(width: 24, height: 24)
+        let glyphSize = rateGlyph.size(withAttributes: rateAttributes)
+        let rateIcon = UIGraphicsImageRenderer(size: rateIconSize, format: format).image { _ in
+            rateGlyph.draw(at: CGPoint(
+                x: (rateIconSize.width - glyphSize.width) / 2,
+                y: (rateIconSize.height - glyphSize.height) / 2
+            ), withAttributes: rateAttributes)
+        }.withRenderingMode(.alwaysOriginal)
+
         let player = AudioHelper.sharedController
-        let resetRate = option("Reset to 1×", symbol: "1.circle") {
+        let resetRate = option("Reset Playback Speed", image: rateIcon) {
             player.setRate(value: 1)
         }
-        let centerPan = option("Center Pan", symbol: "waveform") {
+        let centerPan = option("Center Pan", image: UIImage(systemName: "waveform")) {
             player.setPan(value: 0)
         }
-        let repeatMode: String
-        if player.repeatAll {
-            repeatMode = "Set List"
-        } else if player.repeatOne {
-            repeatMode = "Song"
-        } else {
-            repeatMode = "Off"
+
+        let repeatTint = UIColor.accent.resolvedColor(with: carTraits)
+
+        func tintedRepeatIcon(_ symbol: String) -> UIImage? {
+            guard let icon = UIImage(systemName: symbol)?.withTintColor(repeatTint, renderingMode: .alwaysOriginal) else {
+                return nil
+            }
+            return UIGraphicsImageRenderer(size: icon.size, format: format).image { _ in
+                icon.draw(at: .zero)
+            }.withRenderingMode(.alwaysOriginal)
         }
-        let cycleRepeat = option("Repeat", detail: repeatMode, symbol: player.repeatOne ? "repeat.1" : "repeat") {
-            player.incrementRepeat()
+
+        let repeatSetListIcon = tintedRepeatIcon("repeat")
+        let repeatSongIcon = tintedRepeatIcon("repeat.1")
+        let repeatOffIcon = UIImage(systemName: "repeat")
+
+        func refreshOptions(_ options: CPListTemplate) {
+            let mode: String
+            let icon: UIImage?
+            if player.repeatAll {
+                mode = "Set List"
+                icon = repeatSetListIcon
+            } else if player.repeatOne {
+                mode = "Song"
+                icon = repeatSongIcon
+            } else {
+                mode = "Off"
+                icon = repeatOffIcon
+            }
+
+            let cycleRepeat = CPListItem(text: "Repeat", detailText: mode, image: icon)
+            cycleRepeat.handler = { [weak options] _, completion in
+                player.incrementRepeat()
+                // Finish the selection before replacing the selected row.
+                completion()
+                if let options {
+                    refreshOptions(options)
+                }
+            }
+            options.updateSections([CPListSection(items: [resetRate, centerPan, cycleRepeat])])
         }
-        let options = CPListTemplate(
-            title: "Playback",
-            sections: [CPListSection(items: [resetRate, centerPan, cycleRepeat])]
-        )
+
+        let options = CPListTemplate(title: "Playback", sections: [CPListSection(items: [resetRate, centerPan])])
+        refreshOptions(options)
         interfaceController.pushTemplate(options, animated: true) { _, error in
             if let error {
                 NSLog("Could not present CarPlay playback options: %@", error.localizedDescription)
