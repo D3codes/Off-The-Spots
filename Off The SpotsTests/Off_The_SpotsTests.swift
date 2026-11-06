@@ -105,6 +105,55 @@ struct Off_The_SpotsTests {
     }
 
     @MainActor
+    @Test func playbackUsesFileTimeAndFinishesWithoutProgressPolling() async throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString).appendingPathExtension("wav")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let format = try #require(AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 32_000, channels: 2, interleaved: true))
+        let buffer = try #require(AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 128_000))
+        buffer.frameLength = buffer.frameCapacity
+        let samples = try #require(buffer.floatChannelData)[0]
+        samples.update(repeating: 0, count: Int(buffer.frameLength) * Int(format.channelCount))
+        do {
+            let file = try AVAudioFile(forWriting: url, settings: format.settings, commonFormat: .pcmFormatFloat32, interleaved: true)
+            try file.write(from: buffer)
+        }
+
+        let track = Track(name: "32 kHz", file: try Data(contentsOf: url), fileExtension: "wav")
+        let player = AudioHelper()
+        defer { player.stop() }
+        player.publishProgressChanges = true
+        player.setSelectedSong(song: Song(name: "Timing Test", tracks: [track]), setList: nil)
+        try #require(player.duration == 4)
+        player.play()
+
+        let clock = ContinuousClock()
+        let activationDeadline = clock.now + .seconds(5)
+        while player.isPreparingToPlay && clock.now < activationDeadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        try #require(player.isPlaying)
+        let firstSampleAt = clock.now
+        player.updateProgress()
+        let firstPosition = player.playbackProgress.value
+
+        try await Task.sleep(for: .milliseconds(1500))
+        let elapsed = firstSampleAt.duration(to: clock.now)
+        player.updateProgress()
+        let reported = Duration.seconds(player.playbackProgress.value - firstPosition)
+        #expect(reported > elapsed - .milliseconds(300))
+        #expect(reported < elapsed + .milliseconds(300))
+
+        while player.isPlaying && clock.now < firstSampleAt + .seconds(6) {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        #expect(!player.isPlaying)
+        let remaining = Duration.seconds(player.duration - firstPosition)
+        #expect(clock.now >= firstSampleAt + remaining - .milliseconds(200))
+        #expect(player.playbackProgress.value == 0)
+    }
+
+    @MainActor
     @Test func sectionLoopWrapsAtEndOfTrack() throws {
         let fixture = try #require(Bundle(for: AudioTestBundle.self).url(forResource: "PaddedMP3", withExtension: "mp3"))
         let track = Track(name: "Practice", file: try Data(contentsOf: fixture), fileExtension: "mp3")

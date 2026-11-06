@@ -65,15 +65,14 @@ class AudioHelper: NSObject, ObservableObject {
     private var audioLengthSamples: AVAudioFramePosition = 0
     private var scheduleGeneration: Int = 0
 
-    private var currentFrame: AVAudioFramePosition {
-      guard
-        let lastRenderTime = audioPlayer.lastRenderTime,
-        let playerTime = audioPlayer.playerTime(forNodeTime: lastRenderTime)
-      else {
-        return 0
-      }
+    private var renderedFileFrames: AVAudioFramePosition {
+        guard let lastRenderTime = audioPlayer.lastRenderTime,
+              let playerTime = audioPlayer.playerTime(forNodeTime: lastRenderTime),
+              playerTime.isSampleTimeValid,
+              playerTime.sampleRate > 0 else { return 0 }
 
-      return playerTime.sampleTime
+        // The node's clock can run at a different sample rate than the file.
+        return AVAudioFramePosition(Double(playerTime.sampleTime) / playerTime.sampleRate * audioSampleRate)
     }
     
     private let container: ModelContainer
@@ -150,7 +149,7 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func play() {
-        guard audioFile != nil else {
+        guard audioLengthSamples > 0 else {
             isPlaying = false
             updateNowPlaying()
             return
@@ -194,7 +193,11 @@ class AudioHelper: NSObject, ObservableObject {
         }
         
         if needsFileScheduled {
-          scheduleAudioFile()
+            if seekFrame == audioLengthSamples {
+                seekFrame = 0
+                currentPosition = 0
+            }
+            scheduleAudioFile()
         }
         
         audioPlayer.play()
@@ -212,9 +215,9 @@ class AudioHelper: NSObject, ObservableObject {
     
     func stop() {
         cancelPendingPlayback()
+        scheduleGeneration += 1
         audioPlayer.stop()
         engine.stop()
-        scheduleGeneration += 1
         needsFileScheduled = true
         seekFrame = 0
         playbackProgress.value = 0
@@ -224,7 +227,7 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func skip(seconds: Double) {
-        currentPosition = currentFrame + seekFrame
+        currentPosition = renderedFileFrames + seekFrame
         currentPosition = max(currentPosition, 0)
         currentPosition = min(currentPosition, audioLengthSamples)
         
@@ -234,60 +237,41 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     func setCurrentTime(value: AVAudioFramePosition) {
-        guard let audioFile = audioFile else { return }
+        guard audioFile != nil else { return }
 
         let requestedFrame = min(max(value, 0), audioLengthSamples)
         seekFrame = loopRestartFrame(at: requestedFrame) ?? requestedFrame
         currentPosition = seekFrame
 
         let wasPlaying = audioPlayer.isPlaying
-        audioPlayer.stop()
         scheduleGeneration += 1
+        audioPlayer.stop()
+        needsFileScheduled = true
 
-        if currentPosition < audioLengthSamples {
-            needsFileScheduled = false
-
-            let frameCount = AVAudioFrameCount(audioLengthSamples - seekFrame)
-            let relay = AudioHelperRelay(helper: self)
-            let generation = scheduleGeneration
-            
-            audioPlayer.scheduleSegment(
-                audioFile,
-                startingFrame: seekFrame,
-                frameCount: frameCount,
-                at: nil
-            ) {
-                Task { @MainActor in
-                    guard let helper = relay.helper else { return }
-                    guard helper.scheduleGeneration == generation else { return }
-                    helper.needsFileScheduled = true
-
-                    try? await Task.sleep(for: .seconds(2))
-                    guard helper.scheduleGeneration == generation else { return }
-                    helper.updateProgress()
-                }
-            }
-
+        if currentPosition == audioLengthSamples {
             if wasPlaying {
-              audioPlayer.play()
+                finishPlayback()
+            } else {
+                publishCurrentPosition()
             }
-            publishCurrentPosition()
+            return
         }
+
+        scheduleAudioFile()
+        if wasPlaying {
+            audioPlayer.play()
+        }
+        publishCurrentPosition()
     }
     
     @objc func updateProgress() {
-        currentPosition = currentFrame + seekFrame
+        currentPosition = renderedFileFrames + seekFrame
         currentPosition = max(currentPosition, 0)
         currentPosition = min(currentPosition, audioLengthSamples)
         
-        if let restartFrame = loopRestartFrame(at: currentPosition) {
+        // The completion callback handles EOF after the output finishes playing.
+        if currentPosition < audioLengthSamples, let restartFrame = loopRestartFrame(at: currentPosition) {
             setCurrentTime(value: restartFrame)
-            return
-        }
-        
-        if currentPosition > 0 && currentPosition >= audioLengthSamples {
-            stop()
-            handlePlayerDidFinishPlaying()
             return
         }
 
@@ -387,31 +371,42 @@ class AudioHelper: NSObject, ObservableObject {
     }
     
     private func scheduleAudioFile() {
-        guard let file = audioFile, needsFileScheduled
-        else { return }
+        guard let file = audioFile, needsFileScheduled, seekFrame < audioLengthSamples else { return }
 
         needsFileScheduled = false
-        seekFrame = 0
         let relay = AudioHelperRelay(helper: self)
         let generation = scheduleGeneration
 
-        audioPlayer.scheduleFile(file, at: nil) {
+        let completion: @Sendable (AVAudioPlayerNodeCompletionCallbackType) -> Void = { _ in
             Task { @MainActor in
-                guard let helper = relay.helper else { return }
-                guard helper.scheduleGeneration == generation else { return }
-                helper.needsFileScheduled = true
+                guard let helper = relay.helper, helper.scheduleGeneration == generation else { return }
 
-                try? await Task.sleep(for: .seconds(2))
-                guard helper.scheduleGeneration == generation else { return }
-                helper.updateProgress()
+                if let restartFrame = helper.loopRestartFrame(at: helper.audioLengthSamples) {
+                    helper.setCurrentTime(value: restartFrame)
+                } else {
+                    helper.finishPlayback()
+                }
             }
+        }
+
+        if seekFrame == 0 {
+            audioPlayer.scheduleFile(file, at: nil, completionCallbackType: .dataPlayedBack, completionHandler: completion)
+        } else {
+            audioPlayer.scheduleSegment(
+                file,
+                startingFrame: seekFrame,
+                frameCount: AVAudioFrameCount(audioLengthSamples - seekFrame),
+                at: nil,
+                completionCallbackType: .dataPlayedBack,
+                completionHandler: completion
+            )
         }
     }
 
     private func resetScheduledAudio() {
         cancelPendingPlayback()
-        audioPlayer.stop()
         scheduleGeneration += 1
+        audioPlayer.stop()
         audioFile = nil
         removeTemporaryAudioFile()
         audioSampleRate = 1
@@ -436,9 +431,10 @@ class AudioHelper: NSObject, ObservableObject {
         }
     }
     
-    private func handlePlayerDidFinishPlaying() {
-        isPlaying = false
-        playbackProgress.value = 0
+    private func finishPlayback() {
+        let wasPlaying = isPlaying
+        stop()
+        guard wasPlaying else { return }
         
         let descriptor = FetchDescriptor<Song>(sortBy: [SortDescriptor(\.order, order: .forward)])
         let songs = (try? modelContext.fetch(descriptor)) ?? []
