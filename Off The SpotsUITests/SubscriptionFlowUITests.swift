@@ -20,6 +20,7 @@ final class SubscriptionFlowUITests: XCTestCase {
         let purchaseAlert = app.alerts.firstMatch
         XCTAssertTrue(purchaseAlert.waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertFalse(app.staticTexts["Thank You!"].exists)
+        XCTAssertFalse(purchaseAlert.buttons["Copy Diagnostic Details"].exists)
         purchaseAlert.buttons.firstMatch.tap()
 
         try await session.setSimulatedError(nil, forAPI: .purchase)
@@ -28,10 +29,19 @@ final class SubscriptionFlowUITests: XCTestCase {
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 10), app.debugDescription)
 
-        checkRestore(in: app, message: "Your Off The Spots Pro access is active.")
+        checkRestore(in: app, message: "Your Off The Spots Pro subscription is active.")
+    }
 
+    @MainActor
+    func testRestoreFailureCanCopyDiagnosticDetails() async throws {
+        let session = try startStoreKitSession()
+        let app = XCUIApplication()
+        app.launch()
+        app.navigationBars["Songs"].buttons.firstMatch.tap()
+
+        let failureMessage = "Unable to check your subscription with the App Store. Please try again later."
         try await session.setSimulatedError(.generic(.networkError(URLError(.notConnectedToInternet))), forAPI: .appStoreSync)
-        checkRestore(in: app, message: "We couldn’t check your purchases with the App Store. Please try again.")
+        checkRestore(in: app, message: failureMessage, canCopyDetails: true)
 
         try await session.setSimulatedError(.generic(.userCancelled), forAPI: .appStoreSync)
         checkRestore(in: app, message: "Restore was cancelled.")
@@ -81,9 +91,16 @@ final class SubscriptionFlowUITests: XCTestCase {
     }
 
     @MainActor
-    private func checkRestore(in app: XCUIApplication, message: String) {
-        app.buttons["Restore Purchases"].tap()
-        XCTAssertTrue(app.alerts.staticTexts[message].waitForExistence(timeout: 10), app.debugDescription)
-        app.alerts.buttons["OK"].tap()
+    private func checkRestore(in app: XCUIApplication, message: String, canCopyDetails: Bool = false) {
+        app.buttons["Restore Subscription"].tap()
+        let alert = app.alerts["Restore Subscription"]
+        XCTAssertTrue(alert.staticTexts[message].waitForExistence(timeout: 10), app.debugDescription)
+        let copy = alert.buttons["Copy Diagnostic Details"]
+        XCTAssertEqual(copy.exists, canCopyDetails)
+        if canCopyDetails {
+            copy.tap()
+        } else {
+            alert.buttons["OK"].tap()
+        }
     }
 }

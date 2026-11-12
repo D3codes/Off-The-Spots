@@ -7,6 +7,7 @@
 
 import SwiftUI
 import StoreKit
+import UIKit
 
 struct SettingsView: View {
     @Environment(\.otsProGroupId) var otsProGroupId
@@ -23,6 +24,7 @@ struct SettingsView: View {
     @State private var isRestoring = false
     @State private var showRestoreResult = false
     @State private var restoreMessage: LocalizedStringKey = ""
+    @State private var restoreDiagnostics: String?
     
     @State var show = false
     
@@ -153,6 +155,11 @@ struct SettingsView: View {
         .sheet(isPresented: $showMail) { MailView() }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .alert("Restore Subscription", isPresented: $showRestoreResult) {
+            if let restoreDiagnostics {
+                Button("Copy Diagnostics") {
+                    UIPasteboard.general.string = restoreDiagnostics
+                }
+            }
             Button("OK", role: .cancel) {}
         } message: {
             Text(restoreMessage)
@@ -199,10 +206,13 @@ struct SettingsView: View {
     private func restore() async {
         guard !isRestoring else { return }
         isRestoring = true
+        restoreDiagnostics = nil
         defer { isRestoring = false }
 
+        var step = StoreHelper.RestoreStep.sync
         do {
             try await AppStore.sync()
+            step = .subscriptionStatus
             isPro = try await StoreHelper.refreshProEntitlement(groupID: otsProGroupId)
             restoreMessage = isPro
                 ? "Your Off The Spots Pro subscription is active."
@@ -211,6 +221,7 @@ struct SettingsView: View {
             restoreMessage = "Restore was cancelled."
         } catch {
             restoreMessage = "Unable to check your subscription with the App Store. Please try again later."
+            restoreDiagnostics = StoreHelper.restoreDiagnosticDetails(step: step, error: error)
         }
         showRestoreResult = true
     }

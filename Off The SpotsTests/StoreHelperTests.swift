@@ -5,6 +5,30 @@ import Testing
 
 @Suite(.serialized)
 struct StoreHelperTests {
+    @Test func restoreDiagnosticsIncludeTheStepAndUnderlyingCodes() {
+        let syncDetails = StoreHelper.restoreDiagnosticDetails(
+            step: .sync,
+            error: StoreKitError.networkError(URLError(.notConnectedToInternet))
+        )
+        #expect(syncDetails.contains("Failed step: AppStore.sync()"))
+        #expect(syncDetails.contains("Underlying error: NSURLErrorDomain (-1009)"))
+
+        let cause = NSError(
+            domain: "TestStoreService",
+            code: 14,
+            userInfo: [NSLocalizedDescriptionKey: "Private error description"]
+        )
+        let wrapper = NSError(domain: "TestStoreWrapper", code: 1, userInfo: [NSUnderlyingErrorKey: cause])
+        let statusDetails = StoreHelper.restoreDiagnosticDetails(
+            step: .subscriptionStatus,
+            error: StoreKitError.systemError(wrapper)
+        )
+        #expect(statusDetails.contains("Failed step: Product.SubscriptionInfo.status(for:)"))
+        #expect(statusDetails.contains("Underlying error: TestStoreWrapper (1)"))
+        #expect(statusDetails.contains("Underlying error: TestStoreService (14)"))
+        #expect(!statusDetails.contains("Private error description"))
+    }
+
     @MainActor
     @Test(arguments: [false, true])
     func billingRetryGrantsProOnlyDuringGracePeriod(gracePeriodEnabled: Bool) async throws {
