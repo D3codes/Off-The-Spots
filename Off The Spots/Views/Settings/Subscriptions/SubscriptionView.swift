@@ -12,7 +12,10 @@ struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.otsProGroupId) var otsProGroupId
     
-    @Binding var presentThanksSheet: Bool
+    @State private var hasVerifiedPro = false
+    @State private var awaitingProActivation = false
+    @State private var presentThanksSheet = false
+
     var inSheet: Bool = false
     
     var body: some View {
@@ -48,18 +51,24 @@ struct SubscriptionView: View {
         .subscriptionStoreControlStyle(.compactPicker, placement: .bottomBar)
         .subscriptionStorePickerItemBackground(.thinMaterial)
         .storeButton(.hidden, for: .cancellation)
-        .onInAppPurchaseCompletion { (product: Product, result: Result<Product.PurchaseResult, Error>) in
-            if case .success(.success(let transaction)) = result {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: { presentThanksSheet = true })
-                dismiss()
+        .onInAppPurchaseStart { _ in
+            awaitingProActivation = !hasVerifiedPro
+        }
+        .subscriptionStatusTask(for: otsProGroupId) { taskState in
+            guard case .success(let statuses) = taskState else { return }
+            hasVerifiedPro = StoreHelper.checkForActiveSubscription(in: statuses)
+            if awaitingProActivation && hasVerifiedPro {
+                awaitingProActivation = false
+                presentThanksSheet = true
             }
         }
+        .sheet(isPresented: $presentThanksSheet, onDismiss: { dismiss() }) { ThanksView() }
     }
 }
 
 #Preview {
     NavigationStack {
-        SubscriptionView(presentThanksSheet: .constant(false))
+        SubscriptionView()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {}) { Image(systemName: "chevron.left") }

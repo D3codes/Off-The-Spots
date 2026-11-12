@@ -31,7 +31,6 @@ struct MainView: View {
     @State private var widgetPlaybackTask: Task<Void, Never>?
     @State private var widgetPlaybackError: String?
     @State private var presentWidgetSubscription = false
-    @State private var presentWidgetThanks = false
 
     private var widgetSongs: [LibraryWidgetRecord] {
         songs.map { LibraryWidgetRecord(id: $0.id, name: $0.name) }
@@ -87,7 +86,7 @@ struct MainView: View {
         }
         .sheet(isPresented: $presentWidgetSubscription) {
             NavigationStack {
-                SubscriptionView(presentThanksSheet: $presentWidgetThanks, inSheet: true)
+                SubscriptionView(inSheet: true)
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {
                             Button(role: .close) { presentWidgetSubscription = false }
@@ -95,7 +94,6 @@ struct MainView: View {
                     }
             }
         }
-        .sheet(isPresented: $presentWidgetThanks) { ThanksView() }
         .alert("Unable to Play", isPresented: Binding(
             get: { widgetPlaybackError != nil },
             set: { if !$0 { widgetPlaybackError = nil } }

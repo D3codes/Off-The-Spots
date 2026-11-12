@@ -37,7 +37,6 @@ struct SetListsView: View {
     @Environment(\.otsProGroupId) var otsProGroupId
     @State private var isPro: Bool = false
     @State private var presentSubscription: Bool = false
-    @State private var presentThanksSheet: Bool = false
     
     var body: some View {
         NavigationStack(path: $setListNavPath) {
@@ -138,7 +137,7 @@ struct SetListsView: View {
             }
             .sheet(isPresented: $presentSubscription) {
                 NavigationStack {
-                    SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                    SubscriptionView(inSheet: true)
                         .toolbar {
                             ToolbarItem(placement: .topBarLeading) {
                                 Button(role: .close) { presentSubscription  = false }
@@ -146,7 +145,6 @@ struct SetListsView: View {
                         }
                 }
             }
-            .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 isPro = StoreHelper.checkForActiveSubscription(in: taskState)
             }

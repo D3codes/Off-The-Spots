@@ -60,7 +60,6 @@ struct EditSongView: View {
     @Environment(\.otsProGroupId) var otsProGroupId
     @State private var isPro: Bool = false
     @State private var presentSubscription: Bool = false
-    @State private var presentThanksSheet: Bool = false
     @State private var songNameDraft: String = ""
     @State private var trackDrafts: [TrackDraft] = []
     @State private var sheetMusicDraft: SheetMusicDraft?
@@ -133,7 +132,7 @@ struct EditSongView: View {
         }
         .sheet(isPresented: $presentSubscription) {
             NavigationStack {
-                SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                SubscriptionView(inSheet: true)
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {
                             Button(role: .close) { presentSubscription  = false }
@@ -141,7 +140,6 @@ struct EditSongView: View {
                     }
             }
         }
-        .sheet(isPresented: $presentThanksSheet) { ThanksView() }
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
             isPro = StoreHelper.checkForActiveSubscription(in: taskState)
         }

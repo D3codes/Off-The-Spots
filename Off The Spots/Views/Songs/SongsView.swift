@@ -29,7 +29,6 @@ struct SongsView: View {
     @Environment(\.otsProGroupId) var otsProGroupId
     @State private var isPro: Bool = false
     @State private var presentSubscription: Bool = false
-    @State private var presentThanksSheet: Bool = false
     
     @State var newSong: Song = Song(
         id: UUID(),
@@ -142,7 +141,7 @@ struct SongsView: View {
             }
             .sheet(isPresented: $presentSubscription) {
                 NavigationStack {
-                    SubscriptionView(presentThanksSheet: $presentThanksSheet, inSheet: true)
+                    SubscriptionView(inSheet: true)
                         .toolbar {
                             ToolbarItem(placement: .topBarLeading) {
                                 Button(role: .close) { presentSubscription  = false }
@@ -150,7 +149,6 @@ struct SongsView: View {
                         }
                 }
             }
-            .sheet(isPresented: $presentThanksSheet) { ThanksView() }
             .subscriptionStatusTask(for: otsProGroupId) { taskState in
                 isPro = StoreHelper.checkForActiveSubscription(in: taskState)
             }

@@ -20,16 +20,16 @@ struct SettingsView: View {
     @State private var isPro: Bool = false
     @State private var presentThanksSheet: Bool = false
 
-    func restore() async -> Bool {
-        return ((try? await AppStore.sync()) != nil)
-    }
+    @State private var isRestoring = false
+    @State private var showRestoreResult = false
+    @State private var restoreMessage: LocalizedStringKey = ""
     
     @State var show = false
     
     var body: some View {
         List {
             Section {
-                NavigationLink(destination: SubscriptionView(presentThanksSheet: $presentThanksSheet), label: {
+                NavigationLink(destination: SubscriptionView(), label: {
                     HStack {
                         Image(systemName: "creditcard.fill").foregroundStyle(.accent)
                         VStack {
@@ -46,12 +46,17 @@ struct SettingsView: View {
                 Button(action: { Task { await restore() } }, label: {
                     HStack {
                         Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.circle.fill").foregroundStyle(.green)
-                        Text("Restore Purchases")
+                        Text("Restore Subscription")
+                        if isRestoring {
+                            Spacer()
+                            ProgressView()
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Capsule())
                 })
                 .buttonStyle(.plain)
+                .disabled(isRestoring)
             }
             
             Section {
@@ -147,6 +152,11 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showMail) { MailView() }
         .sheet(isPresented: $presentThanksSheet) { ThanksView() }
+        .alert("Restore Subscription", isPresented: $showRestoreResult) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(restoreMessage)
+        }
         .navigationTitle(Text("Settings"))
         .toolbar(.hidden, for: .tabBar)
         .onAppear { hideMiniPlayer = true }
@@ -184,6 +194,25 @@ struct SettingsView: View {
         .subscriptionStatusTask(for: otsProGroupId) { taskState in
             isPro = StoreHelper.checkForActiveSubscription(in: taskState)
         }
+    }
+
+    private func restore() async {
+        guard !isRestoring else { return }
+        isRestoring = true
+        defer { isRestoring = false }
+
+        do {
+            try await AppStore.sync()
+            isPro = try await StoreHelper.refreshProEntitlement(groupID: otsProGroupId)
+            restoreMessage = isPro
+                ? "Your Off The Spots Pro subscription is active."
+                : "No active Off The Spots Pro subscription was found for this App Store account."
+        } catch StoreKitError.userCancelled {
+            restoreMessage = "Restore was cancelled."
+        } catch {
+            restoreMessage = "Unable to check your subscription with the App Store. Please try again later."
+        }
+        showRestoreResult = true
     }
 }
 

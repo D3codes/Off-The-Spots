@@ -7,8 +7,10 @@
 
 import StoreKit
 import _StoreKit_SwiftUI
+import OSLog
 
 class StoreHelper {
+    private static let logger = Logger(subsystem: "codes.d3.Off-The-Spots", category: "StoreKit")
     @MainActor static let defaults = UserDefaults.standard
     static let monthlyPro: String = "OTS_PRO_SUBSCRIPTION_MONTH"
     static let yearlyPro: String = "OTS_PRO_SUBSCRIPTION_YEAR"
@@ -28,38 +30,57 @@ class StoreHelper {
 
     @MainActor static func hasActiveSubscription(groupID: String = proGroupID) async -> Bool {
         do {
-            let statuses = try await Product.SubscriptionInfo.status(for: groupID)
-            return checkForActiveSubscription(in: statuses)
+            return try await refreshProEntitlement(groupID: groupID)
         } catch {
             return hasCachedActiveSubscription()
         }
     }
     
-    private static func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
-        let activeStatuses = statuses.filter {
-            $0.state != .revoked && $0.state != .expired
-            && ($0.transaction.unsafePayloadValue.productID == monthlyPro || $0.transaction.unsafePayloadValue.productID == yearlyPro)
-        }
-        
-        let isPro: Bool = !activeStatuses.isEmpty
-        
-        if isPro {
-            let verification = activeStatuses.first!.transaction
-            if let transaction = try? verification.payloadValue {
-                let expirationDate: Date = transaction.expirationDate ?? Date.distantFuture
-                let revocationDate: Date = transaction.revocationDate ?? Date.distantFuture
-                
-                print("Expiration: \(expirationDate), Revocation: \(revocationDate), Now: \(Date())")
-                
-                let proExpirationDate: Date = min(expirationDate, revocationDate)
-                
-                print("Pro Expiration: \(proExpirationDate)")
-                DispatchQueue.main.async {
-                    defaults.set(proExpirationDate, forKey: UserDefaultsKeys.proExpirationDate)
-                }
+    @MainActor static func refreshProEntitlement(groupID: String = proGroupID) async throws -> Bool {
+        let statuses = try await Product.SubscriptionInfo.status(for: groupID)
+        return checkForActiveSubscription(in: statuses)
+    }
+
+    @MainActor static func observeTransactions() async {
+        for await result in Transaction.updates {
+            guard case .verified(let transaction) = result,
+                  isProProduct(transaction.productID) else { continue }
+
+            do {
+                _ = try await refreshProEntitlement()
+                await transaction.finish()
+            } catch {
+                logger.error("Could not refresh Pro access for a StoreKit transaction: \(error.localizedDescription, privacy: .private)")
             }
         }
-        
+    }
+
+    @MainActor static func checkForActiveSubscription(in statuses: [Product.SubscriptionInfo.Status]) -> Bool {
+        var isPro = false
+        var cachedExpiration: Date?
+
+        for status in statuses {
+            guard status.state == .subscribed || status.state == .inGracePeriod,
+                  case .verified(let transaction) = status.transaction,
+                  isProProduct(transaction.productID) else { continue }
+
+            isPro = true
+            let expiration: Date?
+            if status.state == .inGracePeriod {
+                expiration = (try? status.renewalInfo.payloadValue)?.gracePeriodExpirationDate
+            } else {
+                expiration = transaction.expirationDate
+            }
+            if let expiration, expiration > (cachedExpiration ?? .distantPast) {
+                cachedExpiration = expiration
+            }
+        }
+
+        defaults.set(cachedExpiration, forKey: UserDefaultsKeys.proExpirationDate)
         return isPro
+    }
+
+    private static func isProProduct(_ productID: String) -> Bool {
+        productID == monthlyPro || productID == yearlyPro
     }
 }
